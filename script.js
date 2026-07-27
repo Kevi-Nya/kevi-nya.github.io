@@ -703,6 +703,101 @@
     container.innerHTML = html;
   }
 
+  // ==================== AI 标签自动生成 ====================
+
+  /**
+   * AI 标签生成器 — 基于语义关键词匹配的智能标签
+   * 根据内容文本自动匹配 1~2 个最合适的标签，覆盖日常/猫咪/AI/思考等多领域。
+   *
+   * 设计目标：模拟 AI 语义理解，使用轻量关键词权重匹配，
+   * 零外部依赖，运行在前端，性能友好。
+   *
+   * @param {string} content - 内容文本（笔记正文或想法标题+摘要）
+   * @returns {string[]} 匹配到的标签数组（1~2 个，按匹配度降序）
+   */
+  function generateTags(content) {
+    if (!content || typeof content !== 'string') return [];
+
+    // 转为小写便于匹配（保留中文）
+    var text = content.toLowerCase();
+
+    // --- 标签关键词池（治愈猫系风格） ---
+    var TAG_POOL = {
+      '猫咪':   ['猫', '猫咪', '小猫', '喵', '猫猫', '毛孩子'],
+      '日常':   ['日常', '今天', '昨天', '早上', '晚上', '下午', '每天'],
+      'AI':     ['ai', '人工智能', '机器学习', '模型', '大语言', 'gpt', 'chatgpt'],
+      '思考':   ['思考', '反思', '感悟', '启发', '意义', '哲学', '深度'],
+      '摄影':   ['摄影', '拍照', '相机', '镜头', '照片', '拍摄', '构图'],
+      '旅行':   ['旅行', '旅游', '出行', '远方', '路上', '风景', '目的地'],
+      '音乐':   ['音乐', '歌', '耳机', '旋律', '节奏', '曲子', '播放'],
+      '里程碑': ['第一个', '第一次', '终于', '完成', '达成', '实现', '里程碑', '突破'],
+      '灵感':   ['灵感', '创意', '想法', '点子', '突然', '闪现'],
+      '心情':   ['开心', '难过', '感动', '治愈', '温暖', '温柔', '幸福'],
+      '学习':   ['学习', '读书', '看书', '知识', '课程', '教程'],
+      '治愈':   ['治愈', '温暖', '温柔', '美好', '幸福', '小确幸', '阳光'],
+      '代码':   ['代码', '编程', '程序', '重构', '开发', '项目', 'bug'],
+      '记录':   ['记录', '日记', '手账', '笔记', '备忘', '记录下'],
+      '美食':   ['好吃', '美食', '茶', '咖啡', '饮料', '料理', '厨房', '抹茶', '拿铁', '吃'],
+      '夏天':   ['夏天', '夏日', '炎热', '空调', '西瓜', '冰'],
+      '秋天':   ['秋天', '秋日', '落叶', '凉爽', '红叶'],
+      '冬天':   ['冬天', '冬日', '雪', '火锅'],
+      '春天':   ['春天', '春日', '花开', '樱花'],
+      '探索':   ['探索', '发现', '未知', '冒险', '新事物'],
+      '生活':   ['生活', '人生', '日子', '时光', '岁月'],
+      '建站':   ['网站', '建站', '博客', '个人网站', '页面', '上线'],
+    };
+
+    // --- 计算每个标签的匹配得分 ---
+    var scores = {};
+    for (var tag in TAG_POOL) {
+      if (!TAG_POOL.hasOwnProperty(tag)) continue;
+      var keywords = TAG_POOL[tag];
+      var score = 0;
+      for (var i = 0; i < keywords.length; i++) {
+        if (text.indexOf(keywords[i]) !== -1) {
+          score += 1;
+        }
+      }
+      if (score > 0) {
+        scores[tag] = score;
+      }
+    }
+
+    // --- 按得分降序排列，取前 2 个 ---
+    var sorted = Object.keys(scores);
+    sorted.sort(function (a, b) { return scores[b] - scores[a]; });
+
+    return sorted.slice(0, 2);
+  }
+
+  /**
+   * 为条目自动补全标签（仅当数据库未提供时使用 AI 生成）
+   * 数据库中的 tag_1/tag_2 优先，空值时调用 generateTags()
+   *
+   * @param {Array} entries - 条目数组
+   * @param {string} type - 'little' 或 'thoughts'
+   */
+  function enrichEntriesWithTags(entries, type) {
+    if (!entries || entries.length === 0) return;
+
+    entries.forEach(function (entry) {
+      // Little Notes: 用 content 生成标签
+      // Thoughts: 用 title + summary 生成标签
+      var content =
+        type === 'little'
+          ? (entry.content || '')
+          : ((entry.title || '') + ' ' + (entry.summary || ''));
+
+      // 仅在前端打标签（不写回 data.json），且仅当 tag_1/tag_2 都为空时
+      if (!entry.tag_1 && !entry.tag_2) {
+        var generated = generateTags(content);
+        // _tag_1/_tag_2 前缀下划线表示 AI 前端生成，区分于数据库写入的 tag_1/tag_2
+        if (generated.length > 0) entry._tag_1 = generated[0];
+        if (generated.length > 1) entry._tag_2 = generated[1];
+      }
+    });
+  }
+
   /**
    * 渲染 Little Notes - 日历版
    * @param {Array} notes - 笔记数组 [{id, content, note_date, mood, tags}, ...]
@@ -719,6 +814,10 @@
    * @param {Object} data - 从 data.json 加载的数据
    */
   function renderDynamicContent(data) {
+    // 自动补全 AI 标签（仅前端，不修改 data.json）
+    if (data.little_notes) enrichEntriesWithTags(data.little_notes, 'little');
+    if (data.thoughts) enrichEntriesWithTags(data.thoughts, 'thoughts');
+
     if (data.about_tags) renderAboutTags(data.about_tags);
     if (data.life_cards) renderLifeCards(data.life_cards);
     if (data.little_notes) renderLittleNotes(data.little_notes);
@@ -823,7 +922,27 @@
             html += '<span class="note-detail-mood">' + entry.mood + '</span>';
           }
           html += '<p class="note-detail-content">' + entry.content + '</p>';
-          if (entry.tags && entry.tags.length > 0) {
+
+          // 标签行：优先数据库 tag_1/tag_2，其次 AI 生成的 _tag_1/_tag_2
+          var tag1 = entry.tag_1 || entry._tag_1 || '';
+          var tag2 = entry.tag_2 || entry._tag_2 || '';
+          var isAiTag = !entry.tag_1 && !entry.tag_2; // 是否全部为 AI 生成
+
+          if (tag1 || tag2) {
+            html += '<div class="note-detail-tags">';
+            if (tag1) {
+              html += '<span class="note-detail-tag' +
+                (isAiTag ? ' tag-ai-generated' : '') + '">' + tag1 + '</span>';
+            }
+            if (tag2) {
+              html += '<span class="note-detail-tag' +
+                (isAiTag ? ' tag-ai-generated' : '') + '">' + tag2 + '</span>';
+            }
+            html += '</div>';
+          }
+
+          // 兼容旧版 tags 数组（如果存在且 tag_1/tag_2 均无）
+          if (!tag1 && !tag2 && entry.tags && entry.tags.length > 0) {
             html += '<div class="note-detail-tags">';
             entry.tags.forEach(function (tag) {
               html += '<span class="note-detail-tag">' + tag + '</span>';
@@ -834,21 +953,48 @@
           // Thoughts 卡片：标题 + 摘要 + 标签
           html += '<h3 class="note-detail-title">' + entry.title + '</h3>';
           html += '<p class="note-detail-summary">' + entry.summary + '</p>';
-          html += '<div class="note-detail-tags">';
-          if (entry.tag_label) {
-            var tagClass = entry.tag_type ? 'tag-' + entry.tag_type : 'tag-default';
-            html += '<span class="note-detail-tag ' + tagClass + '">' + entry.tag_label + '</span>';
+
+          var hasTags = entry.tag_label || entry.tag_1 || entry._tag_1 ||
+                        entry.tag_2 || entry._tag_2 ||
+                        (entry.tags && entry.tags.length > 0);
+
+          if (hasTags) {
+            html += '<div class="note-detail-tags">';
+
+            // 主标签（tag_label + tag_type，来自数据库）
+            if (entry.tag_label) {
+              var tagClass = entry.tag_type ? 'tag-' + entry.tag_type : 'tag-default';
+              html += '<span class="note-detail-tag ' + tagClass + '">' + entry.tag_label + '</span>';
+            }
+
+            // 优先数据库 tag_1/tag_2，其次 AI 生成
+            var tt1 = entry.tag_1 || entry._tag_1 || '';
+            var tt2 = entry.tag_2 || entry._tag_2 || '';
+            var isAiTagT = !entry.tag_1 && !entry.tag_2;
+
+            if (tt1) {
+              html += '<span class="note-detail-tag' +
+                (isAiTagT ? ' tag-ai-generated' : '') + '">' + tt1 + '</span>';
+            }
+            if (tt2) {
+              html += '<span class="note-detail-tag' +
+                (isAiTagT ? ' tag-ai-generated' : '') + '">' + tt2 + '</span>';
+            }
+
+            // 兼容旧版 tags 数组
+            if (!tt1 && !tt2 && entry.tags && entry.tags.length > 0) {
+              entry.tags.forEach(function (tag) {
+                if (tag !== entry.tag_label) {
+                  html += '<span class="note-detail-tag">' + tag + '</span>';
+                }
+              });
+            }
+
+            html += '</div>';
           }
-          if (entry.tags && entry.tags.length > 0) {
-            entry.tags.forEach(function (tag) {
-              if (tag !== entry.tag_label) {
-                html += '<span class="note-detail-tag">' + tag + '</span>';
-              }
-            });
-          }
-          html += '</div>';
         }
 
+        // 关闭 .note-detail-card（little 和 thoughts 共用）
         html += '</div>';
       });
     }

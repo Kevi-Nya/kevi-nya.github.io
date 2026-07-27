@@ -1088,6 +1088,13 @@ body {
   color: #b07a8c;
 }
 
+/* AI 自动生成的标签 — 轻柔区分（带微光感） */
+.tag-ai-generated {
+  background: rgba(221, 214, 254, 0.3) !important;
+  color: #8b7ec8 !important;
+  /* 可选：在标签前加小星标表示 AI 生成 */
+}
+
 /* -------------------- 空状态提示 -------------------- */
 .note-detail-empty {
   flex: 1;

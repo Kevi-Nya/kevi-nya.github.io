@@ -46,7 +46,10 @@ def export_data(conn):
         data["life_cards"] = cur.fetchall()
 
         # Little Notes
-        cur.execute("SELECT content, note_date FROM little_notes ORDER BY sort_order")
+        cur.execute(
+            "SELECT content, note_date, mood, tags, tag_1, tag_2 "
+            "FROM little_notes ORDER BY sort_order"
+        )
         rows = cur.fetchall()
         # 将 date 对象转为字符串
         for row in rows:
@@ -56,7 +59,8 @@ def export_data(conn):
 
         # Thoughts 思考/随笔
         cur.execute(
-            "SELECT tag_type, tag_label, title, summary, thought_date "
+            "SELECT tag_type, tag_label, title, summary, thought_date, "
+            "tags, tag_1, tag_2 "
             "FROM thoughts ORDER BY sort_order"
         )
         rows = cur.fetchall()
