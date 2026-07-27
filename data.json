@@ -52,7 +52,12 @@
       "description": "一杯咖啡，一段代码，一个下午"
     }
   ],
-  "little_notes": [],
+  "little_notes": [
+    {
+      "content": "拥有人生第一个个人网站🎉",
+      "note_date": "2026-07-27"
+    }
+  ],
   "thoughts": [],
   "skills": [
     {
@@ -92,14 +97,8 @@
       "qq_number": "1447954419"
     },
     {
-      "platform": "Bilibili",
-      "url": "https://space.bilibili.com/456988162?spm_id_from=333.1007.0.0",
-      "icon_class": "fa-brands fa-bilibili",
-      "qq_number": null
-    },
-    {
       "platform": "Email",
-      "url": "mailto:1447954419@qq.com",
+      "url": "1447954419@qq.com",
       "icon_class": "fa-solid fa-envelope",
       "qq_number": null
     }

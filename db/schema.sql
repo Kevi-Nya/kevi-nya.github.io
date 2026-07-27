@@ -74,9 +74,21 @@ CREATE TABLE IF NOT EXISTS links (
 -- 迁移语句（如果表已存在，仅添加新字段）
 -- ============================================================
 
--- 为 little_notes 添加 tag_1 / tag_2（如果不存在）
+-- 为 little_notes 添加缺失字段（如果不存在）
 DO $$
 BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM information_schema.columns
+        WHERE table_name = 'little_notes' AND column_name = 'mood'
+    ) THEN
+        ALTER TABLE little_notes ADD COLUMN mood TEXT;
+    END IF;
+    IF NOT EXISTS (
+        SELECT 1 FROM information_schema.columns
+        WHERE table_name = 'little_notes' AND column_name = 'tags'
+    ) THEN
+        ALTER TABLE little_notes ADD COLUMN tags TEXT[];
+    END IF;
     IF NOT EXISTS (
         SELECT 1 FROM information_schema.columns
         WHERE table_name = 'little_notes' AND column_name = 'tag_1'
@@ -91,9 +103,15 @@ BEGIN
     END IF;
 END $$;
 
--- 为 thoughts 添加 tag_1 / tag_2（如果不存在）
+-- 为 thoughts 添加缺失字段（如果不存在）
 DO $$
 BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM information_schema.columns
+        WHERE table_name = 'thoughts' AND column_name = 'tags'
+    ) THEN
+        ALTER TABLE thoughts ADD COLUMN tags TEXT[];
+    END IF;
     IF NOT EXISTS (
         SELECT 1 FROM information_schema.columns
         WHERE table_name = 'thoughts' AND column_name = 'tag_1'

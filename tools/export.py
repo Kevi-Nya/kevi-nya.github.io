@@ -51,10 +51,19 @@ def export_data(conn):
             "FROM little_notes ORDER BY sort_order"
         )
         rows = cur.fetchall()
-        # 将 date 对象转为字符串
+        # 将 date 对象转为字符串，并清理 NULL 值
         for row in rows:
             if isinstance(row["note_date"], date):
-                row["note_date"] = row["note_date"].strftime("%Y.%m.%d")
+                row["note_date"] = row["note_date"].strftime("%Y-%m-%d")
+            # 移除值为 None 的字段，保持 JSON 整洁
+            if row.get("mood") is None:
+                del row["mood"]
+            if row.get("tags") is None:
+                del row["tags"]
+            if row.get("tag_1") is None:
+                del row["tag_1"]
+            if row.get("tag_2") is None:
+                del row["tag_2"]
         data["little_notes"] = rows
 
         # Thoughts 思考/随笔
@@ -66,7 +75,14 @@ def export_data(conn):
         rows = cur.fetchall()
         for row in rows:
             if isinstance(row["thought_date"], date):
-                row["thought_date"] = row["thought_date"].strftime("%Y.%m.%d")
+                row["thought_date"] = row["thought_date"].strftime("%Y-%m-%d")
+            # 移除值为 None 的字段
+            if row.get("tags") is None:
+                del row["tags"]
+            if row.get("tag_1") is None:
+                del row["tag_1"]
+            if row.get("tag_2") is None:
+                del row["tag_2"]
         data["thoughts"] = rows
 
         # Skills 技能标签
