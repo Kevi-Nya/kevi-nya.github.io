@@ -57,6 +57,24 @@
   --transition: 0.35s var(--ease-bounce);
   --transition-smooth: 0.3s var(--ease-smooth);
 
+  /* ========== 动效编排协议 — 三层时序系统 ==========
+     场景级（Scene）：页面切换、大区块过渡
+     容器级（Container）：卡片入场 stagger
+     元素级（Element）：hover / click 微交互
+     "信号灯"编排：场景 → 容器 → 元素，依次亮起 */
+  --choreo-scene-duration: 0.5s;         /* 场景级持续时长 */
+  --choreo-scene-delay: 0s;              /* 场景级起始延迟 */
+  --choreo-container-stagger: 0.06s;     /* 容器级 stagger 间隔 */
+  --choreo-container-duration: 0.6s;     /* 容器级单元素持续 */
+  --choreo-element-duration: 0.25s;      /* 元素级反馈持续 */
+  --choreo-element-delay: 0s;            /* 元素级起始延迟 */
+  /* 首屏 cinematic 序列总时长分配 */
+  --cinematic-phase-1: 0.3s;   /* 背景渐变淡入 */
+  --cinematic-phase-2: 0.5s;   /* 粒子中心扩散 */
+  --cinematic-phase-3: 0.4s;   /* 头像光圈展开 */
+  --cinematic-phase-4: 0.6s;   /* 卡片 stagger 入场 */
+  --cinematic-total: 1.8s;     /* 总时长（≤2s 避免流失） */
+
   /* --- 文字阴影（提升可读性） --- */
   --text-shadow-subtle: 0 1px 2px rgba(0, 0, 0, 0.04);
   --text-shadow-glow: 0 0 12px rgba(248, 179, 209, 0.25);
@@ -85,6 +103,27 @@
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+}
+
+/* 键盘跳转链接（WCAG 2.4.1 — 默认隐藏，聚焦时显示） */
+.skip-link {
+  position: absolute;
+  top: -100px;
+  left: 16px;
+  z-index: 10000;
+  padding: 10px 20px;
+  background: var(--accent-purple);
+  color: #fff;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: top 0.2s ease;
+}
+.skip-link:focus {
+  top: 16px;
+  outline: none;
+  box-shadow: 0 4px 16px rgba(200, 162, 224, 0.5);
 }
 
 /* 全局键盘焦点可见样式（WCAG 2.4.7） */
@@ -1156,7 +1195,6 @@ body {
   background: rgba(221, 214, 254, 0.3);
   color: #8b7ec8;
 }
-}
 
 /* -------------------- 空状态提示 -------------------- */
 .note-detail-empty {
@@ -1434,6 +1472,8 @@ body {
 
   .card, .note-detail-panel {
     background: rgba(40, 35, 50, 0.65);
+    /* 暗色模式下降低模糊强度，减少 GPU 开销 */
+    --glass-blur: 16px;
     backdrop-filter: blur(var(--glass-blur));
     -webkit-backdrop-filter: blur(var(--glass-blur));
   }
@@ -1556,5 +1596,495 @@ body {
   to {
     transform: scale(4);
     opacity: 0;
+  }
+}
+
+/* ==================== 打印样式（@media print） ==================== */
+@media print {
+  /* 隐藏所有装饰和背景层 */
+  .bg-image-parallax,
+  .bg-image-layer,
+  #bg-canvas,
+  .bg-overlay,
+  .bg-decorations,
+  .avatar-ring,
+  .avatar-glow,
+  .avatar-decoration,
+  .ripple,
+  .toast-notification,
+  .skip-link {
+    display: none !important;
+  }
+
+  /* 重置背景为白色，文字为黑色 */
+  body {
+    background: #fff !important;
+    color: #000 !important;
+  }
+
+  /* 去除毛玻璃效果 */
+  .card, .note-detail-panel, .life-card, .project-card,
+  .note-card, .thought-item, .note-detail-card {
+    background: #fff !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    box-shadow: none !important;
+    border: 1px solid #ddd !important;
+    break-inside: avoid;
+  }
+
+  /* 链接保留下划线以便在纸上识别 */
+  a {
+    color: #000 !important;
+    text-decoration: underline !important;
+  }
+
+  /* 页面容器恢复为流式布局 */
+  .page-container {
+    max-width: 100% !important;
+    padding: 0 20px !important;
+  }
+
+  /* 避免卡片内部断页 */
+  .calendar-wrapper,
+  .note-detail-scroll {
+    overflow: visible !important;
+    max-height: none !important;
+  }
+}
+
+/* ==================== 高对比度模式（@media prefers-contrast） ==================== */
+@media (prefers-contrast: high) {
+  :root {
+    --text-primary: #000;
+    --text-secondary: #333;
+    --glass-bg: rgba(255, 255, 255, 0.95);
+    --glass-bg-sub: rgba(255, 255, 255, 0.95);
+    --glass-border: #666;
+    --glass-border-hover: #000;
+  }
+
+  /* 增加描边和对比度 */
+  .card, .note-detail-panel, .life-card, .project-card,
+  .note-card, .thought-item, .note-detail-card,
+  .tag, .skill-tag, .connect-link {
+    border: 2px solid #666 !important;
+    background: #fff !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+
+  /* 链接和按钮确保高对比度 */
+  a, button, .connect-link, .calendar-nav {
+    color: #000 !important;
+    border: 2px solid #000 !important;
+  }
+
+  /* 选中状态确保可见 */
+  .calendar-day.selected,
+  .calendar-day.today {
+    border: 3px solid #000 !important;
+    background: #fff !important;
+    color: #000 !important;
+  }
+}
+
+@media (prefers-contrast: high) and (prefers-color-scheme: dark) {
+  :root {
+    --text-primary: #fff;
+    --text-secondary: #ddd;
+  }
+
+  .card, .note-detail-panel, .life-card, .project-card,
+  .note-card, .thought-item, .note-detail-card,
+  .tag, .skill-tag, .connect-link {
+    border: 2px solid #ccc !important;
+    background: #000 !important;
+  }
+
+  a, button, .connect-link, .calendar-nav {
+    color: #fff !important;
+    border: 2px solid #fff !important;
+  }
+}
+
+/* ==================== CSS contain 渲染隔离优化 ==================== */
+/* 隔离独立容器避免装饰动画触发不必要的全局重排 */
+.card,
+.note-detail-panel,
+.calendar-wrapper,
+.life-card,
+.project-card,
+.note-card,
+.thought-item,
+.bg-decorations {
+  contain: layout style paint;
+}
+
+/* 内容区域不需要 layout contain（避免子元素绝对定位问题），仅隔离 paint */
+.note-detail-scroll,
+.calendar-left,
+.calendar-right {
+  contain: style paint;
+}
+
+/* ============================================================
+   首屏 Cinematic 加载序列 — 四段式品牌仪式感
+   P0 #5：粒子聚合 → logo 浮现 → 内容展开
+   ============================================================ */
+
+.cinematic-preloader {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  z-index: 99999;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+/* Phase 1：背景渐变淡入（0~0.3s） */
+.preloader-bg {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background:
+    radial-gradient(ellipse 60% 50% at 50% 45%, rgba(253, 228, 236, 0.95) 0%, transparent 70%),
+    radial-gradient(ellipse 50% 40% at 50% 55%, rgba(232, 224, 245, 0.9) 0%, transparent 65%),
+    linear-gradient(135deg, #FFF8F0 0%, #FDE4EC 40%, #E8E0F5 100%);
+  opacity: 0;
+  animation: preloader-bg-in var(--cinematic-phase-1) var(--ease-smooth) forwards;
+}
+
+@keyframes preloader-bg-in {
+  to { opacity: 1; }
+}
+
+/* Phase 2：粒子从中心向外扩散（0.3~0.8s） */
+.preloader-burst {
+  position: absolute;
+  top: 50%; left: 50%;
+  width: 0; height: 0;
+  z-index: 2;
+}
+
+.preloader-particle {
+  position: absolute;
+  top: 0; left: 0;
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  opacity: 0;
+  animation: preloader-particle-burst var(--cinematic-phase-2) var(--ease-bounce) forwards;
+  animation-delay: var(--cinematic-phase-1);
+  will-change: transform, opacity;
+}
+
+@keyframes preloader-particle-burst {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0);
+  }
+  20% {
+    opacity: 1;
+    transform: translate(calc(-50% + var(--tx) * 0.3), calc(-50% + var(--ty) * 0.3)) scale(1.4);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(calc(-50% + var(--tx)), calc(-50% + var(--ty))) scale(0.3);
+  }
+}
+
+/* Phase 3：品牌名浮现（0.6~1.0s，与粒子扩散尾部重叠） */
+.preloader-logo {
+  position: relative;
+  z-index: 3;
+  text-align: center;
+  opacity: 0;
+  transform: translateY(12px);
+  animation: preloader-logo-in 0.4s var(--ease-bounce) forwards;
+  animation-delay: 0.6s;
+}
+
+@keyframes preloader-logo-in {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.preloader-name {
+  display: block;
+  font-size: 1.8rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  background: var(--gradient-hero);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 0 16px rgba(248, 179, 209, 0.5));
+}
+
+.preloader-tagline {
+  display: block;
+  font-size: 0.85rem;
+  color: var(--accent-purple);
+  margin-top: 6px;
+  letter-spacing: 0.04em;
+}
+
+/* 加载进度条 */
+.preloader-progress {
+  position: relative;
+  z-index: 3;
+  width: 120px;
+  height: 2px;
+  margin-top: 24px;
+  background: rgba(200, 162, 224, 0.2);
+  border-radius: 1px;
+  overflow: hidden;
+  opacity: 0;
+  animation: preloader-progress-in 0.3s ease forwards;
+  animation-delay: 0.6s;
+}
+
+.preloader-progress::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: linear-gradient(90deg, var(--accent-pink), var(--accent-purple));
+  border-radius: 1px;
+  transform: scaleX(0);
+  transform-origin: left;
+  animation: preloader-progress-fill 1.2s var(--ease-smooth) forwards;
+  animation-delay: 0.6s;
+}
+
+@keyframes preloader-progress-in {
+  to { opacity: 1; }
+}
+
+@keyframes preloader-progress-fill {
+  to { transform: scaleX(1); }
+}
+
+/* Preloader 淡出（1.4~1.6s） */
+.cinematic-preloader.fade-out {
+  animation: preloader-fade-out 0.3s var(--ease-smooth) forwards;
+  animation-delay: 1.3s;
+}
+
+@keyframes preloader-fade-out {
+  to {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
+
+/* 首屏 hero 区域强化入场 — 配合 preloader 揭示 */
+.page:not(.hidden) .hero-a,
+.page:not(.hidden) .hero-b {
+  animation: hero-cinematic-in 0.8s var(--ease-bounce) forwards;
+  animation-delay: 0.9s;
+  opacity: 0;
+}
+
+@keyframes hero-cinematic-in {
+  0% {
+    opacity: 0;
+    transform: translateY(30px) scale(0.95);
+  }
+  60% {
+    opacity: 1;
+    transform: translateY(-4px) scale(1.02);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* 头像光圈展开 — Phase 3 视觉强化 */
+.avatar-glow.cinematic-active {
+  animation: glow-cinematic-expand var(--cinematic-phase-3) var(--ease-bounce) forwards;
+  animation-delay: 0.8s;
+}
+
+@keyframes glow-cinematic-expand {
+  0% {
+    transform: scale(0);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.5);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 0.6;
+  }
+}
+
+/* ==================== 减少动画偏好：跳过 cinematic 序列 ==================== */
+@media (prefers-reduced-motion: reduce) {
+  .cinematic-preloader { display: none !important; }
+  .page:not(.hidden) .hero-a,
+  .page:not(.hidden) .hero-b {
+    animation: none !important;
+    opacity: 1 !important;
+  }
+  .avatar-glow.cinematic-active {
+    animation: none !important;
+  }
+}
+
+/* ============================================================
+   音效开关浮动按钮 — P1 #7
+   ============================================================ */
+
+.sound-toggle {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 1px solid var(--glass-border);
+  background: var(--glass-bg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  color: var(--accent-purple);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9000;
+  box-shadow: var(--shadow-sm), var(--glass-border-glow);
+  transition: transform var(--choreo-element-duration) var(--ease-bounce),
+              background var(--choreo-element-duration) var(--ease-bounce),
+              color var(--choreo-element-duration) var(--ease-bounce),
+              box-shadow var(--choreo-element-duration) var(--ease-bounce);
+  opacity: 0;
+  transform: scale(0.8);
+  animation: sound-toggle-in 0.4s var(--ease-bounce) forwards;
+  animation-delay: 1.8s;
+}
+
+@keyframes sound-toggle-in {
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.sound-toggle:hover {
+  background: var(--glass-hover-bg);
+  color: var(--accent-pink);
+  transform: scale(1.1);
+  box-shadow: var(--shadow-md), var(--shadow-glow-sm);
+}
+
+.sound-toggle:active {
+  transform: scale(0.95);
+}
+
+/* 静音状态：通过 .active class 切换图标 */
+.sound-toggle .sound-icon-off { display: none; }
+.sound-toggle.active .sound-icon-on { display: none; }
+.sound-toggle.active .sound-icon-off { display: block; }
+
+.sound-toggle.active {
+  color: var(--accent-pink);
+  border-color: var(--glass-border-hover);
+  box-shadow: var(--shadow-sm), var(--shadow-glow-sm);
+}
+
+/* 键盘焦点样式（WCAG 可访问性） */
+.sound-toggle:focus-visible {
+  outline: 2px solid var(--accent-purple);
+  outline-offset: 3px;
+}
+
+/* 减少动画时隐藏音效按钮 */
+@media (prefers-reduced-motion: reduce) {
+  .sound-toggle { display: none !important; }
+}
+
+/* 打印时隐藏音效按钮 */
+@media print {
+  .sound-toggle { display: none !important; }
+}
+
+/* ============================================================
+   动效编排增强 — 容器级 stagger 优化
+   为动态渲染内容补充入场动画（数据加载后触发）
+   ============================================================ */
+
+/* 动态内容入场 — 编排协议容器级 */
+.choreo-enter {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity var(--choreo-container-duration) var(--ease-bounce),
+              transform var(--choreo-container-duration) var(--ease-bounce);
+}
+
+.choreo-enter.choreo-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* 月份切换时日历网格的编排入场 */
+.calendar-grid.choreo-slide-in {
+  animation: calendar-slide-in 0.4s var(--ease-bounce) forwards;
+}
+
+@keyframes calendar-slide-in {
+  from {
+    opacity: 0;
+    transform: translateX(var(--slide-dir, 12px));
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* 详情面板切换编排强化 */
+.note-detail-panel.choreo-panel-in {
+  animation: panel-choreo-in 0.3s var(--ease-bounce) forwards;
+}
+
+@keyframes panel-choreo-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 暗色模式适配 preloader */
+@media (prefers-color-scheme: dark) {
+  .preloader-bg {
+    background:
+      radial-gradient(ellipse 60% 50% at 50% 45%, rgba(45, 31, 40, 0.95) 0%, transparent 70%),
+      radial-gradient(ellipse 50% 40% at 50% 55%, rgba(38, 32, 48, 0.9) 0%, transparent 65%),
+      linear-gradient(135deg, #1A1520 0%, #2D1F28 40%, #262030 100%);
+  }
+  .preloader-name {
+    filter: drop-shadow(0 0 16px rgba(200, 162, 224, 0.5));
+  }
+  .sound-toggle {
+    background: rgba(40, 35, 50, 0.65);
+    border-color: var(--glass-border);
+    color: var(--accent-purple);
+  }
+  .sound-toggle:hover {
+    background: rgba(50, 44, 60, 0.88);
   }
 }

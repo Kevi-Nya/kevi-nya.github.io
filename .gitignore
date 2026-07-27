@@ -3,6 +3,7 @@
 
 # Agent
 todolist/
+.workbuddy/
 
 # Python
 __pycache__/
