@@ -30,7 +30,8 @@
   --text-2xl: 2rem;       /* 站点名称 */
   --gray-light: #EDEAE7;
   --text-primary: #2B2B2B;
-  --text-secondary: #4B5563;             /* 加深对比度，WCAG AA 4.5:1 */
+  --text-secondary: #6B5E62;             /* 暖调棕灰，与粉紫底色自然融合 */
+  --text-tertiary: #A08C92;             /* 更浅暖调辅助色，用于日期标注等低优先级文字 */
 
   /* --- 渐变 --- */
   --gradient-btn: linear-gradient(135deg, #FDD5E8, #E0D4F5);
@@ -251,18 +252,18 @@ body {
 /* 命运光带 — 极慢的细长渐变光束 */
 .fate-light-band {
   position: absolute;
-  width: 3px;
+  width: 6px;
   height: 70%;
   top: 10%; left: 25%;
   background: linear-gradient(180deg,
     transparent 0%,
-    rgba(248, 179, 209, 0.15) 15%,
-    rgba(200, 162, 224, 0.18) 45%,
-    rgba(248, 179, 209, 0.10) 75%,
+    rgba(248, 179, 209, 0.25) 15%,
+    rgba(200, 162, 224, 0.30) 45%,
+    rgba(248, 179, 209, 0.18) 75%,
     transparent 100%);
-  border-radius: 1.5px;
-  filter: blur(4px);
-  animation: fate-light-flow 50s ease-in-out infinite;
+  border-radius: 3px;
+  filter: blur(2px);
+  animation: fate-light-flow 25s ease-in-out infinite;
   will-change: transform, opacity;
 }
 
@@ -474,17 +475,33 @@ body {
     0 0 80px rgba(200, 162, 224, 0.25);
 }
 
-/* 头像周围的装饰 */
+/* 头像周围的装饰 — 默认静态，hover 时轻量浮动 */
 .avatar-decoration {
   position: absolute;
   z-index: 2;
   font-size: 17px;
-  animation: dec-float 3s var(--ease-bounce) infinite;
+  opacity: 0.6;
   filter: drop-shadow(0 0 4px rgba(248, 179, 209, 0.3));
+  transition: transform 0.4s var(--ease-bounce), opacity 0.3s ease;
 }
-.dec-star-1 { top: -6px; right: -6px;  animation-delay: 0s; }
-.dec-paw     { bottom: -4px; left: -8px; animation-delay: 1.5s; font-size: 20px; }
-.dec-code    { top: 22px; left: -18px; animation-delay: 0.8s; font-size: 13px; color: var(--accent-purple); }
+.dec-star-1 { top: -6px; right: -6px; }
+.dec-paw     { bottom: -4px; left: -8px; font-size: 20px; }
+.dec-code    { top: 22px; left: -18px; font-size: 13px; color: var(--accent-purple); }
+
+.avatar-wrapper:hover .dec-star-1 {
+  transform: translate(-8px, -4px) rotate(15deg);
+  opacity: 1;
+}
+
+.avatar-wrapper:hover .dec-paw {
+  transform: translate(6px, -2px) rotate(-10deg);
+  opacity: 1;
+}
+
+.avatar-wrapper:hover .dec-code {
+  transform: translate(4px, 6px) rotate(-5deg);
+  opacity: 1;
+}
 
 /* 头像环绕粒子光环（JS 动态注入） */
 .avatar-ring {
@@ -498,21 +515,16 @@ body {
 }
 .avatar-ring-inner {
   border: 2px dashed rgba(248, 179, 209, 0.3);
-  animation: ring-spin 8s linear infinite;
+  animation: ring-spin 12s linear infinite;
 }
 .avatar-ring-outer {
   border: 1.5px solid rgba(200, 162, 224, 0.2);
-  animation: ring-spin 12s linear infinite reverse;
+  /* 静态外环，无动画 */
 }
 
 @keyframes ring-spin {
   from { transform: rotate(0deg); }
   to   { transform: rotate(360deg); }
-}
-
-@keyframes dec-float {
-  0%, 100% { transform: translateY(0); }
-  50%      { transform: translateY(-6px); }
 }
 
 /* -------------------- Hero 区域文字 — 命运光渐变 -------------------- */
@@ -523,10 +535,10 @@ body {
   background: var(--gradient-hero);
   -webkit-background-clip: text;
   background-clip: text;
-  -webkit-text-fill-color: transparent;
+  color: transparent;
   letter-spacing: -0.02em;
   margin-bottom: 12px;
-  filter: drop-shadow(0 0 12px rgba(248, 179, 209, 0.3)) drop-shadow(0 0 4px rgba(200, 162, 224, 0.2));
+  text-shadow: 0 2px 8px rgba(248, 179, 209, 0.3);
 }
 
 .hero-title {
@@ -727,7 +739,7 @@ body {
 
 .note-card:hover, .thought-item:hover {
   background: rgba(255, 255, 255, 1);
-  transform: translateX(4px) scale(1.01);
+  transform: translateY(-3px) scale(1.01);
   box-shadow: var(--glass-shadow-inner), var(--shadow-md), var(--glass-border-glow);
   border-color: var(--glass-border-sub-hover);
 }
@@ -1304,9 +1316,9 @@ body {
     padding: 24px 22px;
     margin-bottom: 28px;
     border-radius: var(--radius-md);
-    background: rgba(255, 255, 255, 0.9);
-    backdrop-filter: none;
-    -webkit-backdrop-filter: none;
+    background: rgba(255, 255, 255, 0.88);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
   }
 
   .life-card, .project-card {
@@ -1382,9 +1394,9 @@ body {
     padding: 20px 18px;
     border-radius: var(--radius-sm);
     margin-bottom: 20px;
-    background: rgba(255, 255, 255, 0.92);
-    backdrop-filter: none;
-    -webkit-backdrop-filter: none;
+    background: rgba(255, 255, 255, 0.88);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
   }
 
   .life-card, .project-card {
@@ -1426,7 +1438,21 @@ body {
   }
 
   .calendar-day {
-    font-size: 0.75rem;
+    font-size: 0.8rem;
+    min-width: 44px;
+    min-height: 44px;
+  }
+
+  .calendar-grid {
+    gap: 3px;
+  }
+
+  .calendar-day.selected {
+    transform: scale(1.02);
+  }
+
+  .calendar-day.selected:hover {
+    transform: scale(1.02);
   }
 
   .note-detail-panel {
@@ -1490,7 +1516,8 @@ body {
     --bg-pink-light: #2D1F28;
     --bg-purple-light: #262030;
     --text-primary: #E8E0EC;
-    --text-secondary: #A098B0;
+    --text-secondary: #C4B5B8;            /* 暗色模式暖调浅灰 */
+    --text-tertiary: #8A7A80;            /* 暗色模式辅助色 */
     --glass-bg: rgba(40, 35, 50, 0.65);
     --glass-bg-sub: rgba(40, 35, 50, 0.58);
     --glass-hover-bg: rgba(50, 44, 60, 0.88);
@@ -1548,6 +1575,47 @@ body {
   .footer {
     content-visibility: auto;
     contain-intrinsic-size: auto 300px;
+  }
+
+  /* Preloader 暗色模式 */
+  .preloader-bg {
+    background:
+      radial-gradient(ellipse 60% 50% at 50% 45%, rgba(45, 31, 40, 0.95) 0%, transparent 70%),
+      radial-gradient(ellipse 50% 40% at 50% 55%, rgba(38, 32, 48, 0.9) 0%, transparent 65%),
+      linear-gradient(135deg, #1A1520 0%, #2D1F28 40%, #262030 100%);
+  }
+  .preloader-name {
+    filter: drop-shadow(0 0 16px rgba(200, 162, 224, 0.5));
+  }
+  .preloader-avatar img {
+    box-shadow:
+      0 0 50px rgba(200, 162, 224, 0.5),
+      0 0 100px rgba(200, 162, 224, 0.3),
+      0 4px 24px rgba(0, 0, 0, 0.4);
+    border-color: rgba(255, 255, 255, 0.6);
+  }
+  .preloader-avatar::after {
+    border-color: rgba(200, 162, 224, 0.5);
+  }
+
+  /* SFX / BGM 按钮暗色模式 */
+  .sound-toggle {
+    background: rgba(40, 35, 50, 0.65);
+    border-color: var(--glass-border);
+    color: var(--text-primary);
+  }
+  .sound-toggle:hover {
+    background: rgba(50, 44, 60, 0.88);
+    color: var(--accent-pink-strong);
+  }
+  .bgm-toggle {
+    background: rgba(40, 35, 50, 0.65);
+    border-color: var(--glass-border);
+    color: var(--text-primary);
+  }
+  .bgm-toggle:hover {
+    background: rgba(50, 44, 60, 0.88);
+    color: var(--accent-purple);
   }
 }
 
@@ -2007,6 +2075,11 @@ body {
   transition: opacity 0.3s var(--ease-smooth);
 }
 
+/* 跳过时立即可见 */
+.cinematic-preloader.skip-immediate {
+  display: none !important;
+}
+
 /* 首屏 hero 区域强化入场 — 配合 preloader 揭示 */
 .page:not(.hidden) .hero-a,
 .page:not(.hidden) .hero-b {
@@ -2284,50 +2357,5 @@ body {
   to {
     opacity: 1;
     transform: translateY(0);
-  }
-}
-
-/* 暗色模式适配 preloader */
-@media (prefers-color-scheme: dark) {
-  .preloader-bg {
-    background:
-      radial-gradient(ellipse 60% 50% at 50% 45%, rgba(45, 31, 40, 0.95) 0%, transparent 70%),
-      radial-gradient(ellipse 50% 40% at 50% 55%, rgba(38, 32, 48, 0.9) 0%, transparent 65%),
-      linear-gradient(135deg, #1A1520 0%, #2D1F28 40%, #262030 100%);
-  }
-  .preloader-name {
-    filter: drop-shadow(0 0 16px rgba(200, 162, 224, 0.5));
-  }
-
-  /* 暗色模式 — 头像辉光强度调整 */
-  .preloader-avatar img {
-    box-shadow:
-      0 0 50px rgba(200, 162, 224, 0.5),
-      0 0 100px rgba(200, 162, 224, 0.3),
-      0 4px 24px rgba(0, 0, 0, 0.4);
-    border-color: rgba(255, 255, 255, 0.6);
-  }
-
-  .preloader-avatar::after {
-    border-color: rgba(200, 162, 224, 0.5);
-  }
-
-  .sound-toggle {
-    background: rgba(40, 35, 50, 0.65);
-    border-color: var(--glass-border);
-    color: var(--text-primary);  /* 暗色模式下仍用亮色文字保证对比度 */
-  }
-  .sound-toggle:hover {
-    background: rgba(50, 44, 60, 0.88);
-    color: var(--accent-pink-strong);
-  }
-  .bgm-toggle {
-    background: rgba(40, 35, 50, 0.65);
-    border-color: var(--glass-border);
-    color: var(--text-primary);
-  }
-  .bgm-toggle:hover {
-    background: rgba(50, 44, 60, 0.88);
-    color: var(--accent-purple);
   }
 }

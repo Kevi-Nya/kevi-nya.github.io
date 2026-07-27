@@ -2520,6 +2520,19 @@
       return Promise.resolve();
     }
 
+    // 回访用户跳过动画（同一 sessionStorage 内已看过）
+    var SKIP_KEY = 'kevi_home_preloader_skip';
+    function shouldSkipPreloader() {
+      try { return window.sessionStorage.getItem(SKIP_KEY) === '1'; } catch (e) { return false; }
+    }
+    function markPreloaderShown() {
+      try { window.sessionStorage.setItem(SKIP_KEY, '1'); } catch (e) {}
+    }
+    if (shouldSkipPreloader()) {
+      preloader.classList.add('skip-immediate');
+      return Promise.resolve();
+    }
+
     return new Promise(function (resolve) {
       // Phase 2：生成粒子爆发元素（14 个，均匀辐射）
       var burst = document.getElementById('preloader-burst');
@@ -2575,6 +2588,7 @@
 
       // 序列完成（2.2s），移除 preloader 并 resolve
       setTimeout(function () {
+        markPreloaderShown();
         if (preloader.parentNode) {
           preloader.parentNode.removeChild(preloader);
         }
