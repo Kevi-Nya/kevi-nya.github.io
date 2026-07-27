@@ -626,6 +626,341 @@ body {
   50%      { transform: translateY(-3px); opacity: 0.7; }
 }
 
+/* ============================================================
+   日历组件 - Apple 风格日历 + 详情面板
+   ============================================================ */
+
+/* -------------------- 日历外层容器 -------------------- */
+.calendar-wrapper {
+  display: flex;
+  gap: 24px;
+  min-height: 420px;
+}
+
+/* -------------------- 左侧日历面板 -------------------- */
+.calendar-left {
+  flex: 0 0 320px;
+  min-width: 280px;
+}
+
+/* -------------------- 月份切换栏 -------------------- */
+.calendar-month-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+  padding: 0 4px;
+}
+
+.calendar-month-label {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  user-select: none;
+}
+
+.calendar-nav {
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(243, 222, 230, 0.5);
+  color: var(--accent-purple);
+  font-size: 0.85rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition);
+}
+
+.calendar-nav:hover {
+  background: var(--gradient-btn);
+  transform: scale(1.1);
+  box-shadow: var(--shadow-sm);
+}
+
+.calendar-nav:active {
+  transform: scale(0.95);
+}
+
+/* -------------------- 星期标题行 -------------------- */
+.calendar-weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  text-align: center;
+  margin-bottom: 8px;
+}
+
+.calendar-weekdays span {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  padding: 6px 0;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+/* 周末列着色 */
+.calendar-weekdays span:nth-child(1),
+.calendar-weekdays span:nth-child(7) {
+  color: var(--accent-pink);
+}
+
+/* -------------------- 日期网格 -------------------- */
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+}
+
+/* -------------------- 单个日期格子 -------------------- */
+.calendar-day {
+  position: relative;
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: var(--text-primary);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all 0.25s ease;
+  user-select: none;
+  background: transparent;
+  border: none;
+  font-family: inherit;
+}
+
+.calendar-day:hover {
+  background: rgba(243, 222, 230, 0.4);
+  box-shadow: 0 0 12px rgba(255, 158, 190, 0.2);
+  transform: translateY(-1px);
+}
+
+/* 非本月日期 */
+.calendar-day.other-month {
+  color: #ccc;
+  cursor: default;
+  pointer-events: none;
+}
+
+/* 今天是当前日期 */
+.calendar-day.today {
+  font-weight: 700;
+  color: var(--accent-pink);
+  background: rgba(255, 158, 190, 0.12);
+  box-shadow: inset 0 0 0 1.5px rgba(255, 158, 190, 0.35);
+}
+
+/* 有内容的日期 - 浅粉色小爪印指示器 */
+.calendar-day.has-notes::after {
+  content: '🐾';
+  position: absolute;
+  bottom: 2px;
+  right: 4px;
+  font-size: 0.55rem;
+  opacity: 0.75;
+  pointer-events: none;
+}
+
+/* 被选中的日期 */
+.calendar-day.selected {
+  background: linear-gradient(135deg, #FBCFE8, #DDD6FE);
+  color: var(--text-primary);
+  font-weight: 700;
+  box-shadow: 0 2px 12px rgba(200, 162, 224, 0.35);
+  transform: scale(1.08);
+  z-index: 1;
+}
+
+.calendar-day.selected:hover {
+  transform: scale(1.08);
+}
+
+/* -------------------- 右侧详情面板 -------------------- */
+.calendar-right {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.note-detail-panel {
+  background: rgba(255, 255, 255, 0.5);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(243, 222, 230, 0.5);
+  border-radius: var(--radius-md);
+  padding: 20px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 300px;
+  transition: all 0.35s ease;
+}
+
+/* 详情面板日期标题 */
+.note-detail-date {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(243, 222, 230, 0.5);
+}
+
+/* 详情滚动区域 */
+.note-detail-scroll {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding-right: 4px;
+}
+
+/* 自定义滚动条 */
+.note-detail-scroll::-webkit-scrollbar {
+  width: 4px;
+}
+.note-detail-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+.note-detail-scroll::-webkit-scrollbar-thumb {
+  background: rgba(200, 162, 224, 0.3);
+  border-radius: 4px;
+}
+
+/* -------------------- 单条笔记/想法卡片 -------------------- */
+.note-detail-card {
+  background: rgba(255, 255, 255, 0.75);
+  border-radius: var(--radius-sm);
+  padding: 14px 16px;
+  position: relative;
+  /* 左侧粉色细线装饰 */
+  border-left: 3px solid var(--accent-pink);
+  box-shadow: var(--shadow-sm);
+  transition: all var(--transition);
+  animation: detailFadeIn 0.4s ease;
+}
+
+.note-detail-card:hover {
+  transform: translateX(3px);
+  box-shadow: var(--shadow-md);
+  border-left-color: var(--accent-purple);
+}
+
+@keyframes detailFadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* 心情图标 */
+.note-detail-mood {
+  position: absolute;
+  top: 12px;
+  right: 14px;
+  font-size: 1.2rem;
+  opacity: 0.8;
+}
+
+/* 笔记内容文字 */
+.note-detail-content {
+  font-size: 0.88rem;
+  color: var(--text-primary);
+  line-height: 1.7;
+  margin-bottom: 8px;
+  padding-right: 28px; /* 给心情图标留空间 */
+}
+
+/* 想法标题 */
+.note-detail-title {
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 6px;
+}
+
+/* 想法摘要 */
+.note-detail-summary {
+  font-size: 0.83rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  margin-bottom: 8px;
+}
+
+/* 标签行 */
+.note-detail-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.note-detail-tag {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 12px;
+  font-size: 0.7rem;
+  font-weight: 600;
+}
+
+/* 标签颜色 */
+.tag-essay { background: rgba(255, 158, 190, 0.2); color: #c06d85; }
+.tag-tech  { background: rgba(200, 162, 224, 0.2); color: #7c5cbf; }
+.tag-life  { background: rgba(167, 200, 220, 0.2); color: #5a8a9f; }
+.tag-default { background: rgba(200, 162, 224, 0.15); color: var(--accent-purple); }
+
+/* 通用笔记标签样式 */
+.note-detail-card .note-detail-tag {
+  background: rgba(243, 222, 230, 0.35);
+  color: #b07a8c;
+}
+
+/* -------------------- 空状态提示 -------------------- */
+.note-detail-empty {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-secondary);
+  text-align: center;
+  gap: 8px;
+}
+
+.note-detail-empty-icon {
+  font-size: 2.5rem;
+  opacity: 0.6;
+}
+
+.note-detail-empty-text {
+  font-size: 0.88rem;
+  line-height: 1.6;
+}
+
+/* 未选择日期时的初始提示 */
+.note-detail-placeholder {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #ccc;
+  text-align: center;
+  gap: 8px;
+}
+
+.note-detail-placeholder-icon {
+  font-size: 2.2rem;
+  opacity: 0.5;
+}
+
+.note-detail-placeholder-text {
+  font-size: 0.85rem;
+}
+
 /* -------------------- 响应式设计 -------------------- */
 
 /* 平板端 (768px 以下) */
@@ -661,6 +996,18 @@ body {
 
   .projects-grid {
     grid-template-columns: repeat(2, 1fr);
+  }
+
+  /* 日历组件平板适配 */
+  .calendar-wrapper {
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .calendar-left {
+    flex: none;
+    min-width: unset;
+    width: 100%;
   }
 }
 
@@ -725,6 +1072,35 @@ body {
   .projects-grid {
     grid-template-columns: 1fr;
     gap: 10px;
+  }
+
+  /* 日历组件手机端适配 */
+  .calendar-wrapper {
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .calendar-left {
+    flex: none;
+    min-width: unset;
+    width: 100%;
+  }
+
+  .calendar-month-label {
+    font-size: 0.9rem;
+  }
+
+  .calendar-day {
+    font-size: 0.75rem;
+  }
+
+  .note-detail-panel {
+    padding: 14px;
+    min-height: 200px;
+  }
+
+  .note-detail-card {
+    padding: 12px;
   }
 
   .connect-links {

@@ -232,22 +232,14 @@
   }
 
   /**
-   * 渲染 Little Notes 短文字卡片
-   * @param {Array} notes - 笔记数组 [{content, note_date}, ...]
+   * 渲染 Little Notes - 日历版
+   * @param {Array} notes - 笔记数组 [{id, content, note_date, mood, tags}, ...]
    */
   function renderLittleNotes(notes) {
-    var container = document.getElementById('notes-container');
+    var container = document.getElementById('little-notes-calendar');
     if (!container) return;
-
-    var html = '';
-    notes.forEach(function (note) {
-      html +=
-        '<div class="note-card">' +
-        '<p>' + note.content + '</p>' +
-        '<span class="note-date">' + note.note_date + '</span>' +
-        '</div>';
-    });
-    container.innerHTML = html;
+    container._entries = notes;
+    renderCalendar(container, 'little');
   }
 
   /**
@@ -264,24 +256,321 @@
   }
 
   /**
-   * 渲染 Thoughts 思考/随笔
-   * @param {Array} thoughts - [{tag_type, tag_label, title, summary, thought_date}, ...]
+   * 渲染 Thoughts - 日历版
+   * @param {Array} thoughts - [{id, title, summary, tags, tag_type, tag_label, thought_date}, ...]
    */
   function renderThoughts(thoughts) {
-    var container = document.getElementById('thoughts-container');
+    var container = document.getElementById('thoughts-calendar');
     if (!container) return;
+    container._entries = thoughts;
+    renderCalendar(container, 'thoughts');
+  }
 
-    var html = '';
-    thoughts.forEach(function (item) {
-      html +=
-        '<div class="thought-item">' +
-        '<div class="thought-tag tag-' + item.tag_type + '">' + item.tag_label + '</div>' +
-        '<h3>' + item.title + '</h3>' +
-        '<p>' + item.summary + '</p>' +
-        '<span class="thought-date">' + item.thought_date + '</span>' +
-        '</div>';
+  // ==================== 日历组件核心函数 ====================
+
+  /**
+   * 按日期字段分组条目
+   * @param {Array} entries - 条目数组
+   * @param {string} dateField - 日期字段名（如 'note_date' 或 'thought_date'）
+   * @returns {Object} 以日期字符串为 key 的分组对象
+   */
+  function groupByDate(entries, dateField) {
+    var map = {};
+    entries.forEach(function (entry) {
+      var date = entry[dateField];
+      if (date) {
+        if (!map[date]) map[date] = [];
+        map[date].push(entry);
+      }
     });
+    return map;
+  }
+
+  /**
+   * 获取指定月份的天数
+   * @param {number} year - 年份
+   * @param {number} month - 月份 (0-11)
+   * @returns {number}
+   */
+  function daysInMonth(year, month) {
+    return new Date(year, month + 1, 0).getDate();
+  }
+
+  /**
+   * 获取指定月份第一天是星期几
+   * @param {number} year - 年份
+   * @param {number} month - 月份 (0-11)
+   * @returns {number} 0=周日, 1=周一, ... 6=周六
+   */
+  function firstDayOfMonth(year, month) {
+    return new Date(year, month, 1).getDay();
+  }
+
+  /**
+   * 格式化日期为 YYYY-MM-DD 字符串
+   * @param {number} year
+   * @param {number} month (0-11)
+   * @param {number} day
+   * @returns {string}
+   */
+  function formatDate(year, month, day) {
+    return year + '-' + String(month + 1).padStart(2, '0') + '-' + String(day).padStart(2, '0');
+  }
+
+  /**
+   * 渲染指定日期的详情面板内容（内部 HTML）
+   * @param {string} dateStr - 日期字符串 YYYY-MM-DD
+   * @param {Array} entries - 该日期的条目数组
+   * @param {'little'|'thoughts'} type - 类型
+   * @returns {string} HTML 字符串
+   */
+  function renderDetailContent(dateStr, entries, type) {
+    var d = new Date(dateStr + 'T00:00:00');
+    var weekdays = ['日', '一', '二', '三', '四', '五', '六'];
+    var dateDisplay = (d.getMonth() + 1) + '月' + d.getDate() + '日 星期' + weekdays[d.getDay()];
+
+    var html = '<div class="note-detail-date">' + dateDisplay + '</div>';
+    html += '<div class="note-detail-scroll">';
+
+    if (!entries || entries.length === 0) {
+      // 空日期温柔提示
+      html += '<div class="note-detail-empty">';
+      html += '<span class="note-detail-empty-icon">' + (type === 'little' ? '🌸' : '🌿') + '</span>';
+      html += '<span class="note-detail-empty-text">' +
+        (type === 'little' ? '这一天也很温柔呢 ✨' : '这一天还没有记录任何想法呢') +
+        '</span>';
+      html += '</div>';
+    } else {
+      entries.forEach(function (entry, index) {
+        // 每条卡片带延迟动画实现依次淡入
+        html += '<div class="note-detail-card" style="animation-delay:' + (index * 0.08) + 's">';
+
+        if (type === 'little') {
+          // Little Notes 卡片：内容 + 心情 + 标签
+          if (entry.mood) {
+            html += '<span class="note-detail-mood">' + entry.mood + '</span>';
+          }
+          html += '<p class="note-detail-content">' + entry.content + '</p>';
+          if (entry.tags && entry.tags.length > 0) {
+            html += '<div class="note-detail-tags">';
+            entry.tags.forEach(function (tag) {
+              html += '<span class="note-detail-tag">' + tag + '</span>';
+            });
+            html += '</div>';
+          }
+        } else {
+          // Thoughts 卡片：标题 + 摘要 + 标签
+          html += '<h3 class="note-detail-title">' + entry.title + '</h3>';
+          html += '<p class="note-detail-summary">' + entry.summary + '</p>';
+          html += '<div class="note-detail-tags">';
+          if (entry.tag_label) {
+            var tagClass = entry.tag_type ? 'tag-' + entry.tag_type : 'tag-default';
+            html += '<span class="note-detail-tag ' + tagClass + '">' + entry.tag_label + '</span>';
+          }
+          if (entry.tags && entry.tags.length > 0) {
+            entry.tags.forEach(function (tag) {
+              if (tag !== entry.tag_label) {
+                html += '<span class="note-detail-tag">' + tag + '</span>';
+              }
+            });
+          }
+          html += '</div>';
+        }
+
+        html += '</div>';
+      });
+    }
+
+    html += '</div>';
+    return html;
+  }
+
+  /**
+   * 渲染未选中日期时的初始占位提示
+   * @param {'little'|'thoughts'} type
+   * @returns {string} HTML 字符串
+   */
+  function renderPlaceholder(type) {
+    return '<div class="note-detail-placeholder">' +
+      '<span class="note-detail-placeholder-icon">' + (type === 'little' ? '📝' : '💭') + '</span>' +
+      '<span class="note-detail-placeholder-text">' +
+      (type === 'little' ? '点击左侧日期查看笔记' : '点击左侧日期查看想法') +
+      '</span></div>';
+  }
+
+  /**
+   * 绑定日历交互事件（日期点击 + 月份切换）
+   * @param {HTMLElement} container - 日历容器 DOM 元素
+   * @param {Object} dateMap - 按日期分组的条目对象
+   * @param {'little'|'thoughts'} type
+   */
+  function bindCalendarEvents(container, dateMap, type) {
+    // 日期格子点击事件
+    var days = container.querySelectorAll('.calendar-day[data-date]');
+    days.forEach(function (day) {
+      day.addEventListener('click', function () {
+        var dateStr = this.getAttribute('data-date');
+
+        // 更新选中状态
+        container.querySelectorAll('.calendar-day.selected').forEach(function (d) {
+          d.classList.remove('selected');
+        });
+        this.classList.add('selected');
+        container.setAttribute('data-selected', dateStr);
+
+        // 更新右侧详情面板（带淡入过渡）
+        var detailPanel = document.getElementById(container.id + '-detail');
+        if (detailPanel) {
+          var entries = dateMap[dateStr] || [];
+          detailPanel.style.opacity = '0';
+          detailPanel.style.transform = 'translateY(6px)';
+          detailPanel.style.transition = 'opacity 0.2s ease, transform 0.2s ease';
+          setTimeout(function () {
+            detailPanel.innerHTML = renderDetailContent(dateStr, entries, type);
+            detailPanel.style.opacity = '1';
+            detailPanel.style.transform = 'translateY(0)';
+          }, 160);
+        }
+      });
+    });
+
+    // 月份切换按钮事件
+    var navBtns = container.querySelectorAll('.calendar-nav');
+    navBtns.forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var year = parseInt(container.getAttribute('data-year'));
+        var month = parseInt(container.getAttribute('data-month'));
+        var dir = this.getAttribute('data-dir');
+
+        if (dir === 'prev') {
+          month--;
+          if (month < 0) { month = 11; year--; }
+        } else {
+          month++;
+          if (month > 11) { month = 0; year++; }
+        }
+
+        container.setAttribute('data-year', year);
+        container.setAttribute('data-month', month);
+
+        // 使用 CSS transition 实现日历平滑切换
+        var calendarLeft = container.querySelector('.calendar-left');
+        if (calendarLeft) {
+          calendarLeft.style.opacity = '0';
+          calendarLeft.style.transform = dir === 'prev' ? 'translateX(-12px)' : 'translateX(12px)';
+          calendarLeft.style.transition = 'opacity 0.2s ease, transform 0.2s ease';
+        }
+
+        setTimeout(function () {
+          // 清除选中日期，重新渲染日历
+          container.setAttribute('data-selected', '');
+          renderCalendar(container, type);
+          if (calendarLeft) {
+            calendarLeft.style.opacity = '1';
+            calendarLeft.style.transform = 'translateX(0)';
+          }
+        }, 180);
+      });
+    });
+  }
+
+  /**
+   * 渲染完整日历组件（左侧日历 + 右侧详情面板）
+   * @param {HTMLElement} container - 日历容器 DOM 元素
+   * @param {'little'|'thoughts'} type - 类型
+   */
+  function renderCalendar(container, type) {
+    var entries = container._entries || [];
+    var dateField = type === 'little' ? 'note_date' : 'thought_date';
+    var dateMap = groupByDate(entries, dateField);
+
+    var today = new Date();
+    var todayStr = formatDate(today.getFullYear(), today.getMonth(), today.getDate());
+
+    // 从 DOM 属性读取或初始化状态
+    var currentYear = parseInt(container.getAttribute('data-year')) || today.getFullYear();
+    var currentMonth = parseInt(container.getAttribute('data-month')) || today.getMonth();
+    var selectedDate = container.getAttribute('data-selected') || '';
+
+    // 构建左侧日历 HTML
+    var html = '<div class="calendar-left">';
+
+    // 月份切换栏
+    html += '<div class="calendar-month-header">';
+    html += '<button class="calendar-nav calendar-nav-prev" data-dir="prev" aria-label="上个月">‹</button>';
+    html += '<span class="calendar-month-label">' + currentYear + '年' + (currentMonth + 1) + '月</span>';
+    html += '<button class="calendar-nav calendar-nav-next" data-dir="next" aria-label="下个月">›</button>';
+    html += '</div>';
+
+    // 星期标题行
+    var weekdays = ['日', '一', '二', '三', '四', '五', '六'];
+    html += '<div class="calendar-weekdays">';
+    weekdays.forEach(function (w) {
+      html += '<span>' + w + '</span>';
+    });
+    html += '</div>';
+
+    // 日期网格 (7 列 x 最多 6 行)
+    html += '<div class="calendar-grid">';
+
+    var firstDay = firstDayOfMonth(currentYear, currentMonth);
+    var totalDays = daysInMonth(currentYear, currentMonth);
+    var prevMonthDays = daysInMonth(currentYear, currentMonth === 0 ? 11 : currentMonth - 1);
+
+    // 填充上月末尾日期
+    for (var i = firstDay - 1; i >= 0; i--) {
+      var pDay = prevMonthDays - i;
+      html += '<div class="calendar-day other-month">' + pDay + '</div>';
+    }
+
+    // 当月日期
+    for (var d = 1; d <= totalDays; d++) {
+      var dateStr = formatDate(currentYear, currentMonth, d);
+      var classes = ['calendar-day'];
+      var hasContent = dateMap[dateStr] && dateMap[dateStr].length > 0;
+
+      if (dateStr === todayStr) classes.push('today');
+      if (hasContent) classes.push('has-notes');
+      if (dateStr === selectedDate) classes.push('selected');
+
+      html += '<div class="' + classes.join(' ') + '" data-date="' + dateStr + '">' + d + '</div>';
+    }
+
+    // 填充下月开头日期（补满最后一行）
+    var remaining = 7 - ((firstDay + totalDays) % 7);
+    if (remaining < 7) {
+      for (var nd = 1; nd <= remaining; nd++) {
+        html += '<div class="calendar-day other-month">' + nd + '</div>';
+      }
+    }
+
+    html += '</div></div>'; // 结束 calendar-left
+
+    // 右侧详情面板
+    html += '<div class="calendar-right"><div class="note-detail-panel" id="' + container.id + '-detail">';
+
+    if (selectedDate && dateMap[selectedDate]) {
+      html += renderDetailContent(selectedDate, dateMap[selectedDate], type);
+    } else if (selectedDate && !dateMap[selectedDate]) {
+      html += renderDetailContent(selectedDate, [], type);
+    } else if (dateMap[todayStr] && dateMap[todayStr].length > 0) {
+      // 默认：今天有内容则显示
+      container.setAttribute('data-selected', todayStr);
+      html += renderDetailContent(todayStr, dateMap[todayStr], type);
+    } else {
+      html += renderPlaceholder(type);
+    }
+
+    html += '</div></div>';
+
     container.innerHTML = html;
+
+    // 持久化状态到 DOM 属性
+    container.setAttribute('data-year', currentYear);
+    container.setAttribute('data-month', currentMonth);
+
+    // 绑定交互事件
+    bindCalendarEvents(container, dateMap, type);
   }
 
   /**
