@@ -1,0 +1,797 @@
+/* ============================================================
+   kevi_nya - 个人数字花园
+   颜色系统：温暖奶油米白 + 浅粉 + 浅紫
+   设计理念：日系、治愈、猫系、Digital Garden
+   ============================================================ */
+
+/* -------------------- CSS 变量与基础重置 -------------------- */
+:root {
+  --bg-primary: #F8F0E8;
+  --bg-pink-light: #F3DEE6;
+  --accent-pink: #FF9EBE;
+  --bg-purple-light: #DDD6FE;
+  --accent-purple: #C8A2E0;
+  --gray-light: #E5E7EB;
+  --text-primary: #2B2B2B;
+  --text-secondary: #6B7280;
+  --gradient-btn: linear-gradient(135deg, #FBCFE8, #DDD6FE);
+  --gradient-card: linear-gradient(135deg, rgba(251, 207, 232, 0.3), rgba(221, 214, 254, 0.3));
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.06);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.08);
+  --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.1);
+  --radius-sm: 12px;
+  --radius-md: 16px;
+  --radius-lg: 24px;
+  --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+*, *::before, *::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Noto Sans JP", "Yu Gothic", sans-serif;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  line-height: 1.7;
+  min-height: 100vh;
+  position: relative;
+  overflow-x: hidden;
+}
+
+/* -------------------- 背景装饰层 -------------------- */
+.bg-overlay {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background:
+    radial-gradient(ellipse 80% 60% at 50% 0%, rgba(243, 222, 230, 0.45) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 50% at 85% 80%, rgba(221, 214, 254, 0.35) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 40% at 15% 30%, rgba(255, 158, 190, 0.15) 0%, transparent 50%),
+    linear-gradient(180deg, rgba(248, 240, 232, 0.88) 0%, rgba(248, 240, 232, 0.92) 50%, rgba(221, 214, 254, 0.25) 100%);
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* 浮动装饰元素 */
+.bg-decorations {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+/* 云朵 */
+.cloud {
+  position: absolute;
+  background: rgba(255, 255, 255, 0.5);
+  border-radius: 50%;
+  filter: blur(20px);
+  animation: float-cloud linear infinite;
+}
+
+.cloud-1 {
+  width: 200px; height: 80px;
+  top: 10%; left: -5%;
+  animation-duration: 25s;
+}
+.cloud-2 {
+  width: 160px; height: 60px;
+  top: 25%; right: -5%;
+  animation-duration: 30s;
+  animation-delay: -8s;
+}
+.cloud-3 {
+  width: 120px; height: 50px;
+  top: 55%; left: 30%;
+  animation-duration: 22s;
+  animation-delay: -15s;
+}
+
+@keyframes float-cloud {
+  from { transform: translateX(0); }
+  50%  { transform: translateX(calc(100vw + 300px)); }
+  50.01% { transform: translateX(calc(-100vw - 300px)); }
+  to   { transform: translateX(0); }
+}
+
+/* 星星 */
+.star {
+  position: absolute;
+  color: var(--accent-purple);
+  opacity: 0.35;
+  font-size: 14px;
+  animation: twinkle 3s ease-in-out infinite;
+}
+.star-1 { top: 8%; left: 12%; animation-delay: 0s; }
+.star-2 { top: 15%; right: 18%; animation-delay: 1.2s; font-size: 10px; }
+.star-3 { top: 45%; left: 8%; animation-delay: 2.1s; font-size: 12px; }
+.star-4 { top: 70%; right: 12%; animation-delay: 0.7s; }
+.star-5 { top: 35%; right: 25%; animation-delay: 1.8s; font-size: 10px; }
+
+@keyframes twinkle {
+  0%, 100% { opacity: 0.2; transform: scale(1); }
+  50%      { opacity: 0.55; transform: scale(1.2); }
+}
+
+/* 猫爪 */
+.paw {
+  position: absolute;
+  font-size: 18px;
+  opacity: 0.25;
+  animation: paw-float 5s ease-in-out infinite;
+}
+.paw-1 { top: 60%; left: 15%; animation-delay: 0s; }
+.paw-2 { top: 30%; right: 10%; animation-delay: 2.5s; }
+.paw-3 { bottom: 15%; right: 20%; animation-delay: 1s; }
+
+@keyframes paw-float {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50%      { transform: translateY(-8px) rotate(5deg); }
+}
+
+/* 代码符号装饰 */
+.code-symbol {
+  position: absolute;
+  color: var(--accent-purple);
+  opacity: 0.2;
+  font-family: "SF Mono", "Fira Code", monospace;
+  font-size: 20px;
+  font-weight: 700;
+}
+.code-symbol-1 { top: 20%; left: 5%; }
+.code-symbol-2 { bottom: 20%; right: 8%; }
+
+/* -------------------- 页面容器 -------------------- */
+.page-container {
+  position: relative;
+  z-index: 1;
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 40px 24px 60px;
+}
+
+/* -------------------- 页面切换 -------------------- */
+.page {
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+.page.hidden {
+  display: none;
+  opacity: 0;
+  transform: translateY(10px);
+}
+.page:not(.hidden) {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* 淡入切换动画 */
+.page.fade-in {
+  animation: pageFadeIn 0.6s ease forwards;
+}
+
+@keyframes pageFadeIn {
+  from { opacity: 0; transform: translateY(15px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* -------------------- 头像区域 -------------------- */
+.avatar-wrapper {
+  position: relative;
+  width: 140px;
+  height: 140px;
+  margin: 0 auto 24px;
+}
+
+.avatar-glow {
+  position: absolute;
+  top: -8px; left: -8px;
+  width: calc(100% + 16px);
+  height: calc(100% + 16px);
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 158, 190, 0.35) 0%, rgba(221, 214, 254, 0.25) 40%, transparent 70%);
+  animation: glow-pulse 3s ease-in-out infinite;
+  z-index: 0;
+}
+
+@keyframes glow-pulse {
+  0%, 100% { transform: scale(1); opacity: 0.7; }
+  50%      { transform: scale(1.08); opacity: 1; }
+}
+
+.avatar {
+  position: relative;
+  z-index: 1;
+  width: 140px;
+  height: 140px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid rgba(255, 255, 255, 0.8);
+  box-shadow:
+    0 4px 20px rgba(0, 0, 0, 0.1),
+    0 0 0 8px rgba(243, 222, 230, 0.3);
+  transition: transform var(--transition), box-shadow var(--transition);
+}
+
+.avatar:hover {
+  transform: scale(1.08);
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.15),
+    0 0 0 8px rgba(243, 222, 230, 0.5),
+    0 0 40px rgba(255, 158, 190, 0.3);
+}
+
+/* 头像周围的装饰 */
+.avatar-decoration {
+  position: absolute;
+  z-index: 2;
+  font-size: 16px;
+  animation: dec-float 3s ease-in-out infinite;
+}
+.dec-star-1 { top: -4px; right: -4px; animation-delay: 0s; }
+.dec-paw     { bottom: -2px; left: -6px; animation-delay: 1.5s; font-size: 18px; }
+.dec-code    { top: 20px; left: -16px; animation-delay: 0.8s; font-size: 12px; color: var(--accent-purple); }
+
+@keyframes dec-float {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-5px); }
+}
+
+/* -------------------- Hero 区域文字 -------------------- */
+.site-name {
+  text-align: center;
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  letter-spacing: -0.02em;
+  margin-bottom: 8px;
+}
+
+.hero-subtitle {
+  text-align: center;
+  font-size: 1.05rem;
+  color: var(--accent-pink);
+  margin-bottom: 12px;
+}
+
+.hero-message {
+  text-align: center;
+  font-size: 0.95rem;
+  color: var(--text-secondary);
+  line-height: 1.8;
+  max-width: 400px;
+  margin: 0 auto;
+}
+
+.hero-title {
+  text-align: center;
+  font-size: 0.95rem;
+  color: var(--accent-purple);
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  margin-bottom: 8px;
+}
+
+.hero-bio {
+  text-align: center;
+  font-size: 1rem;
+  color: var(--text-secondary);
+}
+
+/* -------------------- 卡片通用样式 -------------------- */
+.card {
+  background: rgba(255, 255, 255, 0.65);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  border-radius: var(--radius-lg);
+  padding: 28px 32px;
+  margin-bottom: 20px;
+  box-shadow: var(--shadow-sm);
+  transition: transform var(--transition), box-shadow var(--transition);
+}
+
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.card-title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.card-icon {
+  font-size: 1.25rem;
+}
+
+/* -------------------- 动画类 -------------------- */
+.fade-in-up {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 0.7s ease, transform 0.7s ease;
+}
+.fade-in-up.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* 延迟 */
+.delay-1 { transition-delay: 0.1s; }
+.delay-2 { transition-delay: 0.2s; }
+.delay-3 { transition-delay: 0.3s; }
+.delay-4 { transition-delay: 0.4s; }
+.delay-5 { transition-delay: 0.5s; }
+.delay-6 { transition-delay: 0.6s; }
+
+/* -------------------- Page A - About Me 标签 -------------------- */
+.about-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 16px;
+  background: var(--gradient-card);
+  border-radius: 20px;
+  font-size: 0.9rem;
+  color: var(--text-primary);
+  transition: transform var(--transition), box-shadow var(--transition);
+}
+
+.tag:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-sm);
+}
+
+/* -------------------- Page A - My Life 卡片网格 -------------------- */
+.life-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 14px;
+}
+
+.life-card {
+  background: rgba(255, 255, 255, 0.6);
+  border: 1px solid rgba(200, 162, 224, 0.2);
+  border-radius: var(--radius-md);
+  padding: 20px 16px;
+  text-align: center;
+  transition: transform var(--transition), box-shadow var(--transition);
+}
+
+.life-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-md);
+  border-color: rgba(200, 162, 224, 0.4);
+}
+
+.life-emoji {
+  font-size: 2rem;
+  display: block;
+  margin-bottom: 10px;
+}
+
+.life-card h3 {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 6px;
+}
+
+.life-card p {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+/* -------------------- Page A - Little Notes -------------------- */
+.notes-grid {
+  display: grid;
+  gap: 12px;
+}
+
+.note-card {
+  background: var(--gradient-card);
+  border-radius: var(--radius-sm);
+  padding: 18px 20px;
+  transition: transform var(--transition);
+}
+
+.note-card:hover {
+  transform: translateX(4px);
+}
+
+.note-card p {
+  font-size: 0.9rem;
+  color: var(--text-primary);
+  line-height: 1.6;
+  margin-bottom: 8px;
+}
+
+.note-date {
+  font-size: 0.78rem;
+  color: var(--accent-purple);
+}
+
+/* -------------------- Page B - About 文字 -------------------- */
+.about-text {
+  font-size: 0.95rem;
+  color: var(--text-secondary);
+  line-height: 1.9;
+}
+
+/* -------------------- Page B - Projects 网格 -------------------- */
+.projects-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(145px, 1fr));
+  gap: 14px;
+}
+
+.project-card {
+  background: rgba(255, 255, 255, 0.6);
+  border: 1px solid rgba(200, 162, 224, 0.2);
+  border-radius: var(--radius-md);
+  padding: 22px 18px;
+  text-align: center;
+  transition: transform var(--transition), box-shadow var(--transition);
+}
+
+.project-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-md);
+  border-color: rgba(200, 162, 224, 0.4);
+}
+
+.project-icon {
+  font-size: 2rem;
+  margin-bottom: 10px;
+}
+
+.project-card h3 {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 8px;
+}
+
+.project-card p {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+/* -------------------- Page B - Thoughts 列表 -------------------- */
+.thoughts-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.thought-item {
+  background: var(--gradient-card);
+  border-radius: var(--radius-sm);
+  padding: 18px 20px;
+  transition: transform var(--transition);
+}
+
+.thought-item:hover {
+  transform: translateX(4px);
+}
+
+.thought-tag {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 12px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.tag-essay { background: rgba(255, 158, 190, 0.25); color: #c06d85; }
+.tag-tech  { background: rgba(200, 162, 224, 0.25); color: #7c5cbf; }
+.tag-life  { background: rgba(167, 200, 220, 0.25); color: #5a8a9f; }
+
+.thought-item h3 {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 6px;
+}
+
+.thought-item p {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  margin-bottom: 8px;
+}
+
+.thought-date {
+  font-size: 0.78rem;
+  color: var(--accent-purple);
+}
+
+/* -------------------- Page B - Skills 标签云 -------------------- */
+.skills-cloud {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.skill-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 10px 18px;
+  background: var(--gradient-btn);
+  border-radius: 24px;
+  font-size: 0.9rem;
+  color: var(--text-primary);
+  font-weight: 500;
+  transition: transform var(--transition), box-shadow var(--transition);
+}
+
+.skill-tag:hover {
+  transform: translateY(-2px) scale(1.05);
+  box-shadow: var(--shadow-md);
+}
+
+/* -------------------- Connect 链接区域 -------------------- */
+.connect-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: center;
+}
+
+.connect-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 24px;
+  background: rgba(255, 255, 255, 0.7);
+  border: 1px solid rgba(200, 162, 224, 0.25);
+  border-radius: 28px;
+  text-decoration: none;
+  color: var(--text-primary);
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: all var(--transition);
+}
+
+.connect-link:hover {
+  background: var(--gradient-btn);
+  border-color: transparent;
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.connect-link i {
+  font-size: 1.1rem;
+  color: var(--accent-purple);
+  transition: color var(--transition);
+}
+
+.connect-link:hover i {
+  color: var(--accent-pink);
+}
+
+/* -------------------- 页脚 -------------------- */
+.footer {
+  text-align: center;
+  padding: 32px 0 16px;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+
+.heart {
+  color: var(--accent-pink);
+  animation: heartbeat 1.2s ease-in-out infinite;
+}
+
+@keyframes heartbeat {
+  0%, 100% { transform: scale(1); }
+  15%      { transform: scale(1.3); }
+  30%      { transform: scale(1); }
+  45%      { transform: scale(1.2); }
+  60%      { transform: scale(1); }
+}
+
+.coffee {
+  display: inline-block;
+  animation: coffee-steam 2s ease-in-out infinite;
+}
+
+@keyframes coffee-steam {
+  0%, 100% { transform: translateY(0); opacity: 1; }
+  50%      { transform: translateY(-3px); opacity: 0.7; }
+}
+
+/* -------------------- 响应式设计 -------------------- */
+
+/* 平板端 (768px 以下) */
+@media (max-width: 768px) {
+  .page-container {
+    padding: 32px 20px 48px;
+  }
+
+  .avatar-wrapper {
+    width: 120px;
+    height: 120px;
+    margin-bottom: 20px;
+  }
+
+  .avatar {
+    width: 120px;
+    height: 120px;
+  }
+
+  .site-name {
+    font-size: 1.65rem;
+  }
+
+  .card {
+    padding: 22px 20px;
+    border-radius: var(--radius-md);
+  }
+
+  /* 卡片网格改为 2 列 */
+  .life-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .projects-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* 手机端 (480px 以下) */
+@media (max-width: 480px) {
+  .page-container {
+    padding: 24px 16px 40px;
+  }
+
+  .avatar-wrapper {
+    width: 100px;
+    height: 100px;
+    margin-bottom: 16px;
+  }
+
+  .avatar {
+    width: 100px;
+    height: 100px;
+  }
+
+  .avatar-glow {
+    top: -6px; left: -6px;
+    width: calc(100% + 12px);
+    height: calc(100% + 12px);
+  }
+
+  .avatar:hover {
+    transform: scale(1.05);
+  }
+
+  .site-name {
+    font-size: 1.4rem;
+  }
+
+  .hero-subtitle,
+  .hero-title {
+    font-size: 0.85rem;
+  }
+
+  .hero-message,
+  .hero-bio {
+    font-size: 0.85rem;
+  }
+
+  .card {
+    padding: 18px 16px;
+    border-radius: var(--radius-sm);
+    margin-bottom: 14px;
+  }
+
+  .card-title {
+    font-size: 1rem;
+    margin-bottom: 14px;
+  }
+
+  /* 手机端单列布局 */
+  .life-grid {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .projects-grid {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .connect-links {
+    gap: 8px;
+  }
+
+  .connect-link {
+    padding: 10px 18px;
+    font-size: 0.82rem;
+    border-radius: 24px;
+  }
+
+  .tag,
+  .skill-tag {
+    font-size: 0.82rem;
+    padding: 7px 14px;
+  }
+
+  /* 隐藏部分背景装饰以提升性能 */
+  .cloud-3,
+  .paw-2,
+  .code-symbol-2 {
+    display: none;
+  }
+
+  /* 减小装饰元素尺寸 */
+  .cloud-1 { width: 120px; height: 50px; }
+  .cloud-2 { width: 100px; height: 40px; }
+}
+
+/* 大型桌面端优化 (>1200px) */
+@media (min-width: 1200px) {
+  .page-container {
+    max-width: 780px;
+    padding: 48px 24px 72px;
+  }
+
+  .avatar-wrapper {
+    width: 160px;
+    height: 160px;
+  }
+
+  .avatar {
+    width: 160px;
+    height: 160px;
+  }
+
+  .site-name {
+    font-size: 2.2rem;
+  }
+}
+
+/* 暗色主题偏好适配 - 轻微调整 */
+@media (prefers-color-scheme: dark) {
+  /* 保持温暖氛围，仅微调 */
+  body {
+    /* 保持原色，不做暗色切换 */
+  }
+}
+
+/* 减少动画偏好 */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
