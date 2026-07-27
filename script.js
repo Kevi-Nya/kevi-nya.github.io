@@ -149,7 +149,9 @@
    * @returns {Promise<Object>} 包含 about_tags, life_cards, little_notes 的数据对象
    */
   function loadData() {
-    return fetch('data.json')
+    // 添加时间戳参数避免浏览器/CDN 缓存旧版本的 data.json
+    var cacheBuster = '?v=' + Date.now();
+    return fetch('data.json' + cacheBuster)
       .then(function (response) {
         if (!response.ok) {
           throw new Error('数据加载失败: HTTP ' + response.status);
@@ -165,6 +167,8 @@
 
   /**
    * 默认数据（当 data.json 不可用时的降级方案）
+   * 注意：little_notes 和 thoughts 保持为空数组，
+   * 避免 data.json 更新后降级时仍显示旧内容。
    * @returns {Object}
    */
   function getDefaultData() {
@@ -178,12 +182,8 @@
         { emoji: '📷', title: 'Photography', description: '用镜头捕捉生活中的温柔瞬间' },
         { emoji: '🐱', title: 'Cats', description: '猫咪是世界上最美好的存在' },
       ],
-      little_notes: [
-        { content: '欢迎来到 kevi_nya 🌸', note_date: '2025.01.01' },
-      ],
-      thoughts: [
-        { tag_type: 'essay', tag_label: '随笔', title: '关于 AI 与创造力的思考', summary: 'AI 不是替代创造力的工具，而是放大创造力的伙伴……', thought_date: '2025.01.12' },
-      ],
+      little_notes: [],
+      thoughts: [],
       skills: [
         { emoji: '🤖', name: 'AI' },
         { emoji: '🐍', name: 'Python' },
