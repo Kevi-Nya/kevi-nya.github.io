@@ -583,14 +583,15 @@ body {
   text-shadow: var(--text-shadow-subtle);
 }
 
-/* Below-fold 卡片延迟渲染优化 — content-visibility 浏览器原生懒渲染 */
-.fade-in-up.delay-2,
-.fade-in-up.delay-3,
-.fade-in-up.delay-4,
-.fade-in-up.delay-5,
-.fade-in-up.delay-6 {
+/* ==================== below-fold 内容延迟渲染优化 ==================== */
+/* 浏览器原生 content-visibility 跳过屏幕外元素渲染，降低首屏布局成本 */
+/* 注意：calendar-wrapper 是交互组件，需要完整渲染，不参与延迟渲染 */
+.projects-grid,
+.skills-cloud,
+#links-container,
+.footer {
   content-visibility: auto;
-  contain-intrinsic-size: auto 320px;
+  contain-intrinsic-size: auto 300px;
 }
 
 .card-icon {
@@ -1514,6 +1515,15 @@ body {
       radial-gradient(ellipse 30% 22% at 60% 40%, rgba(200, 162, 224, 0.12) 0%, transparent 55%),
       var(--bg-primary);
   }
+
+  /* content-visibility 暗色模式同步 */
+  .projects-grid,
+  .skills-cloud,
+  #links-container,
+  .footer {
+    content-visibility: auto;
+    contain-intrinsic-size: auto 300px;
+  }
 }
 
 /* 减少动画偏好 */
@@ -2026,6 +2036,98 @@ body {
 /* 打印时隐藏音效按钮 */
 @media print {
   .sound-toggle { display: none !important; }
+  .bgm-toggle   { display: none !important; }
+}
+
+/* ============================================================
+   BGM 背景音乐按钮 — P2
+   位于 SFX 按钮上方，三态：静音/已开启/播放中
+   ============================================================ */
+
+.bgm-toggle {
+  position: fixed;
+  bottom: 76px;  /* 在 sound-toggle 上方 8px */
+  right: 24px;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 1px solid var(--glass-border);
+  background: var(--glass-bg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  color: var(--text-secondary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9000;
+  box-shadow: var(--shadow-sm), var(--glass-border-glow);
+  transition: transform var(--choreo-element-duration) var(--ease-bounce),
+              background var(--choreo-element-duration) var(--ease-bounce),
+              color var(--choreo-element-duration) var(--ease-bounce),
+              box-shadow var(--choreo-element-duration) var(--ease-bounce);
+  opacity: 0;
+  transform: scale(0.8);
+  animation: bgm-toggle-in 0.4s var(--ease-bounce) forwards;
+  animation-delay: 2.0s; /* 比 SFX 按钮稍晚出现 */
+}
+
+@keyframes bgm-toggle-in {
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.bgm-toggle:hover {
+  background: var(--glass-hover-bg);
+  color: var(--accent-purple);
+  transform: scale(1.1);
+  box-shadow: var(--shadow-md), var(--shadow-glow-sm);
+}
+
+.bgm-toggle:active {
+  transform: scale(0.95);
+}
+
+/* BGM 按钮三态图标切换 */
+.bgm-toggle.muted .bgm-icon-playing,
+.bgm-toggle.muted .bgm-icon-on     { display: none; }
+.bgm-toggle.muted .bgm-icon-muted  { display: block; }
+
+.bgm-toggle:not(.muted):not(.playing) .bgm-icon-playing,
+.bgm-toggle:not(.muted):not(.playing) .bgm-icon-muted { display: none; }
+.bgm-toggle:not(.muted):not(.playing) .bgm-icon-on     { display: block; }
+
+.bgm-toggle.playing .bgm-icon-on,
+.bgm-toggle.playing .bgm-icon-muted { display: none; }
+.bgm-toggle.playing .bgm-icon-playing { display: block; }
+
+/* 播放中状态 — 音符脉动 + 主题色 */
+.bgm-toggle.playing {
+  color: var(--accent-pink);
+  border-color: var(--glass-border-hover);
+  box-shadow: var(--shadow-sm), var(--shadow-glow-sm);
+}
+
+.bgm-toggle.playing .bgm-icon-playing {
+  animation: bgm-note-pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes bgm-note-pulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50%      { transform: scale(1.15); opacity: 0.8; }
+}
+
+/* 键盘焦点样式 */
+.bgm-toggle:focus-visible {
+  outline: 2px solid var(--accent-purple);
+  outline-offset: 3px;
+}
+
+/* 减少动画时隐藏 BGM 按钮 */
+@media (prefers-reduced-motion: reduce) {
+  .bgm-toggle { display: none !important; }
 }
 
 /* ============================================================
@@ -2096,5 +2198,14 @@ body {
   }
   .sound-toggle:hover {
     background: rgba(50, 44, 60, 0.88);
+  }
+  .bgm-toggle {
+    background: rgba(40, 35, 50, 0.65);
+    border-color: var(--glass-border);
+    color: var(--text-secondary);
+  }
+  .bgm-toggle:hover {
+    background: rgba(50, 44, 60, 0.88);
+    color: var(--accent-purple);
   }
 }

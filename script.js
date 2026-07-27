@@ -79,6 +79,11 @@
     showEl.classList.remove('hidden');
     hideEl.classList.add('hidden');
 
+    // 强制显示目标页面的所有动画元素（防止 initScrollAnimation 时序竞争导致内容不可见）
+    showEl.querySelectorAll('.fade-in-up').forEach(function (el) {
+      el.classList.add('visible');
+    });
+
     // 强制回流后触发动画
     void showEl.offsetWidth;
     showEl.classList.add('fade-in');
@@ -91,6 +96,9 @@
 
     // 动效编排：场景级过渡 — 播放柔风音效 + 延迟触发容器级 stagger
     Choreographer.sceneTransition();
+
+    // BGM 页面切换：自动 crossfade 到对应页面的环境音乐
+    switchBgmForPage(pageId);
   }
 
   /**
@@ -1437,8 +1445,10 @@
     var html = '';
     links.forEach(function (link) {
       var iconSvg = PLATFORM_ICONS[link.platform] || '';
+      var isExternal = !link.qq_number; // QQ 链接为复制交互，非外部跳转
       html +=
         '<a href="' + escapeHtml(link.url) + '" class="connect-link" aria-label="' + escapeHtml(link.platform) + '"' +
+        (isExternal ? ' target="_blank" rel="noopener noreferrer"' : '') +
         (link.qq_number ? ' data-qq="' + escapeHtml(link.qq_number) + '"' : '') + '>' +
         iconSvg +
         '<span>' + escapeHtml(link.platform) + '</span>' +
@@ -1634,6 +1644,82 @@
       toggle.classList.add('active');
     } else {
       toggle.classList.remove('active');
+    }
+  }
+
+  // ==================== BGM 播放控制按钮 ====================
+
+  /**
+   * 初始化 BGM 播放/暂停按钮
+   * 位于 SFX 按钮旁，三态图标：播放中 / 已开启 / 静音中
+   */
+  function initBgmToggle() {
+    var toggle = document.getElementById('bgm-toggle');
+    if (!toggle) return;
+
+    updateBgmToggleState(toggle);
+
+    toggle.addEventListener('click', function () {
+      SoundEngine.init(); // 确保 AudioContext 存在
+      BgmEngine.init();
+
+      var newMuted = !BgmEngine.isMuted();
+      BgmEngine.setMuted(newMuted);
+
+      if (!newMuted) {
+        // 开启了 BGM，开始播放当前页面的音乐
+        var page = (pageA && !pageA.classList.contains('hidden')) ? 'a' : 'b';
+        BgmEngine.play(page);
+      }
+
+      updateBgmToggleState(toggle);
+    });
+  }
+
+  /**
+   * 更新 BGM 按钮的视觉状态（三态图标）
+   */
+  function updateBgmToggleState(toggle) {
+    var bgmMuted = BgmEngine.isMuted();
+    var isPlaying = BgmEngine.isPlaying();
+
+    toggle.setAttribute('aria-pressed', String(!bgmMuted));
+
+    if (isPlaying) {
+      toggle.setAttribute('aria-label', 'BGM 播放中 — 点击关闭');
+      toggle.title = 'BGM 播放中 — 点击关闭';
+    } else if (!bgmMuted) {
+      toggle.setAttribute('aria-label', 'BGM 已开启 — 点击关闭');
+      toggle.title = 'BGM 已开启 — 点击关闭';
+    } else {
+      toggle.setAttribute('aria-label', '开启 BGM 背景音乐');
+      toggle.title = '开启 BGM 背景音乐';
+    }
+
+    // 三态 class 控制
+    toggle.classList.remove('playing', 'muted');
+    if (isPlaying) {
+      toggle.classList.add('playing');
+    } else if (bgmMuted) {
+      toggle.classList.add('muted');
+    }
+  }
+
+  // ==================== BGM 页面切换联动 ====================
+
+  /**
+   * 在页面切换时自动切换 BGM
+   * @param {string} page - 'a' | 'b'
+   */
+  function switchBgmForPage(page) {
+    BgmEngine.init();
+    if (!BgmEngine.isMuted() && BgmEngine.isStarted()) {
+      BgmEngine.play(page);
+    }
+    // 更新 BGM 按钮状态
+    var toggle = document.getElementById('bgm-toggle');
+    if (toggle) {
+      updateBgmToggleState(toggle);
     }
   }
 
@@ -1899,10 +1985,450 @@
       playToggle: playToggle,
       playSwitch: playSwitch,
       playOpen: playOpen,
+      // 暴露 AudioContext 供 BgmEngine 共用
+      getContext: function () { return audioCtx; },
+      isInitialized: function () { return initialized; },
     };
   })();
 
-  // ==================== 防抖工具 ====================
+  // ==================== 背景音乐引擎（BGM Engine — P2） ====================
+
+  /**
+   * BgmEngine — 生成式环境音乐引擎
+   *
+   * 设计理念：
+   * - 使用 Web Audio API 程序化生成治愈系环境音乐，零外部音频文件
+   * - 双页面差异化：Page A「花园深处」温暖私密 / Page B「花园入口」开放轻快
+   * - 钢琴和弦 + 铃铛点缀 + lo-fi 噪感纹理 + 猫元素随机触发
+   * - 120s 循环周期，自动 crossfade 切换
+   * - 与 SoundEngine 共享 AudioContext，独立 GainNode 控制音量
+   * - 默认静音（尊重用户），需手动点击 BGM 按钮开启
+   */
+  var BgmEngine = (function () {
+    var audioCtx = null;
+    var bgmGain = null;        // BGM 独立增益节点
+    var playing = false;       // 是否在播放
+    var started = false;       // 是否已启动过
+    var currentPage = null;    // 'a' | 'b' | null
+    var muted = true;          // 默认静音
+    var volume = 0.45;         // 默认音量 45%
+    var crossfading = false;
+
+    // 活跃的振荡器/节点列表（用于清理）
+    var activeNodes = [];
+    var chordTimer = null;
+    var bellTimer = null;
+    var catTimer = null;
+
+    // 检测减少动画偏好
+    var prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    // 从 localStorage 读取 BGM 偏好
+    try {
+      muted = localStorage.getItem('kevi_bgm_muted') !== 'false'; // 默认静音
+      var savedVol = parseFloat(localStorage.getItem('kevi_bgm_volume'));
+      if (!isNaN(savedVol) && savedVol >= 0 && savedVol <= 1) {
+        volume = savedVol;
+      }
+    } catch (e) {
+      muted = true;
+      volume = 0.45;
+    }
+
+    /**
+     * 初始化（需要 SoundEngine 的 AudioContext）
+     */
+    function init() {
+      if (started) return;
+      var ctx = SoundEngine.getContext();
+      if (!ctx) return;
+      audioCtx = ctx;
+      bgmGain = audioCtx.createGain();
+      bgmGain.gain.value = muted ? 0 : volume;
+      bgmGain.connect(audioCtx.destination);
+      started = true;
+    }
+
+    /**
+     * 开始播放指定页面的 BGM
+     * @param {string} page - 'a' | 'b'
+     */
+    function play(page) {
+      if (!started || prefersReducedMotion || muted) return;
+      if (page === currentPage && playing) return;
+
+      // 如果 AudioContext 被暂停，恢复
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+
+      if (currentPage && currentPage !== page) {
+        // 页面切换：crossfade
+        crossfadeTo(page);
+        return;
+      }
+
+      currentPage = page;
+      playing = true;
+      scheduleMusic(page);
+      scheduleCatElements(page);
+    }
+
+    /**
+     * 暂停 BGM
+     */
+    function pause() {
+      playing = false;
+      stopAllMusic();
+      currentPage = null;
+    }
+
+    /**
+     * crossfade 到新页面 BGM（0.8s 过渡）
+     * @param {string} newPage - 'a' | 'b'
+     */
+    function crossfadeTo(newPage) {
+      if (crossfading) return;
+      crossfading = true;
+
+      // 当前音乐 0.8s 淡出
+      var fadeStart = audioCtx.currentTime;
+      var tempGain = bgmGain;
+      var originalVolume = muted ? 0 : volume;
+      tempGain.gain.setValueAtTime(originalVolume, fadeStart);
+      tempGain.gain.linearRampToValueAtTime(0.001, fadeStart + 0.8);
+
+      // 0.4s 后停止旧音乐，启动新音乐
+      setTimeout(function () {
+        stopAllMusic();
+        currentPage = newPage;
+
+        // 0.4s 后新音乐淡入（总计 0.8s crossfade）
+        setTimeout(function () {
+          scheduleMusic(newPage);
+          scheduleCatElements(newPage);
+          playing = true;
+          bgmGain.gain.setValueAtTime(0.001, audioCtx.currentTime);
+          bgmGain.gain.linearRampToValueAtTime(originalVolume, audioCtx.currentTime + 0.4);
+          crossfading = false;
+        }, 400);
+      }, 200);
+    }
+
+    /**
+     * 停止所有音乐（清理振荡器、停止调度器）
+     */
+    function stopAllMusic() {
+      clearInterval(chordTimer);
+      clearInterval(bellTimer);
+      clearTimeout(catTimer);
+      chordTimer = null;
+      bellTimer = null;
+      catTimer = null;
+
+      // 停止所有活跃的振荡器
+      activeNodes.forEach(function (node) {
+        try { node.stop(); } catch (e) { /* 已停止 */ }
+      });
+      activeNodes = [];
+    }
+
+    /**
+     * 调度钢琴和弦 + 铃铛
+     * @param {string} page - 'a' | 'b'
+     */
+    function scheduleMusic(page) {
+      if (!playing || !started) return;
+
+      var isPageA = page === 'a';
+
+      // Page A 和弦进行：Cmaj7 → Am7 → Fmaj7 → G7（温暖私密）
+      // Page B 和弦进行：Gmaj7 → Em7 → Cmaj7 → D7（明亮开放在 G 大调）
+      var chordsA = [
+        [261.63, 329.63, 392.00, 493.88], // Cmaj7: C E G B
+        [220.00, 261.63, 329.63, 392.00], // Am7:  A C E G
+        [174.61, 220.00, 261.63, 349.23], // Fmaj7: F A C E
+        [196.00, 246.94, 293.66, 349.23], // G7:   G B D F
+      ];
+      var chordsB = [
+        [196.00, 246.94, 293.66, 369.99], // Gmaj7: G B D F#
+        [164.81, 196.00, 246.94, 293.66], // Em7:   E G B D
+        [261.63, 329.63, 392.00, 493.88], // Cmaj7: C E G B
+        [293.66, 369.99, 440.00, 523.25], // D7:    D F# A C
+      ];
+      var chords = isPageA ? chordsA : chordsB;
+      var chordDuration = isPageA ? 7.5 : 6.5; // Page A 更长更舒缓
+      var bellFreq = isPageA ? 0.35 : 0.25;    // Page A 铃铛频率更高
+      var chordIndex = 0;
+
+      // 立即播放第一个和弦
+      playChord(chords[chordIndex], chordDuration, isPageA);
+
+      // 定时播放后续和弦（15s 周期 = 4 和弦 × 和弦时长 → 约 28-30s）
+      chordTimer = setInterval(function () {
+        chordIndex = (chordIndex + 1) % chords.length;
+        playChord(chords[chordIndex], chordDuration, isPageA);
+      }, chordDuration * 1000);
+
+      // 铃铛点缀：随机高音点缀
+      scheduleBells(bellFreq, isPageA);
+    }
+
+    /**
+     * 播放单个钢琴和弦（多层泛音叠加模拟钢琴质感）
+     * @param {number[]} freqs - 和弦频率数组
+     * @param {number} duration - 持续时间(秒)
+     * @param {boolean} isPageA - 是否 Page A
+     */
+    function playChord(freqs, duration, isPageA) {
+      if (!audioCtx || audioCtx.state === 'suspended') return;
+      var now = audioCtx.currentTime;
+
+      freqs.forEach(function (freq, i) {
+        // 基音（柔和正弦波）
+        var osc = audioCtx.createOscillator();
+        var gain = audioCtx.createGain();
+        osc.type = 'sine';
+        osc.frequency.value = freq;
+        // 稍微 detune 模拟 lo-fi 温暖感
+        if (isPageA) {
+          osc.detune.value = (Math.random() - 0.5) * 8; // ±4 cent
+        }
+        gain.gain.setValueAtTime(0, now);
+        gain.gain.linearRampToValueAtTime(0.06 / (i + 1), now + 0.4); // 基音稍强
+        gain.gain.exponentialRampToValueAtTime(0.001, now + duration);
+        osc.connect(gain);
+        gain.connect(bgmGain);
+        osc.start(now);
+        osc.stop(now + duration + 0.5);
+        activeNodes.push(osc);
+
+        // 泛音层（模拟钢琴泛音）
+        var harmOsc = audioCtx.createOscillator();
+        var harmGain = audioCtx.createGain();
+        harmOsc.type = 'triangle';
+        harmOsc.frequency.value = freq * 2;
+        harmGain.gain.setValueAtTime(0, now);
+        harmGain.gain.linearRampToValueAtTime(0.02 / (i + 1), now + 0.3);
+        harmGain.gain.exponentialRampToValueAtTime(0.001, now + duration * 0.7);
+        harmOsc.connect(harmGain);
+        harmGain.connect(bgmGain);
+        harmOsc.start(now);
+        harmOsc.stop(now + duration + 0.3);
+        activeNodes.push(harmOsc);
+      });
+    }
+
+    /**
+     * 铃铛点缀调度器
+     * @param {number} freq - 每秒触发概率
+     * @param {boolean} isPageA
+     */
+    function scheduleBells(probability, isPageA) {
+      bellTimer = setInterval(function () {
+        if (!playing || !audioCtx || audioCtx.state === 'suspended') return;
+        if (Math.random() < probability) {
+          playBell(isPageA);
+        }
+      }, 1500); // 每 1.5s 检查一次
+    }
+
+    /**
+     * 播放单个铃铛音
+     */
+    function playBell(isPageA) {
+      var now = audioCtx.currentTime;
+      var baseFreq = 800 + Math.random() * 1200; // 800-2000Hz
+
+      // 双泛音铃铛
+      [1, 1.5].forEach(function (mult) {
+        var osc = audioCtx.createOscillator();
+        var gain = audioCtx.createGain();
+        osc.type = 'sine';
+        osc.frequency.value = baseFreq * mult;
+        gain.gain.setValueAtTime(0, now);
+        gain.gain.linearRampToValueAtTime(isPageA ? 0.04 : 0.03, now + 0.02);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3 + Math.random() * 0.2);
+        osc.connect(gain);
+        gain.connect(bgmGain);
+        osc.start(now);
+        osc.stop(now + 0.5);
+        activeNodes.push(osc);
+      });
+    }
+
+    /**
+     * 调度猫元素随机触发
+     * Page A: 每 30-60s / Page B: 每 90-120s
+     * @param {string} page - 'a' | 'b'
+     */
+    function scheduleCatElements(page) {
+      var isPageA = page === 'a';
+      var minInterval = isPageA ? 30000 : 90000;
+      var maxInterval = isPageA ? 60000 : 120000;
+
+      function scheduleNext() {
+        if (!playing) return;
+        var delay = minInterval + Math.random() * (maxInterval - minInterval);
+        catTimer = setTimeout(function () {
+          if (!playing) return;
+          // 80% 呼噜声 + 20% 轻声喵叫
+          if (Math.random() < 0.8) {
+            playPurr();
+          } else {
+            playSoftMeow();
+          }
+          scheduleNext();
+        }, delay);
+      }
+
+      scheduleNext();
+    }
+
+    /**
+     * 猫呼噜声（30-60Hz 低频 + 振幅调制）
+     */
+    function playPurr() {
+      if (!audioCtx || audioCtx.state === 'suspended') return;
+      var now = audioCtx.currentTime;
+      var duration = 3 + Math.random() * 2;
+
+      // 基底低频
+      var osc = audioCtx.createOscillator();
+      var modOsc = audioCtx.createOscillator();
+      var modGain = audioCtx.createGain();
+      var gain = audioCtx.createGain();
+
+      osc.type = 'sine';
+      osc.frequency.value = 45; // 低频呼噜
+      modOsc.type = 'sine';
+      modOsc.frequency.value = 25; // 25Hz 调制频率
+      modGain.gain.value = 15; // 调制深度
+      modOsc.connect(modGain);
+      modGain.connect(osc.frequency); // 频率调制
+
+      gain.gain.setValueAtTime(0, now);
+      gain.gain.linearRampToValueAtTime(0.08, now + 0.3);
+      gain.gain.setValueAtTime(0.08, now + duration - 0.3);
+      gain.gain.linearRampToValueAtTime(0, now + duration);
+
+      osc.connect(gain);
+      gain.connect(bgmGain);
+      osc.start(now);
+      modOsc.start(now);
+      osc.stop(now + duration + 0.1);
+      modOsc.stop(now + duration + 0.1);
+      activeNodes.push(osc, modOsc);
+    }
+
+    /**
+     * 轻声喵叫（比 SFX 版更轻柔）
+     */
+    function playSoftMeow() {
+      if (!audioCtx || audioCtx.state === 'suspended') return;
+      var now = audioCtx.currentTime;
+
+      function meowTone(freq, endFreq, duration, vol, delay) {
+        var osc = audioCtx.createOscillator();
+        var gain = audioCtx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(freq, now + delay);
+        osc.frequency.exponentialRampToValueAtTime(endFreq, now + delay + duration);
+        gain.gain.setValueAtTime(0, now + delay);
+        gain.gain.linearRampToValueAtTime(vol, now + delay + 0.02);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + delay + duration);
+        osc.connect(gain);
+        gain.connect(bgmGain);
+        osc.start(now + delay);
+        osc.stop(now + delay + duration + 0.05);
+        activeNodes.push(osc);
+      }
+
+      meowTone(350, 500, 0.2, 0.06, 0);
+      meowTone(500, 320, 0.25, 0.04, 0.18);
+    }
+
+    /**
+     * 设置静音状态
+     */
+    function setMuted(value) {
+      muted = value;
+      try {
+        localStorage.setItem('kevi_bgm_muted', String(muted));
+      } catch (e) {}
+      if (bgmGain) {
+        bgmGain.gain.value = muted ? 0 : volume;
+      }
+      if (muted) {
+        pause();
+      }
+    }
+
+    /**
+     * 获取静音状态
+     */
+    function isMuted() {
+      return muted;
+    }
+
+    /**
+     * 设置音量
+     * @param {number} val - 0-1
+     */
+    function setVolume(val) {
+      volume = Math.max(0, Math.min(1, val));
+      try {
+        localStorage.setItem('kevi_bgm_volume', String(volume));
+      } catch (e) {}
+      if (bgmGain && !muted) {
+        bgmGain.gain.value = volume;
+      }
+    }
+
+    /**
+     * 获取音量
+     */
+    function getVolume() {
+      return volume;
+    }
+
+    /**
+     * 获取当前播放的页面
+     */
+    function getCurrentPage() {
+      return currentPage;
+    }
+
+    /**
+     * 是否正在播放
+     */
+    function isPlaying() {
+      return playing;
+    }
+
+    // 页面不可见时暂停 BGM
+    document.addEventListener('visibilitychange', function () {
+      if (document.hidden && playing) {
+        stopAllMusic();
+      } else if (!document.hidden && playing && currentPage && !muted) {
+        scheduleMusic(currentPage);
+        scheduleCatElements(currentPage);
+      }
+    });
+
+    return {
+      init: init,
+      play: play,
+      pause: pause,
+      setMuted: setMuted,
+      isMuted: isMuted,
+      setVolume: setVolume,
+      getVolume: getVolume,
+      getCurrentPage: getCurrentPage,
+      isPlaying: isPlaying,
+      isStarted: function () { return started; },
+    };
+  })();
 
   /**
    * 防抖函数
@@ -2069,6 +2595,7 @@
       initClickRipple();
       initSoundHooks();
       initSoundToggle();
+      initBgmToggle();
       initBackgroundParallax();
       initBackgroundParticles();
 
@@ -2086,6 +2613,7 @@
       // 在首次用户手势（点击/触摸/键盘）后才创建 AudioContext
       function initAudioOnFirstGesture() {
         SoundEngine.init();
+        BgmEngine.init(); // 预初始化 BGM 引擎（不自动播放，需用户手动点击按钮开启）
         document.removeEventListener('click', initAudioOnFirstGesture);
         document.removeEventListener('touchstart', initAudioOnFirstGesture);
         document.removeEventListener('keydown', initAudioOnFirstGesture);
