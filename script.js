@@ -255,10 +255,371 @@
     requestAnimationFrame(animateParallax);
   }
 
+  // ==================== Canvas 粒子系统 ====================
+
   /**
-   * 从 data.json 加载内容数据
-   * @returns {Promise<Object>} 包含 about_tags, life_cards, little_notes 的数据对象
+   * Canvas 梦幻粒子背景
+   * 细碎星星、缓慢上升微光、偶尔出现的猫爪/爱心
+   * 与鼠标轻柔互动，营造漂浮在云上的治愈 AI 小房间氛围
+   *
+   * 配置说明（可通过修改 CONFIG 对象轻松调节）：
+   * - particleCount: 桌面端粒子总数（默认 120）
+   * - mobileCount:  移动端粒子总数（默认 40）
+   * - mouseForce:   鼠标吸引力强度（默认 0.25，值越大越跟手）
+   * - mouseRadius:  鼠标影响半径（默认 180px）
+   * - 调整 starRatio/glowRatio/pawRatio/heartRatio 改变各类型比例
    */
+  function initBackgroundParticles() {
+    // --- 可配置参数（通过此对象轻松开关/调节） ---
+    var CONFIG = {
+      particleCount: 120,        // 桌面端粒子总数
+      mobileCount: 40,          // 移动端粒子总数
+      starRatio: 0.55,          // 星星粒子比例
+      glowRatio: 0.30,          // 微光粒子比例
+      pawRatio: 0.08,           // 猫爪粒子比例
+      heartRatio: 0.07,         // 爱心粒子比例
+      minSize: 1,               // 基础粒子最小半径(px)
+      maxSize: 3.5,             // 基础粒子最大半径(px)
+      pawHeartSize: 15,         // 猫爪/爱心显示字号(px)
+      minOpacity: 0.10,         // 粒子最低透明度
+      maxOpacity: 0.38,         // 粒子最高透明度
+      mouseForce: 0.25,         // 鼠标吸引力（0=无，0.5=强）
+      mouseRadius: 180,         // 鼠标影响半径(px)
+      floatBaseSpeed: 0.12,     // 基础漂浮速度
+      swayAmplitude: 0.4,       // 摇摆幅度
+      pawHeartLifetime: 6000,   // 猫爪/爱心存活时间(ms)
+      glowRiseSpeed: 0.3,       // 微光上升速度
+    };
+
+    // --- 检测环境 ---
+    var canvas = document.getElementById('bg-canvas');
+    if (!canvas) return;
+
+    // prefers-reduced-motion：用户减少动画时直接跳过
+    var motionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+    if (motionQuery.matches) return;
+
+    // 移动端检测
+    var isMobile = /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent) ||
+                   ('ontouchstart' in window && window.innerWidth < 768);
+
+    var ctx = canvas.getContext('2d');
+    var particles = [];
+    var particleCount = isMobile ? CONFIG.mobileCount : CONFIG.particleCount;
+
+    // 鼠标状态
+    var mouseX = -9999;
+    var mouseY = -9999;
+    var mousePresent = false;
+
+    // Canvas 尺寸
+    var w, h;
+    // 像素比（HiDPI 适配）
+    var dpr = Math.min(window.devicePixelRatio || 1, 2);
+
+    // --- 颜色调色板（严格匹配网站色系） ---
+    var colors = [
+      { r: 255, g: 158, b: 190 },  // 浅粉 accent-pink
+      { r: 200, g: 162, b: 224 },  // 浅紫 accent-purple
+      { r: 221, g: 214, b: 254 },  // 浅紫 light
+      { r: 255, g: 220, b: 235 },  // 柔和粉
+      { r: 243, g: 222, b: 230 },  // 浅粉 bg-pink-light
+      { r: 255, g: 245, b: 240 },  // 暖白
+      { r: 235, g: 210, b: 245 },  // 淡紫
+    ];
+
+    // --- 粒子类 ---
+    /**
+     * 创建一个粒子
+     * @param {string} type - 'star' | 'glow' | 'paw' | 'heart'
+     */
+    function Particle(type) {
+      this.type = type;
+      this.reset(true); // 初始化时随机位置
+    }
+
+    /**
+     * 重置粒子状态
+     * @param {boolean} randomY - 是否随机 Y（初始化时 true，边界重生时根据类型决定）
+     */
+    Particle.prototype.reset = function (randomY) {
+      var colorIdx = Math.floor(Math.random() * colors.length);
+      var color = colors[colorIdx];
+
+      this.x = Math.random() * w;
+      this.y = randomY ? Math.random() * h : (this.type === 'glow' ? h + 20 : -20);
+      this.color = color;
+      this.baseSize = CONFIG.minSize + Math.random() * (CONFIG.maxSize - CONFIG.minSize);
+      this.baseOpacity = CONFIG.minOpacity + Math.random() * (CONFIG.maxOpacity - CONFIG.minOpacity);
+      this.twinklePhase = Math.random() * Math.PI * 2;  // 闪烁相位（星星用）
+      this.swayPhase = Math.random() * Math.PI * 2;     // 摇摆相位
+      this.swaySpeed = 0.3 + Math.random() * 0.7;       // 摇摆速度
+      this.floatSpeed = CONFIG.floatBaseSpeed * (0.6 + Math.random() * 0.8);
+
+      // 猫爪/爱心特有
+      if (this.type === 'paw' || this.type === 'heart') {
+        this.birthTime = performance.now();
+        this.lifetime = CONFIG.pawHeartLifetime * (0.5 + Math.random());
+        this.opacity = 0; // 从淡入开始
+        this.scale = 0.6 + Math.random() * 0.4;
+      } else {
+        this.opacity = this.baseOpacity;
+        this.lifetime = Infinity;
+      }
+    };
+
+    /**
+     * 更新粒子位置与状态
+     * @param {number} dt - 时间增量（归一化，约 0.016 @ 60fps）
+     */
+    Particle.prototype.update = function (dt) {
+      var effectiveDt = Math.min(dt, 2.5); // 防止标签页切换后跳帧
+
+      // 基础漂浮（微光粒子向上漂，其他轻微随机漂浮）
+      if (this.type === 'glow') {
+        this.y -= CONFIG.glowRiseSpeed * effectiveDt;
+      } else {
+        this.y -= this.floatSpeed * 0.3 * effectiveDt;
+      }
+
+      // 水平轻微摇摆
+      this.x += Math.sin(performance.now() * 0.0005 * this.swaySpeed + this.swayPhase)
+                * CONFIG.swayAmplitude * effectiveDt;
+
+      // 鼠标互动：轻柔吸引
+      if (mousePresent) {
+        var dx = mouseX - this.x;
+        var dy = mouseY - this.y;
+        var dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist < CONFIG.mouseRadius && dist > 0) {
+          var force = (1 - dist / CONFIG.mouseRadius) * CONFIG.mouseForce;
+          this.x += (dx / dist) * force * effectiveDt * 30;
+          this.y += (dy / dist) * force * effectiveDt * 30;
+        }
+      }
+
+      // 猫爪/爱心：计算淡入淡出
+      if (this.type === 'paw' || this.type === 'heart') {
+        var elapsed = performance.now() - this.birthTime;
+        var progress = elapsed / this.lifetime;
+        if (progress > 1) {
+          this.reset(false);
+          return;
+        }
+        // 前10%淡入，后30%淡出
+        if (progress < 0.1) {
+          this.opacity = this.baseOpacity * (progress / 0.1);
+        } else if (progress > 0.7) {
+          this.opacity = this.baseOpacity * ((1 - progress) / 0.3);
+        } else {
+          this.opacity = this.baseOpacity;
+        }
+      }
+
+      // 边界检测：超出则重生
+      var margin = 30;
+      if (this.y < -margin || this.y > h + margin ||
+          this.x < -margin || this.x > w + margin) {
+        this.reset(this.type !== 'glow');
+      }
+    };
+
+    /**
+     * 绘制粒子
+     */
+    Particle.prototype.draw = function () {
+      ctx.save();
+      var currentOpacity = this.opacity;
+
+      // 星星粒子：闪烁 + 四角星形
+      if (this.type === 'star') {
+        var twinkle = 0.5 + 0.5 * Math.sin(
+          performance.now() * 0.002 + this.twinklePhase
+        );
+        currentOpacity = this.baseOpacity * (0.5 + twinkle * 0.5);
+
+        ctx.globalAlpha = currentOpacity;
+        ctx.fillStyle = rgbStr(this.color);
+
+        var size = this.baseSize;
+        var cx = this.x, cy = this.y;
+
+        // 绘制发光光晕
+        var glowGrad = ctx.createRadialGradient(cx, cy, 0, cx, cy, size * 2.5);
+        glowGrad.addColorStop(0, rgbaStr(this.color, currentOpacity * 0.7));
+        glowGrad.addColorStop(1, rgbaStr(this.color, 0));
+        ctx.fillStyle = glowGrad;
+        ctx.beginPath();
+        ctx.arc(cx, cy, size * 2.5, 0, Math.PI * 2);
+        ctx.fill();
+
+        // 绘制四角星
+        drawStar4(cx, cy, size, size * 0.4, rgbaStr(this.color, 1));
+      }
+
+      // 微光粒子：柔光圆点 + 光晕
+      else if (this.type === 'glow') {
+        ctx.globalAlpha = currentOpacity;
+        var grad = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, this.baseSize * 3);
+        grad.addColorStop(0, rgbaStr(this.color, 1));
+        grad.addColorStop(0.3, rgbaStr(this.color, 0.5));
+        grad.addColorStop(1, rgbaStr(this.color, 0));
+        ctx.fillStyle = grad;
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.baseSize * 3, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      // 猫爪粒子：emoji 文字
+      else if (this.type === 'paw') {
+        ctx.globalAlpha = this.opacity;
+        ctx.font = Math.round(CONFIG.pawHeartSize * this.scale * dpr) + 'px serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('🐾', this.x, this.y);
+      }
+
+      // 爱心粒子：文字渲染
+      else if (this.type === 'heart') {
+        ctx.globalAlpha = this.opacity;
+        ctx.font = Math.round(CONFIG.pawHeartSize * this.scale * dpr) + 'px serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        var symbol = Math.random() > 0.5 ? '♡' : '♥';
+        ctx.fillStyle = rgbStr(this.color);
+        ctx.fillText(symbol, this.x, this.y);
+      }
+
+      ctx.restore();
+    };
+
+    // --- 工具函数 ---
+    function rgbStr(c) {
+      return 'rgb(' + c.r + ',' + c.g + ',' + c.b + ')';
+    }
+    function rgbaStr(c, a) {
+      return 'rgba(' + c.r + ',' + c.g + ',' + c.b + ',' + a + ')';
+    }
+
+    /**
+     * 绘制四角星形
+     */
+    function drawStar4(cx, cy, outerR, innerR, color) {
+      var spikes = 4;
+      var step = Math.PI / spikes;
+      var rot = Math.PI / 2;
+      ctx.fillStyle = color;
+      ctx.beginPath();
+      for (var i = 0; i < spikes * 2; i++) {
+        var r = i % 2 === 0 ? outerR : innerR;
+        var angle = i * step - rot;
+        var px = cx + Math.cos(angle) * r;
+        var py = cy + Math.sin(angle) * r;
+        if (i === 0) ctx.moveTo(px, py);
+        else ctx.lineTo(px, py);
+      }
+      ctx.closePath();
+      ctx.fill();
+    }
+
+    // --- 初始化粒子池 ---
+    function createParticles() {
+      particles = [];
+      var typeDist = [
+        { type: 'star', ratio: CONFIG.starRatio },
+        { type: 'glow', ratio: CONFIG.glowRatio },
+        { type: 'paw', ratio: CONFIG.pawRatio },
+        { type: 'heart', ratio: CONFIG.heartRatio },
+      ];
+
+      // 按比例分配
+      var cursor = 0;
+      for (var i = 0; i < typeDist.length; i++) {
+        var count = Math.round(particleCount * typeDist[i].ratio);
+        for (var j = 0; j < count && cursor < particleCount; j++) {
+          particles.push(new Particle(typeDist[i].type));
+          cursor++;
+        }
+      }
+      // 填充剩余（四舍五入导致）
+      while (cursor < particleCount) {
+        particles.push(new Particle('star'));
+        cursor++;
+      }
+    }
+
+    // --- Canvas 尺寸适配 ---
+    function resizeCanvas() {
+      w = window.innerWidth;
+      h = window.innerHeight;
+      canvas.width = w * dpr;
+      canvas.height = h * dpr;
+      canvas.style.width = w + 'px';
+      canvas.style.height = h + 'px';
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    }
+
+    // 监听窗口 resize（带防抖）
+    var resizeTimer;
+    function onResize() {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(function () {
+        resizeCanvas();
+      }, 150);
+    }
+    window.addEventListener('resize', onResize);
+
+    // --- 鼠标交互 ---
+    function onMouseMove(e) {
+      mouseX = e.clientX;
+      mouseY = e.clientY;
+      mousePresent = true;
+    }
+    function onMouseLeave() {
+      mousePresent = false;
+    }
+    function onTouchMove(e) {
+      if (!e.touches || e.touches.length === 0) return;
+      mouseX = e.touches[0].clientX;
+      mouseY = e.touches[0].clientY;
+      mousePresent = true;
+    }
+    function onTouchEnd() {
+      mousePresent = false;
+    }
+
+    document.addEventListener('mousemove', onMouseMove, { passive: true });
+    document.addEventListener('mouseleave', onMouseLeave);
+    if (isMobile) {
+      document.addEventListener('touchmove', onTouchMove, { passive: true });
+      document.addEventListener('touchend', onTouchEnd);
+    }
+
+    // --- 主渲染循环 ---
+    var lastTime = performance.now();
+
+    function animate(now) {
+      // 计算归一化时间增量
+      var dt = (now - lastTime) / 16.667; // 约 1.0 @ 60fps
+      lastTime = now;
+
+      // 清空画布
+      ctx.clearRect(0, 0, w, h);
+
+      // 更新 + 绘制所有粒子
+      for (var i = 0; i < particles.length; i++) {
+        particles[i].update(dt);
+        particles[i].draw();
+      }
+
+      requestAnimationFrame(animate);
+    }
+
+    // --- 启动 ---
+    resizeCanvas();
+    createParticles();
+    requestAnimationFrame(animate);
+  }
   function loadData() {
     // 添加时间戳参数避免浏览器/CDN 缓存旧版本的 data.json
     var cacheBuster = '?v=' + Date.now();
@@ -822,6 +1183,7 @@
       initScrollAnimation();
       initAvatarEffect();
       initBackgroundParallax();
+      initBackgroundParticles();
     });
   }
 
