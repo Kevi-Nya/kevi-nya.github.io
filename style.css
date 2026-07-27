@@ -2394,3 +2394,342 @@ body {
     transform: translateY(0);
   }
 }
+
+/* ============================================================
+   彩蛋系统样式（Easter Egg System）
+   六彩蛋实施方案 — 零外部依赖
+   ============================================================ */
+
+/* -------------------- 彩蛋一：猫爪五连击 — 头像抖动 -------------------- */
+@keyframes avatar-shake-easter {
+  0%, 100% { transform: translateX(0); }
+  15% { transform: translateX(-4px) rotate(-2deg); }
+  30% { transform: translateX(4px) rotate(2deg); }
+  45% { transform: translateX(-3px) rotate(-1deg); }
+  60% { transform: translateX(3px) rotate(1deg); }
+  75% { transform: translateX(-1px); }
+  90% { transform: translateX(1px); }
+}
+
+.avatar-shake-easter {
+  animation: avatar-shake-easter 0.4s ease !important;
+}
+
+/* -------------------- 彩蛋二："nya" 暗号 — 背景滤镜 + 文字 -------------------- */
+@keyframes nya-filter-in {
+  from {
+    background-color: transparent;
+    backdrop-filter: hue-rotate(0deg);
+    -webkit-backdrop-filter: hue-rotate(0deg);
+  }
+  to {
+    background-color: rgba(200, 162, 224, 0.08);
+    backdrop-filter: hue-rotate(-30deg);
+    -webkit-backdrop-filter: hue-rotate(-30deg);
+  }
+}
+
+@keyframes nya-filter-out {
+  from {
+    background-color: rgba(200, 162, 224, 0.08);
+    backdrop-filter: hue-rotate(-30deg);
+    -webkit-backdrop-filter: hue-rotate(-30deg);
+  }
+  to {
+    background-color: transparent;
+    backdrop-filter: hue-rotate(0deg);
+    -webkit-backdrop-filter: hue-rotate(0deg);
+  }
+}
+
+#nya-overlay {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 8000;
+  animation: nya-filter-in 0.8s ease forwards;
+}
+
+#nya-text {
+  position: fixed;
+  bottom: 120px;
+  left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  font-family: 'LXGW WenKai', serif;
+  font-size: 1.4rem;
+  color: var(--accent-pink);
+  opacity: 0;
+  pointer-events: none;
+  z-index: 9001;
+  transition: opacity 0.6s ease, transform 0.6s var(--ease-bounce);
+}
+
+#nya-text.nya-text-visible {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+.fate-light-band.nya-boost {
+  animation-duration: 3s !important;
+  opacity: 0.8 !important;
+}
+
+/* -------------------- 彩蛋三：午夜花园 — 夜间氛围 -------------------- */
+#night-overlay {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+  background: radial-gradient(
+    ellipse 80% 50% at 50% 100%,
+    rgba(26, 21, 48, 0.25) 0%,
+    transparent 70%
+  );
+}
+
+.moon-decor {
+  position: absolute;
+  top: 8%;
+  right: 15%;
+  font-size: 2rem;
+  animation: moon-float 8s ease-in-out infinite;
+  pointer-events: none;
+  user-select: none;
+}
+
+@keyframes moon-float {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  25% { transform: translateY(-10px) rotate(5deg); }
+  50% { transform: translateY(-3px) rotate(-3deg); }
+  75% { transform: translateY(-12px) rotate(2deg); }
+}
+
+/* -------------------- 彩蛋四：BGM 隐藏曲目 — 按钮旋转 -------------------- */
+@keyframes bgm-egg-spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+.bgm-toggle.egg-spin {
+  animation: bgm-egg-spin 0.5s var(--ease-bounce);
+}
+
+/* 彩蛋提示 Toast */
+.egg-toast {
+  position: fixed;
+  bottom: 100px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: 'LXGW WenKai', serif;
+  font-size: 1rem;
+  color: var(--accent-purple-strong);
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-sm);
+  padding: 8px 20px;
+  z-index: 10000;
+  opacity: 0;
+  pointer-events: none;
+  box-shadow: var(--shadow-md), var(--shadow-glow-sm);
+  transition: opacity 0.5s ease, transform 0.5s var(--ease-bounce);
+}
+
+.egg-toast.visible {
+  opacity: 1;
+  transform: translateX(-50%) translateY(-8px);
+}
+
+/* -------------------- 彩蛋五：访客留言瓶 — 毛玻璃对话框 -------------------- */
+.message-bottle-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.25);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  z-index: 9500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: overlay-fade-in 0.25s ease;
+}
+
+@keyframes overlay-fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.message-bottle-dialog {
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-lg);
+  padding: 32px 28px;
+  max-width: 360px;
+  width: 90%;
+  box-shadow: var(--shadow-lg), var(--shadow-glow-md);
+  animation: dialog-pop-in 0.35s var(--ease-bounce);
+}
+
+@keyframes dialog-pop-in {
+  from { transform: scale(0.9) translateY(20px); opacity: 0; }
+  to   { transform: scale(1) translateY(0); opacity: 1; }
+}
+
+.message-bottle-dialog.closing {
+  animation: dialog-pop-out 0.4s var(--ease-bounce) forwards;
+}
+
+@keyframes dialog-pop-out {
+  from { transform: scale(1) translateY(0); opacity: 1; }
+  to   { transform: scale(0.85) translateY(-30px); opacity: 0; }
+}
+
+.message-bottle-icon {
+  text-align: center;
+  font-size: 2.5rem;
+  margin-bottom: 12px;
+}
+
+.message-bottle-dialog h3 {
+  font-family: 'LXGW WenKai', serif;
+  font-size: var(--text-lg);
+  color: var(--text-primary);
+  text-align: center;
+  margin-bottom: 8px;
+}
+
+.message-bottle-date {
+  text-align: center;
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+  margin-bottom: 16px;
+}
+
+.message-bottle-dialog textarea {
+  width: 100%;
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-sm);
+  padding: 12px;
+  font-family: 'LXGW WenKai', serif;
+  font-size: var(--text-sm);
+  background: rgba(255, 255, 255, 0.5);
+  color: var(--text-primary);
+  resize: none;
+  margin: 16px 0;
+  box-sizing: border-box;
+}
+
+.message-bottle-dialog textarea:focus {
+  outline: 2px solid var(--accent-purple);
+  outline-offset: 2px;
+}
+
+.message-bottle-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  margin-top: 8px;
+}
+
+.message-bottle-actions button {
+  padding: 8px 20px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--glass-border);
+  background: var(--glass-bg);
+  font-family: 'LXGW WenKai', serif;
+  font-size: var(--text-sm);
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: all var(--choreo-element-duration) var(--ease-bounce);
+}
+
+.message-bottle-actions button:hover {
+  background: rgba(200, 162, 224, 0.12);
+  border-color: var(--glass-border-hover);
+}
+
+.message-bottle-submit {
+  background: var(--gradient-btn) !important;
+  border-color: transparent !important;
+}
+
+.message-bottle-submit:hover {
+  box-shadow: var(--shadow-glow-sm);
+}
+
+/* 日历格子中的留言瓶标记 */
+.calendar-day.has-bottle::before {
+  content: '🌟';
+  position: absolute;
+  top: 2px;
+  right: 4px;
+  font-size: 9px;
+  pointer-events: none;
+}
+
+.calendar-day.bottle-flash {
+  animation: bottle-flash-anim 0.6s ease;
+}
+
+@keyframes bottle-flash-anim {
+  0%, 100% { box-shadow: inset 0 0 0 rgba(255, 215, 0, 0); }
+  50% { box-shadow: inset 0 0 12px rgba(255, 215, 0, 0.5); }
+}
+
+/* -------------------- 彩蛋六：页脚心形 — 心跳放大 + 粒子 -------------------- */
+@keyframes heart-beat-burst {
+  0%   { transform: scale(1); }
+  15%  { transform: scale(1.5); }
+  30%  { transform: scale(1); }
+  45%  { transform: scale(2); }
+  60%  { transform: scale(1); }
+  75%  { transform: scale(2.8); }
+  100% { transform: scale(3.2); opacity: 0; }
+}
+
+.footer-heart.bursting {
+  animation: heart-beat-burst 0.8s ease forwards;
+}
+
+.footer-heart-new {
+  display: inline-block;
+  animation: heart-fade-in 0.5s ease 0.8s both;
+}
+
+@keyframes heart-fade-in {
+  from { transform: scale(0); opacity: 0; }
+  to   { transform: scale(1); opacity: 1; }
+}
+
+/* prefers-reduced-motion 降级 */
+@media (prefers-reduced-motion: reduce) {
+  .avatar-shake-easter,
+  .bgm-toggle.egg-spin,
+  .message-bottle-dialog,
+  .footer-heart.bursting,
+  .footer-heart-new {
+    animation: none !important;
+  }
+
+  .moon-decor {
+    animation: none;
+  }
+
+  .calendar-day.has-bottle::before {
+    animation: none;
+  }
+}
+
+/* 夜间模式全局样式 */
+body.night-mode .bg-overlay {
+  /* 夜间整体加深 15% */
+  opacity: 1.15;
+}
+
+body.night-mode .cloud {
+  /* 夜间云朵更透明 */
+  opacity: 0.06;
+}

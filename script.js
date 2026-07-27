@@ -16,6 +16,84 @@
   var pageA = document.getElementById('page-a');
   var pageB = document.getElementById('page-b');
 
+  // ==================== 共享装饰层状态（供主粒子循环统一渲染） ====================
+  // 萤火虫数据（由 midnight garden 填充，主循环绘制）
+  var sharedFireflies = [];
+  var sharedFirefliesActive = false;
+  // 常驻爱心数据（由 heart burst 填充，主循环绘制）
+  var sharedPermanentHearts = [];
+
+  /**
+   * 在主粒子循环每帧末尾统一绘制叠加装饰层
+   * 包含：萤火虫粒子 + 心形碎裂常驻爱心
+   * @param {CanvasRenderingContext2D} ctx
+   * @param {HTMLCanvasElement} canvas
+   */
+  function renderSharedDecorations(ctx, canvas) {
+    // --- 萤火虫绘制 ---
+    if (sharedFirefliesActive && sharedFireflies.length > 0) {
+      var motionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+      var isReducedMotion = motionQuery.matches;
+
+      for (var i = 0; i < sharedFireflies.length; i++) {
+        var f = sharedFireflies[i];
+        // 不规则游走
+        f.vx += (Math.random() - 0.5) * 0.02;
+        f.vy += (Math.random() - 0.5) * 0.02;
+        f.vx *= 0.995;
+        f.vy *= 0.995;
+        f.x += f.vx;
+        f.y += f.vy;
+
+        if (f.x < 0 || f.x > canvas.width) f.vx *= -1;
+        if (f.y < 0 || f.y > canvas.height) f.vy *= -1;
+
+        // 呼吸明灭
+        var alpha = isReducedMotion ? 0.5 :
+          (0.3 + 0.7 * (Math.sin(Date.now() * f.twinkleSpeed + f.phase) * 0.5 + 0.5));
+
+        // 辉光
+        ctx.beginPath();
+        ctx.arc(f.x, f.y, 6, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(200, 232, 160, ' + (alpha * 0.3) + ')';
+        ctx.fill();
+
+        // 核心
+        ctx.beginPath();
+        ctx.arc(f.x, f.y, 2, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(220, 250, 180, ' + (alpha * 0.9) + ')';
+        ctx.fill();
+      }
+    }
+
+    // --- 常驻爱心绘制 ---
+    if (sharedPermanentHearts.length > 0) {
+      ctx.save();
+      for (var j = 0; j < sharedPermanentHearts.length; j++) {
+        var h = sharedPermanentHearts[j];
+        h.x += h.vx;
+        h.y += h.vy;
+        h.vx *= 0.998;
+        h.vy *= 0.998;
+        h.rotation += h.rotSpeed * 0.016;
+
+        if (h.x < 20 || h.x > canvas.width - 20) h.vx *= -1;
+        if (h.y < 20 || h.y > canvas.height - 20) h.vy *= -1;
+
+        ctx.globalAlpha = h.alpha;
+        ctx.save();
+        ctx.translate(h.x, h.y);
+        ctx.rotate(h.rotation);
+        ctx.font = h.size + 'px serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('💛', 0, 0);
+        ctx.restore();
+      }
+      ctx.restore();
+    }
+  }
+
   // ==================== 安全哈希工具 ====================
 
   /**
@@ -721,6 +799,9 @@
         particles[i].draw();
       }
 
+      // 绘制共享装饰层（萤火虫 + 常驻爱心）
+      renderSharedDecorations(ctx, canvas);
+
       requestAnimationFrame(animate);
     }
 
@@ -1322,6 +1403,19 @@
    * @param {HTMLElement} container - 日历容器 DOM 元素
    * @param {'little'|'thoughts'} type - 类型
    */
+
+  /**
+   * 检查指定日期是否有留言瓶数据
+   * @param {string} dateStr - 'YYYY-MM-DD' 格式
+   * @returns {boolean}
+   */
+  function hasBottleMessages(dateStr) {
+    try {
+      var bottles = JSON.parse(localStorage.getItem('kevi_message_bottles') || '[]');
+      return bottles.some(function (b) { return b.date === dateStr; });
+    } catch (e) { return false; }
+  }
+
   function renderCalendar(container, type) {
     var entries = container._entries || [];
     var dateField = type === 'little' ? 'note_date' : 'thought_date';
@@ -1371,14 +1465,17 @@
       var dateStr = formatDate(currentYear, currentMonth, d);
       var classes = ['calendar-day'];
       var hasContent = dateMap[dateStr] && dateMap[dateStr].length > 0;
+      var hasBottle = hasBottleMessages(dateStr);
 
       if (dateStr === todayStr) classes.push('today');
       if (hasContent) classes.push('has-notes');
+      if (hasBottle) classes.push('has-bottle');
       if (dateStr === selectedDate) classes.push('selected');
 
       var ariaLabel = (currentMonth + 1) + '月' + d + '日';
       if (dateStr === todayStr) ariaLabel += '，今天';
       if (hasContent) ariaLabel += '，有' + dateMap[dateStr].length + '条' + (type === 'little' ? '笔记' : '想法');
+      if (hasBottle) ariaLabel += '，有留言瓶';
 
       html += '<button type="button" class="' + classes.join(' ') + '" data-date="' + dateStr + '"' +
         ' role="gridcell" tabindex="-1"' +
@@ -1531,6 +1628,30 @@
         toast.remove();
       });
     }, duration || 2500);
+  }
+
+  /**
+   * 彩蛋专用 Toast — 使用 .egg-toast 毛玻璃霞鹜文楷样式
+   * @param {string} message - 提示文字
+   * @param {number} [duration=3000] - 显示时长(ms)
+   */
+  function showEggToast(message, duration) {
+    var existing = document.querySelector('.egg-toast');
+    if (existing) existing.remove();
+
+    var toast = document.createElement('div');
+    toast.className = 'egg-toast';
+    toast.textContent = message;
+    document.body.appendChild(toast);
+    requestAnimationFrame(function () {
+      toast.classList.add('visible');
+    });
+    if (duration) {
+      setTimeout(function () {
+        toast.classList.remove('visible');
+        setTimeout(function () { toast.remove(); }, 500);
+      }, duration);
+    }
   }
 
   // ==================== 点击水波纹效果 ====================
@@ -2062,6 +2183,307 @@
       osc2.stop(now + 0.40);
     }
 
+    // ==================== 彩蛋音效合成器（P3 — 六彩蛋方案 B：Web Audio API 合成） ====================
+
+    /**
+     * 彩蛋① 猫爪五连击 — 短促可爱的"喵"（~1.2s）
+     * 双振荡器（基频 sin + 泛音 triangle）+ 频率滑音模拟猫叫上扬再下降
+     * 比常规 UI 音效高 3dB，突出彩蛋感
+     */
+    function playEasterEggMeow() {
+      if (!canPlay()) return;
+      var now = audioCtx.currentTime;
+      var masterGain = audioCtx.createGain();
+      masterGain.connect(audioCtx.destination);
+      masterGain.gain.setValueAtTime(0, now);
+      masterGain.gain.linearRampToValueAtTime(0.65, now + 0.03);
+      masterGain.gain.linearRampToValueAtTime(0.5, now + 0.6);
+      masterGain.gain.linearRampToValueAtTime(0, now + 1.2);
+
+      var osc1 = audioCtx.createOscillator();
+      osc1.type = 'sine';
+      osc1.frequency.setValueAtTime(380, now);
+      osc1.frequency.linearRampToValueAtTime(620, now + 0.15);
+      osc1.frequency.linearRampToValueAtTime(280, now + 0.7);
+      osc1.frequency.linearRampToValueAtTime(150, now + 1.0);
+
+      var osc2 = audioCtx.createOscillator();
+      osc2.type = 'triangle';
+      osc2.frequency.setValueAtTime(760, now);
+      osc2.frequency.linearRampToValueAtTime(1240, now + 0.12);
+      osc2.frequency.linearRampToValueAtTime(320, now + 0.65);
+      osc2.frequency.linearRampToValueAtTime(100, now + 0.95);
+
+      var gain1 = audioCtx.createGain();
+      gain1.gain.setValueAtTime(0.55, now);
+      gain1.gain.linearRampToValueAtTime(0, now + 0.9);
+      var gain2 = audioCtx.createGain();
+      gain2.gain.setValueAtTime(0.15, now);
+      gain2.gain.linearRampToValueAtTime(0, now + 0.8);
+
+      osc1.connect(gain1).connect(masterGain);
+      osc2.connect(gain2).connect(masterGain);
+      osc1.start(now); osc2.start(now);
+      osc1.stop(now + 1.2); osc2.stop(now + 1.2);
+    }
+
+    /**
+     * 彩蛋② "nya" 暗号 — 魔法铃铛"叮"（~0.8s）
+     * 三个三角波振荡器（A6/E7/A7 根音+五度+八度）依次延迟触发
+     */
+    function playNyaChime() {
+      if (!canPlay()) return;
+      var now = audioCtx.currentTime;
+      var masterGain = audioCtx.createGain();
+      masterGain.connect(audioCtx.destination);
+      masterGain.gain.setValueAtTime(0, now);
+      masterGain.gain.linearRampToValueAtTime(0.35, now + 0.02);
+      masterGain.gain.exponentialRampToValueAtTime(0.001, now + 0.8);
+
+      var freqs = [1760, 2640, 3520]; // A6, E7, A7
+      var delays = [0, 0.04, 0.08];
+      for (var i = 0; i < 3; i++) {
+        var osc = audioCtx.createOscillator();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(freqs[i], now + delays[i]);
+        var gain = audioCtx.createGain();
+        gain.gain.setValueAtTime(0, now);
+        gain.gain.linearRampToValueAtTime(0.3 - i * 0.08, now + delays[i] + 0.02);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + delays[i] + 0.5);
+        osc.connect(gain).connect(masterGain);
+        osc.start(now + delays[i]);
+        osc.stop(now + delays[i] + 0.6);
+      }
+    }
+
+    /**
+     * 彩蛋③ 午夜花园 — 夜间环境底噪层（极简白噪声 + 低通滤波）
+     * 返回 { source, gain } 供后续销毁
+     */
+    var nightAmbienceNodes = null;
+    function createNightAmbience() {
+      if (!audioCtx) return null;
+      // 先销毁旧的环境音
+      destroyNightAmbience();
+      var bufferSize = 2 * audioCtx.sampleRate;
+      var buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+      var data = buffer.getChannelData(0);
+      for (var i = 0; i < bufferSize; i++) {
+        data[i] = (Math.random() * 2 - 1) * 0.02;
+      }
+      var source = audioCtx.createBufferSource();
+      source.buffer = buffer;
+      source.loop = true;
+      var filter = audioCtx.createBiquadFilter();
+      filter.type = 'lowpass';
+      filter.frequency.setValueAtTime(600, audioCtx.currentTime);
+      filter.Q.setValueAtTime(2, audioCtx.currentTime);
+      var gain = audioCtx.createGain();
+      gain.gain.setValueAtTime(0, audioCtx.currentTime);
+      gain.gain.linearRampToValueAtTime(0.06, audioCtx.currentTime + 3); // 3s渐入
+      source.connect(filter).connect(gain).connect(audioCtx.destination);
+      source.start();
+      nightAmbienceNodes = { source: source, gain: gain };
+      return nightAmbienceNodes;
+    }
+
+    function destroyNightAmbience() {
+      if (!nightAmbienceNodes) return;
+      var now = audioCtx ? audioCtx.currentTime : 0;
+      try {
+        nightAmbienceNodes.gain.gain.linearRampToValueAtTime(0, now + 1.5);
+        setTimeout(function () {
+          try { nightAmbienceNodes.source.stop(); } catch (e) {}
+          nightAmbienceNodes = null;
+        }, 1600);
+      } catch (e) {
+        nightAmbienceNodes = null;
+      }
+    }
+
+    function isNightAmbienceActive() {
+      return nightAmbienceNodes !== null;
+    }
+
+    /**
+     * 彩蛋④ BGM 隐藏曲目 — Lo-Fi 钢琴 C-G-Am-F（15s，~75BPM）
+     * 多正弦波叠加和弦 + 黑胶噪点层 + 第7秒喵点缀
+     * 返回 { masterGain, stop } 供 BgmEngine 管理生命周期
+     */
+    function playEasterEggBgm() {
+      if (!canPlay()) return null;
+      var now = audioCtx.currentTime;
+      var masterGain = audioCtx.createGain();
+      masterGain.connect(audioCtx.destination);
+      masterGain.gain.setValueAtTime(0, now);
+      masterGain.gain.linearRampToValueAtTime(0.25, now + 0.5);
+      masterGain.gain.linearRampToValueAtTime(0.25, now + 14);
+      masterGain.gain.linearRampToValueAtTime(0, now + 15);
+
+      var chords = [
+        { notes: [261.6, 329.6, 392.0], time: 0 },
+        { notes: [196.0, 246.9, 329.6], time: 3.75 },
+        { notes: [220.0, 261.6, 329.6], time: 7.5 },
+        { notes: [174.6, 220.0, 261.6], time: 11.25 }
+      ];
+
+      chords.forEach(function (chord) {
+        chord.notes.forEach(function (freq) {
+          var osc = audioCtx.createOscillator();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(freq, now + chord.time);
+          var gain = audioCtx.createGain();
+          gain.gain.setValueAtTime(0, now + chord.time);
+          gain.gain.linearRampToValueAtTime(0.12, now + chord.time + 0.2);
+          gain.gain.linearRampToValueAtTime(0.08, now + chord.time + 3.5);
+          gain.gain.linearRampToValueAtTime(0, now + chord.time + 3.75);
+          osc.connect(gain).connect(masterGain);
+          osc.start(now + chord.time);
+          osc.stop(now + chord.time + 3.75);
+        });
+      });
+
+      // Lo-Fi 黑胶噪点层
+      var noiseBufferSize = 4 * audioCtx.sampleRate;
+      var noiseBuffer = audioCtx.createBuffer(1, noiseBufferSize, audioCtx.sampleRate);
+      var noiseData = noiseBuffer.getChannelData(0);
+      for (var j = 0; j < noiseBufferSize; j++) {
+        noiseData[j] = (Math.random() * 2 - 1) * 0.015;
+      }
+      var noise = audioCtx.createBufferSource();
+      noise.buffer = noiseBuffer;
+      noise.loop = true;
+      var noiseGain = audioCtx.createGain();
+      noiseGain.gain.setValueAtTime(0.04, now);
+      noiseGain.gain.linearRampToValueAtTime(0.04, now + 14);
+      noiseGain.gain.linearRampToValueAtTime(0, now + 15);
+      noise.connect(noiseGain).connect(masterGain);
+      noise.start(now);
+      noise.stop(now + 15);
+
+      // 第7秒插入轻声喵点缀
+      setTimeout(function () {
+        if (!audioCtx || muted) return;
+        var meowNow = audioCtx.currentTime;
+        var meowGain = audioCtx.createGain();
+        meowGain.connect(audioCtx.destination);
+        meowGain.gain.setValueAtTime(0, meowNow);
+        meowGain.gain.linearRampToValueAtTime(0.08, meowNow + 0.02);
+        meowGain.gain.linearRampToValueAtTime(0.05, meowNow + 0.4);
+        meowGain.gain.linearRampToValueAtTime(0, meowNow + 0.8);
+
+        var mo = audioCtx.createOscillator();
+        mo.type = 'sine';
+        mo.frequency.setValueAtTime(420, meowNow);
+        mo.frequency.linearRampToValueAtTime(580, meowNow + 0.12);
+        mo.frequency.linearRampToValueAtTime(320, meowNow + 0.5);
+        mo.connect(meowGain);
+        mo.start(meowNow);
+        mo.stop(meowNow + 0.55);
+      }, 7000);
+
+      return {
+        masterGain: masterGain,
+        stop: function () {
+          try {
+            masterGain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.3);
+            setTimeout(function () {
+              try { noise.stop(); } catch (e) {}
+            }, 400);
+          } catch (e) {}
+        }
+      };
+    }
+
+    /**
+     * 彩蛋⑤ 访客留言瓶 — 瓶塞弹出音效（~0.5s）
+     * 低频正弦波从 180Hz 上扬至 360Hz，温暖"噗"感
+     */
+    function playBottleOpen() {
+      if (!canPlay()) return;
+      var now = audioCtx.currentTime;
+      var osc = audioCtx.createOscillator();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(180, now);
+      osc.frequency.exponentialRampToValueAtTime(360, now + 0.15);
+      var gain = audioCtx.createGain();
+      gain.gain.setValueAtTime(0, now);
+      gain.gain.linearRampToValueAtTime(0.35, now + 0.02);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.4);
+      osc.connect(gain).connect(audioCtx.destination);
+      osc.start(now);
+      osc.stop(now + 0.5);
+    }
+
+    /**
+     * 彩蛋⑤ 访客留言瓶 — 确认提交音效（~0.5s）
+     * 两个三角波上行音符 C5→E5，"叮-咚"感
+     */
+    function playBottleSubmit() {
+      if (!canPlay()) return;
+      var now = audioCtx.currentTime;
+      var notes = [523, 659]; // C5, E5
+      notes.forEach(function (freq, i) {
+        var osc = audioCtx.createOscillator();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(freq, now + i * 0.1);
+        var gain = audioCtx.createGain();
+        gain.gain.setValueAtTime(0, now + i * 0.1);
+        gain.gain.linearRampToValueAtTime(0.15, now + i * 0.1 + 0.02);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.1 + 0.4);
+        osc.connect(gain).connect(audioCtx.destination);
+        osc.start(now + i * 0.1);
+        osc.stop(now + i * 0.1 + 0.5);
+      });
+    }
+
+    /**
+     * 彩蛋⑥ 页脚心形碎裂 — 3拍心跳 + 高频碎裂（~1.5s）
+     * 低频50Hz正弦脉冲 × 3 + 高通滤波白噪声碎裂爆裂
+     */
+    function playHeartBurst() {
+      if (!canPlay()) return;
+      var now = audioCtx.currentTime;
+      var masterGain = audioCtx.createGain();
+      masterGain.connect(audioCtx.destination);
+      masterGain.gain.setValueAtTime(0.4, now);
+
+      // 三拍心跳 — 低频短脉冲（咚-咚-咚，间隔0.25s）
+      for (var i = 0; i < 3; i++) {
+        var osc = audioCtx.createOscillator();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(50, now + i * 0.25);
+        var gain = audioCtx.createGain();
+        gain.gain.setValueAtTime(0, now + i * 0.25);
+        gain.gain.linearRampToValueAtTime(0.8, now + i * 0.25 + 0.03);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.25 + 0.2);
+        osc.connect(gain).connect(masterGain);
+        osc.start(now + i * 0.25);
+        osc.stop(now + i * 0.25 + 0.25);
+      }
+
+      // 碎裂层 — 高通滤波白噪声（在心跳后 0.8s 触发）
+      var bufferSize = Math.floor(0.6 * audioCtx.sampleRate);
+      var buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+      var data = buffer.getChannelData(0);
+      for (var k = 0; k < bufferSize; k++) {
+        var t = k / audioCtx.sampleRate;
+        data[k] = (Math.random() * 2 - 1) * Math.max(0, 1 - t * 3) * 0.4;
+      }
+      var noise = audioCtx.createBufferSource();
+      noise.buffer = buffer;
+      var filter = audioCtx.createBiquadFilter();
+      filter.type = 'highpass';
+      filter.frequency.setValueAtTime(3000, now + 0.8);
+      var noiseGain = audioCtx.createGain();
+      noiseGain.gain.setValueAtTime(0, now);
+      noiseGain.gain.linearRampToValueAtTime(0.35, now + 0.8);
+      noiseGain.gain.exponentialRampToValueAtTime(0.001, now + 1.4);
+      noise.connect(filter).connect(noiseGain).connect(masterGain);
+      noise.start(now + 0.8);
+      noise.stop(now + 1.5);
+    }
+
     return {
       init: init,
       resume: resume,
@@ -2077,6 +2499,16 @@
       // 暴露 AudioContext 供 BgmEngine 共用
       getContext: function () { return audioCtx; },
       isInitialized: function () { return initialized; },
+      // 彩蛋音效合成器（P3）
+      playEasterEggMeow: playEasterEggMeow,
+      playNyaChime: playNyaChime,
+      createNightAmbience: createNightAmbience,
+      destroyNightAmbience: destroyNightAmbience,
+      isNightAmbienceActive: isNightAmbienceActive,
+      playEasterEggBgm: playEasterEggBgm,
+      playBottleOpen: playBottleOpen,
+      playBottleSubmit: playBottleSubmit,
+      playHeartBurst: playHeartBurst,
     };
   })();
 
@@ -2099,6 +2531,7 @@
     var playing = false;       // 是否在播放
     var started = false;       // 是否已启动过
     var currentPage = null;    // 'a' | 'b' | null
+    var currentVariant = 'default'; // 'default' | 'night' | 'easter-egg'
     var muted = true;          // 默认静音
     var volume = 0.45;         // 默认音量 45%
     var crossfading = false;
@@ -2142,9 +2575,10 @@
      * 开始播放指定页面的 BGM
      * @param {string} page - 'a' | 'b'
      */
-    function play(page) {
+    function play(page, variant) {
       if (!started || prefersReducedMotion || muted) return;
-      if (page === currentPage && playing) return;
+      variant = variant || 'default';
+      if (page === currentPage && playing && currentVariant === variant) return;
 
       // 如果 AudioContext 被暂停，恢复
       if (audioCtx.state === 'suspended') {
@@ -2153,20 +2587,28 @@
 
       if (currentPage && currentPage !== page) {
         // 页面切换：crossfade
-        crossfadeTo(page);
+        crossfadeTo(page, variant);
         return;
       }
 
       currentPage = page;
+      currentVariant = variant;
       playing = true;
-      scheduleMusic(page);
+      if (variant === 'night') {
+        scheduleNightMusic(page);
+      } else {
+        scheduleMusic(page);
+      }
       scheduleCatElements(page);
     }
+
+    var lastPage = null; // 保存暂停前的页面，用于 resume
 
     /**
      * 暂停 BGM
      */
     function pause() {
+      lastPage = currentPage;
       playing = false;
       stopAllMusic();
       currentPage = null;
@@ -2176,9 +2618,10 @@
      * crossfade 到新页面 BGM（0.8s 过渡）
      * @param {string} newPage - 'a' | 'b'
      */
-    function crossfadeTo(newPage) {
+    function crossfadeTo(newPage, variant) {
       if (crossfading) return;
       crossfading = true;
+      variant = variant || 'default';
 
       // 当前音乐 0.8s 淡出
       var fadeStart = audioCtx.currentTime;
@@ -2194,7 +2637,12 @@
 
         // 0.4s 后新音乐淡入（总计 0.8s crossfade）
         setTimeout(function () {
-          scheduleMusic(newPage);
+          currentVariant = variant;
+          if (variant === 'night') {
+            scheduleNightMusic(newPage);
+          } else {
+            scheduleMusic(newPage);
+          }
           scheduleCatElements(newPage);
           playing = true;
           bgmGain.gain.setValueAtTime(0.001, audioCtx.currentTime);
@@ -2264,7 +2712,42 @@
     }
 
     /**
-     * 播放单个钢琴和弦（多层泛音叠加模拟钢琴质感）
+     * 夜间 BGM 变奏 — 降低 BPM、延长音符时值、纯 sine 波
+     */
+    function scheduleNightMusic(page) {
+      if (!playing || !started) return;
+      var isPageA = page === 'a';
+      var chordsA = [[261.63,329.63,392.00,493.88],[220.00,261.63,329.63,392.00],[174.61,220.00,261.63,349.23],[196.00,246.94,293.66,349.23]];
+      var chordsB = [[196.00,246.94,293.66,369.99],[164.81,196.00,246.94,293.66],[261.63,329.63,392.00,493.88],[293.66,369.99,440.00,523.25]];
+      var chords = isPageA ? chordsA : chordsB;
+      var chordDuration = 12, bellFreq = 0.15, chordIndex = 0;
+      playNightChord(chords[chordIndex], chordDuration);
+      chordTimer = setInterval(function () {
+        chordIndex = (chordIndex + 1) % chords.length;
+        playNightChord(chords[chordIndex], chordDuration);
+      }, chordDuration * 1000);
+      scheduleBells(bellFreq, true);
+    }
+
+    function playNightChord(freqs, duration) {
+      if (!audioCtx || audioCtx.state === 'suspended') return;
+      var now = audioCtx.currentTime;
+      freqs.forEach(function (freq, i) {
+        var osc = audioCtx.createOscillator();
+        var gain = audioCtx.createGain();
+        osc.type = 'sine'; osc.frequency.value = freq;
+        gain.gain.setValueAtTime(0, now);
+        gain.gain.linearRampToValueAtTime(0.04 / (i + 1), now + 0.6);
+        gain.gain.setValueAtTime(0.04 / (i + 1), now + duration - 0.6);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + duration);
+        osc.connect(gain); gain.connect(bgmGain);
+        osc.start(now); osc.stop(now + duration + 0.5);
+        activeNodes.push(osc);
+      });
+    }
+
+    /**
+     * 播放钢琴和弦（多层泛音叠加模拟钢琴质感）
      * @param {number[]} freqs - 和弦频率数组
      * @param {number} duration - 持续时间(秒)
      * @param {boolean} isPageA - 是否 Page A
@@ -2284,7 +2767,7 @@
           osc.detune.value = (Math.random() - 0.5) * 8; // ±4 cent
         }
         gain.gain.setValueAtTime(0, now);
-        gain.gain.linearRampToValueAtTime(0.06 / (i + 1), now + 0.4); // 基音稍强
+        gain.gain.linearRampToValueAtTime(0.06 / (i + 1), now + 0.4);
         gain.gain.exponentialRampToValueAtTime(0.001, now + duration);
         osc.connect(gain);
         gain.connect(bgmGain);
@@ -2495,12 +2978,94 @@
       return playing;
     }
 
+    /**
+     * 恢复 AudioContext 并重新开始播放
+     */
+    function resume() {
+      if (!started || muted) return;
+      if (audioCtx && audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+      if (currentPage && !playing) {
+        playing = true;
+        if (currentVariant === 'night') {
+          scheduleNightMusic(currentPage);
+        } else {
+          scheduleMusic(currentPage);
+        }
+        scheduleCatElements(currentPage);
+      }
+    }
+
+    /**
+     * 夜间模式切换 — 供午夜花园彩蛋调用
+     * @param {boolean} enable - true 切换夜间，false 切回白天
+     */
+    function setNightMode(enable) {
+      if (!started || !currentPage) return;
+      if (enable && currentVariant !== 'night') {
+        // 切换到夜间变奏
+        var wasPlaying = playing;
+        stopAllMusic();
+        currentVariant = 'night';
+        if (wasPlaying) {
+          playing = true;
+          scheduleNightMusic(currentPage);
+          scheduleCatElements(currentPage);
+        }
+      } else if (!enable && currentVariant === 'night') {
+        // 切回白天
+        var wasPlaying2 = playing;
+        stopAllMusic();
+        currentVariant = 'default';
+        if (wasPlaying2) {
+          playing = true;
+          scheduleMusic(currentPage);
+          scheduleCatElements(currentPage);
+        }
+      }
+    }
+
+    /**
+     * 播放彩蛋隐藏曲目 - Lo-Fi 钢琴（~15s）
+     * 委托给 SoundEngine.playEasterEggBgm()
+     */
+    function playEasterEggTrack() {
+      // 暂停当前 BGM
+      var wasPlaying = playing;
+      if (wasPlaying) {
+        stopAllMusic();
+        playing = false;
+      }
+
+      var track = SoundEngine.playEasterEggBgm();
+      if (!track) return;
+
+      // 15s 后恢复
+      setTimeout(function () {
+        try { track.stop(); } catch (e) {}
+        if (wasPlaying && currentPage && !muted) {
+          playing = true;
+          if (currentVariant === 'night') {
+            scheduleNightMusic(currentPage);
+          } else {
+            scheduleMusic(currentPage);
+          }
+          scheduleCatElements(currentPage);
+        }
+      }, 15000);
+    }
+
     // 页面不可见时暂停 BGM
     document.addEventListener('visibilitychange', function () {
       if (document.hidden && playing) {
         stopAllMusic();
       } else if (!document.hidden && playing && currentPage && !muted) {
-        scheduleMusic(currentPage);
+        if (currentVariant === 'night') {
+          scheduleNightMusic(currentPage);
+        } else {
+          scheduleMusic(currentPage);
+        }
         scheduleCatElements(currentPage);
       }
     });
@@ -2509,6 +3074,7 @@
       init: init,
       play: play,
       pause: pause,
+      resume: resume,
       setMuted: setMuted,
       isMuted: isMuted,
       setVolume: setVolume,
@@ -2516,6 +3082,8 @@
       getCurrentPage: getCurrentPage,
       isPlaying: isPlaying,
       isStarted: function () { return started; },
+      setNightMode: setNightMode,
+      playEasterEggTrack: playEasterEggTrack,
     };
   })();
 
@@ -2716,6 +3284,599 @@
     });
   }
 
+  // ==================== 彩蛋① 猫爪五连击（P3） ====================
+
+  /**
+   * 头像五连击彩蛋 — 3 秒内连续点击头像 5 次触发粒子爆发 + 喵叫音效
+   */
+  function initAvatarQuintupleClickEasterEgg() {
+    var clickCount = 0;
+    var clickTimer = null;
+    var CLICK_WINDOW = 3000; // 3s
+    var CLICK_TARGET = 5;
+
+    function resetCounter() {
+      clickCount = 0;
+      if (clickTimer) clearTimeout(clickTimer);
+      clickTimer = null;
+    }
+
+    // 事件委托：监听所有 avatar 点击
+    document.addEventListener('click', function (e) {
+      var avatar = e.target.closest('.avatar');
+      if (!avatar) return;
+
+      clickCount++;
+      if (clickTimer) clearTimeout(clickTimer);
+      clickTimer = setTimeout(resetCounter, CLICK_WINDOW);
+
+      if (clickCount >= CLICK_TARGET) {
+        resetCounter();
+        // 触发音效
+        SoundEngine.playEasterEggMeow();
+        // 视觉反馈：粒子爆发
+        triggerAvatarParticleBurst(avatar);
+      }
+    });
+  }
+
+  /**
+   * 头像粒子爆发动画
+   */
+  function triggerAvatarParticleBurst(avatar) {
+    // 阶段 1：头像抖动 0.4s
+    avatar.classList.add('avatar-shake-easter');
+    setTimeout(function () {
+      avatar.classList.remove('avatar-shake-easter');
+    }, 400);
+
+    var wrapper = avatar.closest('.avatar-wrapper');
+    if (!wrapper) return;
+    var rect = avatar.getBoundingClientRect();
+    var cx = rect.left + rect.width / 2;
+    var cy = rect.top + rect.height / 2;
+    var particleCount = 20;
+
+    for (var i = 0; i < particleCount; i++) {
+      var particle = document.createElement('span');
+      particle.textContent = Math.random() > 0.4 ? '🐾' : '💛';
+      particle.style.cssText = 'position:fixed;pointer-events:none;z-index:9999;' +
+        'font-size:' + (16 + Math.random() * 14) + 'px;line-height:1;';
+      particle.style.left = cx + 'px';
+      particle.style.top = cy + 'px';
+      document.body.appendChild(particle);
+
+      var angle = Math.random() * Math.PI * 2;
+      var distance = 50 + Math.random() * 80;
+      var dx = Math.cos(angle) * distance;
+      var dy = Math.sin(angle) * distance;
+      var rotation = (Math.random() - 0.5) * 360;
+
+      particle.animate([
+        { transform: 'translate(-50%, -50%) scale(1) rotate(0deg)', opacity: 1 },
+        { transform: 'translate(calc(-50% + ' + dx + 'px), calc(-50% + ' + dy + 'px)) scale(0) rotate(' + rotation + 'deg)', opacity: 0 }
+      ], { duration: 600 + Math.random() * 400, easing: 'cubic-bezier(0.23, 1, 0.32, 1)', fill: 'forwards' })
+      .onfinish = function () { particle.remove(); };
+    }
+  }
+
+  // ==================== 彩蛋② "nya" 暗号（P3） ====================
+
+  /**
+   * "nya" 键盘序列彩蛋 — 1.5s 内连续键入 n-y-a 触发铃铛音效
+   */
+  function initNyaSequenceEasterEgg() {
+    var sequence = ['n', 'y', 'a'];
+    var seqIndex = 0;
+    var seqTimer = null;
+    var SEQ_TIMEOUT = 1500;
+
+    document.addEventListener('keydown', function (e) {
+      // 忽略在输入框内的输入
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.isContentEditable) return;
+
+      if (e.key.toLowerCase() === sequence[seqIndex]) {
+        seqIndex++;
+        if (seqTimer) clearTimeout(seqTimer);
+        seqTimer = setTimeout(function () { seqIndex = 0; }, SEQ_TIMEOUT);
+
+        if (seqIndex >= sequence.length) {
+          seqIndex = 0;
+          if (seqTimer) clearTimeout(seqTimer);
+          // 触发魔法铃铛音效
+          SoundEngine.playNyaChime();
+          // 视觉反馈：页面瞬间柔光闪烁
+          triggerNyaFlash();
+        }
+      } else {
+        seqIndex = 0;
+      }
+    });
+  }
+
+  /**
+   * "nya" 触发时的完整视觉效果（3.5s 时序）
+   */
+  function triggerNyaFlash() {
+    // 阶段 1：背景滤镜叠加层（CSS 动画自动处理 0.8s 渐入）
+    var overlay = document.createElement('div');
+    overlay.id = 'nya-overlay';
+    document.body.appendChild(overlay);
+
+    // 阶段 2：命运光带加速
+    var fateBand = document.querySelector('.fate-light-band');
+    if (fateBand) fateBand.classList.add('nya-boost');
+
+    // 阶段 3：文字浮现（0.3s 后）
+    var text = document.createElement('div');
+    text.id = 'nya-text';
+    text.textContent = 'にゃーん ♪';
+    document.body.appendChild(text);
+    requestAnimationFrame(function () {
+      text.classList.add('nya-text-visible');
+    });
+
+    // 时序清理（总 3.5s）
+    // t=1500ms: 光带恢复
+    setTimeout(function () {
+      if (fateBand) fateBand.classList.remove('nya-boost');
+    }, 1500);
+
+    // t=2000ms: 背景滤镜开始渐出（0.8s）
+    setTimeout(function () {
+      overlay.style.animation = 'nya-filter-out 0.8s ease forwards';
+    }, 2000);
+
+    // t=2800ms: 文字开始渐出
+    setTimeout(function () {
+      text.classList.remove('nya-text-visible');
+    }, 2800);
+
+    // t=3500ms: 清理所有 DOM
+    setTimeout(function () {
+      if (overlay.parentNode) overlay.remove();
+      if (text.parentNode) text.remove();
+    }, 3500);
+  }
+
+  // ==================== 彩蛋④ BGM 隐藏曲目（P3） ====================
+
+  /**
+   * BGM 开关彩蛋 — 3 秒内快速切换 6 次触发隐藏 Lo-Fi 曲目
+   */
+  function initBgmHiddenTrackEasterEgg() {
+    var toggleCount = 0;
+    var toggleTimer = null;
+    var TOGGLE_WINDOW = 4000; // 规格：4 秒窗口
+    var TOGGLE_TARGET = 6;
+    var easterEggPlaying = false;
+
+    var bgmToggle = document.getElementById('bgm-toggle');
+    if (!bgmToggle) return;
+
+    bgmToggle.addEventListener('click', function () {
+      if (easterEggPlaying) return;
+
+      toggleCount++;
+      if (toggleTimer) clearTimeout(toggleTimer);
+      toggleTimer = setTimeout(function () { toggleCount = 0; }, TOGGLE_WINDOW);
+
+      if (toggleCount >= TOGGLE_TARGET) {
+        toggleCount = 0;
+        if (toggleTimer) clearTimeout(toggleTimer);
+        easterEggPlaying = true;
+
+        // 按钮旋转动画
+        bgmToggle.classList.add('egg-spin');
+        setTimeout(function () {
+          bgmToggle.classList.remove('egg-spin');
+        }, 500);
+
+        // 播放隐藏曲目
+        BgmEngine.playEasterEggTrack();
+
+        // 视觉反馈 — 使用专用 .egg-toast 样式
+        showEggToast('🎹 发现隐藏曲目...', 3000);
+
+        // 15s 后重置（与曲目时长一致）
+        setTimeout(function () {
+          easterEggPlaying = false;
+          var t = document.getElementById('bgm-toggle');
+          if (t) updateBgmToggleState(t);
+        }, 15500);
+      }
+    });
+  }
+
+  // ==================== 彩蛋⑤ 访客留言瓶（P3） ====================
+
+  /**
+   * 留言瓶彩蛋 — Page A 日历中双击空白未来日期弹出留言对话框
+   */
+  function initMessageBottleEasterEgg() {
+    document.addEventListener('dblclick', function (e) {
+      var dayBtn = e.target.closest('.calendar-day[data-date]');
+      if (!dayBtn) return;
+
+      // 仅 Page A 日历
+      var calendarSection = dayBtn.closest('#little-notes-calendar');
+      if (!calendarSection) return;
+
+      var dateStr = dayBtn.getAttribute('data-date');
+      var today = new Date();
+      var todayStr = formatDate(today.getFullYear(), today.getMonth(), today.getDate());
+      if (dateStr <= todayStr) return; // 仅未来日期
+
+      // 检查是否有内容（有内容不触发留言瓶）
+      if (dayBtn.classList.contains('has-notes')) return;
+
+      // 播放瓶塞音效
+      SoundEngine.playBottleOpen();
+
+      // 弹出留言瓶对话框
+      showMessageBottleDialog(dateStr, dayBtn);
+    });
+  }
+
+  /**
+   * 留言瓶对话框
+   */
+  function showMessageBottleDialog(dateStr, dayBtn) {
+    // 移除已有对话框
+    var existing = document.querySelector('.message-bottle-overlay');
+    if (existing) existing.remove();
+
+    var overlay = document.createElement('div');
+    overlay.className = 'message-bottle-overlay';
+    overlay.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.3);' +
+      'z-index:10000;display:flex;align-items:center;justify-content:center;' +
+      'backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);';
+    overlay.addEventListener('click', function (ev) {
+      if (ev.target === overlay) overlay.remove();
+    });
+
+    var dialog = document.createElement('div');
+    dialog.className = 'message-bottle-dialog';
+    dialog.style.cssText = 'background:var(--glass-bg);backdrop-filter:blur(28px);-webkit-backdrop-filter:blur(28px);' +
+      'border:1px solid var(--glass-border);border-radius:var(--radius-lg);padding:32px 36px;' +
+      'max-width:400px;width:90%;box-shadow:var(--glass-hover-shadow);' +
+      'animation:bottleDialogIn 0.5s cubic-bezier(0.23,1,0.32,1);';
+
+    var d = new Date(dateStr + 'T00:00:00');
+    var dateDisplay = (d.getMonth() + 1) + '月' + d.getDate() + '日';
+
+    dialog.innerHTML = '<div style="text-align:center;margin-bottom:20px;">' +
+      '<span style="font-size:2.5rem;">🍾</span>' +
+      '<h3 style="font-size:1.1rem;font-weight:700;color:var(--text-primary);margin:12px 0 4px;">给 ' + dateDisplay + ' 留言</h3>' +
+      '<p style="font-size:0.85rem;color:var(--text-secondary);">写一句话，放进时间漂流瓶里...</p>' +
+      '</div>' +
+      '<textarea class="bottle-textarea" placeholder="写下你想说的话..." ' +
+      'style="width:100%;min-height:100px;border:1px solid var(--glass-border-sub);border-radius:var(--radius-sm);' +
+      'padding:14px;font-family:inherit;font-size:0.9rem;resize:vertical;background:rgba(255,255,255,0.5);' +
+      'color:var(--text-primary);outline:none;transition:border-color 0.3s;">' +
+      '</textarea>' +
+      '<div style="display:flex;gap:12px;margin-top:18px;justify-content:flex-end;">' +
+      '<button class="bottle-cancel-btn" style="padding:10px 20px;border:1px solid var(--glass-border-sub);' +
+      'border-radius:24px;background:transparent;color:var(--text-secondary);cursor:pointer;font-family:inherit;font-size:0.9rem;">取消</button>' +
+      '<button class="bottle-submit-btn" style="padding:10px 24px;border:none;border-radius:24px;' +
+      'background:var(--gradient-btn);color:var(--text-primary);cursor:pointer;font-family:inherit;' +
+      'font-size:0.9rem;font-weight:600;">放入漂流瓶 🎀</button>' +
+      '</div>';
+
+    overlay.appendChild(dialog);
+    document.body.appendChild(overlay);
+
+    // 聚焦文本框
+    var textarea = dialog.querySelector('.bottle-textarea');
+    setTimeout(function () { textarea.focus(); }, 300);
+
+    // 取消按钮
+    dialog.querySelector('.bottle-cancel-btn').addEventListener('click', function () {
+      overlay.remove();
+    });
+
+    // ESC 键关闭
+    function onEscKey(e) {
+      if (e.key === 'Escape') {
+        overlay.remove();
+        document.removeEventListener('keydown', onEscKey);
+      }
+    }
+    document.addEventListener('keydown', onEscKey);
+
+    // 提交按钮
+    dialog.querySelector('.bottle-submit-btn').addEventListener('click', function () {
+      var message = textarea.value.trim();
+      if (!message) return;
+      // 播放确认音效
+      SoundEngine.playBottleSubmit();
+      // 存储到 localStorage
+      saveMessageBottle(dateStr, message);
+      // 更新日历格子标记
+      if (dayBtn) {
+        dayBtn.classList.add('has-bottle');
+        dayBtn.classList.add('bottle-flash');
+        setTimeout(function () { dayBtn.classList.remove('bottle-flash'); }, 600);
+      }
+      // 显示成功反馈
+      dialog.innerHTML = '<div style="text-align:center;padding:20px 0;">' +
+        '<span style="font-size:3rem;">✨</span>' +
+        '<h3 style="font-size:1.1rem;margin:12px 0 4px;">漂流瓶已放入大海</h3>' +
+        '<p style="font-size:0.85rem;color:var(--text-secondary);">' + dateDisplay + ' 的那天，你会收到这份温柔</p>' +
+        '</div>';
+      setTimeout(function () { overlay.remove(); }, 2000);
+    });
+  }
+
+  /**
+   * 保存留言瓶到 localStorage
+   */
+  function saveMessageBottle(dateStr, message) {
+    var bottles = [];
+    try {
+      bottles = JSON.parse(localStorage.getItem('kevi_message_bottles') || '[]');
+    } catch (e) {}
+    bottles.push({ date: dateStr, message: message, created: Date.now() });
+    try {
+      localStorage.setItem('kevi_message_bottles', JSON.stringify(bottles));
+    } catch (e) {}
+  }
+
+  // ==================== 彩蛋⑥ 页脚心形碎裂（P3） ====================
+
+  /**
+   * 心形碎裂彩蛋 — Page B 页脚💛 移动端长按 1.5s / 桌面端双击
+   */
+  function initHeartBurstEasterEgg() {
+    var footerHeart = document.querySelector('#page-b .footer-heart');
+    if (!footerHeart) return;
+
+    var longPressTimer = null;
+    var LONG_PRESS_DURATION = 1500;
+    var isMobile = /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent) ||
+                   ('ontouchstart' in window && window.innerWidth < 768);
+
+    if (isMobile) {
+      // 移动端：长按 1.5s
+      footerHeart.addEventListener('touchstart', function (e) {
+        longPressTimer = setTimeout(function () {
+          triggerHeartBurst(footerHeart);
+        }, LONG_PRESS_DURATION);
+      });
+      footerHeart.addEventListener('touchend', function () {
+        if (longPressTimer) clearTimeout(longPressTimer);
+      });
+      footerHeart.addEventListener('touchmove', function () {
+        if (longPressTimer) clearTimeout(longPressTimer);
+      });
+    } else {
+      // 桌面端：双击
+      footerHeart.addEventListener('dblclick', function (e) {
+        e.preventDefault();
+        triggerHeartBurst(footerHeart);
+      });
+    }
+  }
+
+  /**
+   * 触发心形碎裂动画 + 音效
+   */
+  var isHeartBursting = false;
+
+  function triggerHeartBurst(heartEl) {
+    // 防重复触发
+    if (isHeartBursting) return;
+    try {
+      if (sessionStorage.getItem('kevi_heart_burst_triggered') === '1') return;
+      sessionStorage.setItem('kevi_heart_burst_triggered', '1');
+    } catch (e) {}
+    isHeartBursting = true;
+
+    SoundEngine.playHeartBurst();
+
+    // 阶段 1：心跳放大动画（CSS 动画 0.8s）
+    heartEl.classList.add('bursting');
+
+    // 阶段 2：0.8s 后碎片飞散 + 替换文字
+    setTimeout(function () {
+      var rect = heartEl.getBoundingClientRect();
+      var cx = rect.left + rect.width / 2;
+      var cy = rect.top + rect.height / 2;
+      var fragmentCount = 22;
+
+      for (var i = 0; i < fragmentCount; i++) {
+        var frag = document.createElement('span');
+        frag.textContent = '💛';
+        frag.style.cssText = 'position:fixed;pointer-events:none;z-index:10001;' +
+          'font-size:' + (12 + Math.random() * 16) + 'px;line-height:1;';
+        frag.style.left = cx + 'px';
+        frag.style.top = cy + 'px';
+        document.body.appendChild(frag);
+
+        var angle = Math.random() * Math.PI * 2;
+        var distance = 40 + Math.random() * 80;
+        var dx = Math.cos(angle) * distance;
+        var dy = Math.sin(angle) * distance - 30;
+        var rotation = (Math.random() - 0.5) * 360;
+        var isPermanent = i < 6;
+
+        var anim = frag.animate([
+          { transform: 'translate(-50%, -50%) scale(1) rotate(0deg)', opacity: 1 },
+          { transform: 'translate(calc(-50% + ' + dx + 'px), calc(-50% + ' + dy + 'px)) scale(0) rotate(' + rotation + 'deg)', opacity: 0 }
+        ], { duration: 800 + Math.random() * 400, easing: 'cubic-bezier(0.23, 1, 0.32, 1)', fill: 'forwards' });
+
+        if (isPermanent) {
+          anim.onfinish = function () {
+            addPermanentHeartOnCanvas(cx, cy);
+            frag.remove();
+          };
+        } else {
+          anim.onfinish = function () { frag.remove(); };
+        }
+      }
+
+      // Footer 文字替换
+      setTimeout(function () {
+        var footerPara = document.querySelector('#page-b .footer p');
+        if (!footerPara) {
+          footerPara = document.querySelector('.page:not(.hidden) .footer p');
+        }
+        if (footerPara && footerPara.querySelector('.footer-heart')) {
+          footerPara.innerHTML = '© 2026 Kevi_Nya · Made with lots and lots of <span class="footer-heart" style="animation:heart-fade-in 0.5s ease 0.2s both;display:inline-block;">💛💛💛</span> and <span class="coffee">☕</span>';
+        }
+      }, 200);
+    }, 800);
+
+    // 2.2s 后解锁（所有动画结束）
+    setTimeout(function () {
+      isHeartBursting = false;
+    }, 2200);
+  }
+
+  /**
+   * 在 Canvas 背景添加常驻爱心（本会话有效，由主循环统一绘制）
+   */
+  function addPermanentHeartOnCanvas(cx, cy) {
+    sharedPermanentHearts.push({
+      x: cx,
+      y: cy,
+      vx: (Math.random() - 0.5) * 0.3,
+      vy: -0.2 - Math.random() * 0.3,
+      size: 14 + Math.random() * 12,
+      alpha: 0.25,
+      rotation: Math.random() * Math.PI * 2,
+      rotSpeed: (Math.random() - 0.5) * 0.3
+    });
+  }
+
+  // ==================== 彩蛋③ 午夜花园（P3） ====================
+
+  /**
+   * 午夜花园彩蛋 — 每日 22:00–06:00 自动切换夜间氛围
+   */
+  function initMidnightGardenEasterEgg() {
+    var NIGHT_START = 22; // 22:00
+    var NIGHT_END = 6;    // 06:00
+    var nightActive = false;
+
+    function isNightTime() {
+      var hour = new Date().getHours();
+      return hour >= NIGHT_START || hour < NIGHT_END;
+    }
+
+    function activateNightMode() {
+      if (nightActive) return;
+      nightActive = true;
+
+      // 创建夜间环境底噪
+      SoundEngine.createNightAmbience();
+
+      // 切换 BGM 为夜间变奏
+      BgmEngine.setNightMode(true);
+
+      // 视觉：创建夜间蒙层
+      var overlay = document.createElement('div');
+      overlay.id = 'night-overlay';
+      overlay.setAttribute('aria-hidden', 'true');
+      document.body.appendChild(overlay);
+
+      // 视觉：创建月亮装饰
+      var moon = document.createElement('span');
+      moon.className = 'moon-decor';
+      moon.textContent = '🌙';
+      moon.setAttribute('aria-hidden', 'true');
+      var decorations = document.querySelector('.bg-decorations');
+      if (decorations) decorations.appendChild(moon);
+
+      // 整体色调标记
+      document.body.classList.add('night-mode');
+
+      // 启动萤火虫粒子
+      startFireflyParticles();
+    }
+
+    function deactivateNightMode() {
+      if (!nightActive) return;
+      nightActive = false;
+
+      // 销毁夜间环境底噪
+      SoundEngine.destroyNightAmbience();
+
+      // 恢复 BGM
+      BgmEngine.setNightMode(false);
+
+      // 清理视觉元素
+      var overlay = document.getElementById('night-overlay');
+      if (overlay) overlay.remove();
+
+      var moon = document.querySelector('.moon-decor');
+      if (moon) moon.remove();
+
+      document.body.classList.remove('night-mode');
+
+      // 停止萤火虫粒子
+      stopFireflyParticles();
+    }
+
+    // ===== 萤火虫粒子系统（数据由主循环统一绘制，无独立 rAF） =====
+
+    function startFireflyParticles() {
+      var canvas = document.getElementById('bg-canvas');
+      if (!canvas) return;
+
+      var motionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+      var isReducedMotion = motionQuery.matches;
+      var count = isReducedMotion ? 4 : 12;
+
+      sharedFireflies = [];
+      for (var i = 0; i < count; i++) {
+        sharedFireflies.push({
+          x: Math.random() * canvas.width,
+          y: Math.random() * canvas.height,
+          vx: (Math.random() - 0.5) * 0.3,
+          vy: (Math.random() - 0.5) * 0.3 - 0.2,
+          phase: Math.random() * Math.PI * 2,
+          twinkleSpeed: isReducedMotion ? 0 : (0.01 + Math.random() * 0.02)
+        });
+      }
+
+      sharedFirefliesActive = true;
+    }
+
+    function stopFireflyParticles() {
+      sharedFirefliesActive = false;
+      sharedFireflies = [];
+    }
+
+    // 初始检测
+    if (isNightTime()) {
+      // 延迟执行，等待 BGM 初始化
+      setTimeout(function () {
+        activateNightMode();
+      }, 2000);
+    }
+
+    // 定时检查（每 5 分钟）
+    setInterval(function () {
+      if (isNightTime()) {
+        activateNightMode();
+      } else {
+        deactivateNightMode();
+      }
+    }, 300000);
+
+    // 页面可见性变化时重新检测（用户从其他标签页切回）
+    document.addEventListener('visibilitychange', function () {
+      if (!document.hidden) {
+        if (isNightTime()) {
+          activateNightMode();
+        } else {
+          deactivateNightMode();
+        }
+      }
+    });
+  }
+
   // ==================== 初始化 ====================
 
   function init() {
@@ -2733,6 +3894,14 @@
       initPawEasterEgg();
       initBackgroundParallax();
       initBackgroundParticles();
+
+      // 彩蛋系统（P3 — 六彩蛋交互）
+      initAvatarQuintupleClickEasterEgg();
+      initNyaSequenceEasterEgg();
+      initBgmHiddenTrackEasterEgg();
+      initMessageBottleEasterEgg();
+      initHeartBurstEasterEgg();
+      initMidnightGardenEasterEgg();
 
       // 首屏 cinematic 加载序列 — 在所有模块初始化后启动
       // 序列完成后不再调用 initScrollAnimation（已在序列内触发）
