@@ -9,7 +9,7 @@
   // ==================== 常量 ====================
   // 专属页面密钥的 SHA-256 哈希值（不暴露明文密钥）
   // 实际使用请替换为真实密钥的哈希值
-  var SECRET_HASH = '5b4e7c8d9a0f1e2d3c4b5a6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2b3c4d5e6f';
+  var SECRET_HASH = '8c2be977af0aacf99f28cc4396e1236db29d38ea7f56a673b8eca380658589c3';
   var PARAM_NAME = 'from';
 
   // DOM 元素引用
