@@ -1989,10 +1989,9 @@ body {
   to { transform: scaleX(1); }
 }
 
-/* Preloader 淡出（1.4~1.6s） */
+/* Preloader 淡出（由 JS setTimeout 在 1.8s 触发） */
 .cinematic-preloader.fade-out {
   animation: preloader-fade-out 0.3s var(--ease-smooth) forwards;
-  animation-delay: 1.3s;
 }
 
 @keyframes preloader-fade-out {
