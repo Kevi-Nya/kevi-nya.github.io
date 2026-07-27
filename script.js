@@ -79,6 +79,21 @@
     showEl.classList.remove('hidden');
     hideEl.classList.add('hidden');
 
+    // 防御性日历重渲染：初始化阶段 renderDynamicContent 在 Page A 处于 display:none
+    // 时渲染日历，部分浏览器在 display:none 容器内对 innerHTML 赋值存在不确定性。
+    // 在页面变为可见后强制刷新日历，确保内容始终正确。
+    if (pageId === 'a') {
+      var lnContainer = document.getElementById('little-notes-calendar');
+      if (lnContainer && lnContainer._entries) {
+        renderCalendar(lnContainer, 'little');
+      }
+    } else {
+      var thContainer = document.getElementById('thoughts-calendar');
+      if (thContainer && thContainer._entries) {
+        renderCalendar(thContainer, 'thoughts');
+      }
+    }
+
     // 强制显示目标页面的所有动画元素（防止 initScrollAnimation 时序竞争导致内容不可见）
     showEl.querySelectorAll('.fade-in-up').forEach(function (el) {
       el.classList.add('visible');
