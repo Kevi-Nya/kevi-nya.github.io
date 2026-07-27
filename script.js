@@ -142,6 +142,181 @@
     });
   }
 
+  // ==================== 动态数据加载与渲染 ====================
+
+  /**
+   * 从 data.json 加载内容数据
+   * @returns {Promise<Object>} 包含 about_tags, life_cards, little_notes 的数据对象
+   */
+  function loadData() {
+    return fetch('data.json')
+      .then(function (response) {
+        if (!response.ok) {
+          throw new Error('数据加载失败: HTTP ' + response.status);
+        }
+        return response.json();
+      })
+      .catch(function (error) {
+        console.warn('⚠️ 无法加载 data.json，使用默认数据:', error.message);
+        // 降级：返回默认数据
+        return getDefaultData();
+      });
+  }
+
+  /**
+   * 默认数据（当 data.json 不可用时的降级方案）
+   * @returns {Object}
+   */
+  function getDefaultData() {
+    return {
+      about_tags: [
+        { emoji: '🤖', label: 'AI 爱好者' },
+        { emoji: '🐱', label: '猫咪' },
+        { emoji: '📷', label: '摄影' },
+      ],
+      life_cards: [
+        { emoji: '📷', title: 'Photography', description: '用镜头捕捉生活中的温柔瞬间' },
+        { emoji: '🐱', title: 'Cats', description: '猫咪是世界上最美好的存在' },
+      ],
+      little_notes: [
+        { content: '欢迎来到 kevi_nya 🌸', note_date: '2025.01.01' },
+      ],
+      thoughts: [
+        { tag_type: 'essay', tag_label: '随笔', title: '关于 AI 与创造力的思考', summary: 'AI 不是替代创造力的工具，而是放大创造力的伙伴……', thought_date: '2025.01.12' },
+      ],
+      skills: [
+        { emoji: '🤖', name: 'AI' },
+        { emoji: '🐍', name: 'Python' },
+      ],
+      links: [
+        { platform: 'GitHub', url: '#', icon_class: 'fa-brands fa-github' },
+        { platform: 'Email', url: '#', icon_class: 'fa-solid fa-envelope' },
+      ],
+    };
+  }
+
+  /**
+   * 渲染 About Me 兴趣标签
+   * @param {Array} tags - 标签数组 [{emoji, label}, ...]
+   */
+  function renderAboutTags(tags) {
+    var container = document.getElementById('about-tags-container');
+    if (!container) return;
+
+    var html = '';
+    tags.forEach(function (tag) {
+      html += '<span class="tag">' + tag.emoji + ' ' + tag.label + '</span>';
+    });
+    container.innerHTML = html;
+  }
+
+  /**
+   * 渲染 My Life 生活卡片
+   * @param {Array} cards - 卡片数组 [{emoji, title, description}, ...]
+   */
+  function renderLifeCards(cards) {
+    var container = document.getElementById('life-cards-container');
+    if (!container) return;
+
+    var html = '';
+    cards.forEach(function (card) {
+      html +=
+        '<div class="life-card">' +
+        '<span class="life-emoji">' + card.emoji + '</span>' +
+        '<h3>' + card.title + '</h3>' +
+        '<p>' + card.description + '</p>' +
+        '</div>';
+    });
+    container.innerHTML = html;
+  }
+
+  /**
+   * 渲染 Little Notes 短文字卡片
+   * @param {Array} notes - 笔记数组 [{content, note_date}, ...]
+   */
+  function renderLittleNotes(notes) {
+    var container = document.getElementById('notes-container');
+    if (!container) return;
+
+    var html = '';
+    notes.forEach(function (note) {
+      html +=
+        '<div class="note-card">' +
+        '<p>' + note.content + '</p>' +
+        '<span class="note-date">' + note.note_date + '</span>' +
+        '</div>';
+    });
+    container.innerHTML = html;
+  }
+
+  /**
+   * 使用数据渲染所有动态区域
+   * @param {Object} data - 从 data.json 加载的数据
+   */
+  function renderDynamicContent(data) {
+    if (data.about_tags) renderAboutTags(data.about_tags);
+    if (data.life_cards) renderLifeCards(data.life_cards);
+    if (data.little_notes) renderLittleNotes(data.little_notes);
+    if (data.thoughts) renderThoughts(data.thoughts);
+    if (data.skills) renderSkills(data.skills);
+    if (data.links) renderLinks(data.links);
+  }
+
+  /**
+   * 渲染 Thoughts 思考/随笔
+   * @param {Array} thoughts - [{tag_type, tag_label, title, summary, thought_date}, ...]
+   */
+  function renderThoughts(thoughts) {
+    var container = document.getElementById('thoughts-container');
+    if (!container) return;
+
+    var html = '';
+    thoughts.forEach(function (item) {
+      html +=
+        '<div class="thought-item">' +
+        '<div class="thought-tag tag-' + item.tag_type + '">' + item.tag_label + '</div>' +
+        '<h3>' + item.title + '</h3>' +
+        '<p>' + item.summary + '</p>' +
+        '<span class="thought-date">' + item.thought_date + '</span>' +
+        '</div>';
+    });
+    container.innerHTML = html;
+  }
+
+  /**
+   * 渲染 Skills 技能标签
+   * @param {Array} skills - [{emoji, name}, ...]
+   */
+  function renderSkills(skills) {
+    var container = document.getElementById('skills-container');
+    if (!container) return;
+
+    var html = '';
+    skills.forEach(function (skill) {
+      html += '<span class="skill-tag">' + skill.emoji + ' ' + skill.name + '</span>';
+    });
+    container.innerHTML = html;
+  }
+
+  /**
+   * 渲染 Links 社交链接
+   * @param {Array} links - [{platform, url, icon_class}, ...]
+   */
+  function renderLinks(links) {
+    var container = document.getElementById('links-container');
+    if (!container) return;
+
+    var html = '';
+    links.forEach(function (link) {
+      html +=
+        '<a href="' + link.url + '" class="connect-link" aria-label="' + link.platform + '">' +
+        '<i class="' + link.icon_class + '"></i>' +
+        '<span>' + link.platform + '</span>' +
+        '</a>';
+    });
+    container.innerHTML = html;
+  }
+
   // ==================== 防抖工具 ====================
 
   /**
@@ -165,9 +340,14 @@
   // ==================== 初始化 ====================
 
   function init() {
-    initPageRouting();
-    initScrollAnimation();
-    initAvatarEffect();
+    // 先加载数据并渲染，再初始化页面路由和动画
+    loadData().then(function (data) {
+      renderDynamicContent(data);
+
+      initPageRouting();
+      initScrollAnimation();
+      initAvatarEffect();
+    });
   }
 
   // DOM 加载完成后初始化

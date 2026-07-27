@@ -10,6 +10,7 @@
 ## ✨ 特性
 
 - **双页面模式** — URL 参数 `?from=4b68ab3847feda7d` 触发访客专属页面，默认显示公开主页，无刷新 fade 切换
+- **数据库驱动内容** — PostgreSQL 管理全部动态内容（About Me / My Life / Little Notes / Thoughts / Skills / Links），`tools/export.py` 一键导出 JSON
 - **日系治愈设计** — 温暖奶油米白底色 + 浅粉浅紫渐变，Apple 留白感 × Notion 卡片布局
 - **猫系元素** — 浮动云朵、星星、猫爪、代码符号等 CSS 纯动画装饰
 - **完全响应式** — 桌面 / 平板 / 手机三段适配，卡片网格自动调整列数
@@ -43,9 +44,15 @@ npx serve .
 .
 ├── index.html      # 主页面（页面 A：访客专属 + 页面 B：公开主页）
 ├── style.css       # 样式系统（颜色、布局、动画、响应式）
-├── script.js       # 路由控制、滚动动画、交互效果
+├── script.js       # 路由控制、滚动动画、交互效果、动态数据渲染
+├── data.json       # 内容数据（由 tools/export.py 从 PostgreSQL 导出）
 ├── pics/
 │   └── SH.JPG      # 头像
+├── db/
+│   ├── schema.sql  # PostgreSQL 数据库建表语句
+│   └── seed.sql    # 初始种子数据
+├── tools/
+│   └── export.py   # 数据导出脚本（PostgreSQL → JSON）
 └── README.md
 ```
 
@@ -88,6 +95,69 @@ npx serve .
 - Thoughts 随笔列表（分类标签：随笔 / 技术 / 生活）
 - Skills 技能标签云
 - Links 社交链接
+
+## 🗄 内容管理（PostgreSQL）
+
+网站的全部动态内容（About Me / My Life / Little Notes / Thoughts / Skills / Links）由 PostgreSQL 数据库管理。日常更新直接用 `psql` 操作数据库，然后重新导出即可，**无需编辑任何 .sql 文件**。
+
+### 初始化（仅首次）
+
+```bash
+# 创建数据库并建表
+psql -d postgres -c "CREATE DATABASE kevi_nya;"
+psql -d kevi_nya -f db/schema.sql
+
+# 导入初始数据
+psql -d kevi_nya -f db/seed.sql
+
+# 导出 JSON
+python3 tools/export.py
+```
+
+### 日常更新
+
+```bash
+# 直接通过 psql 增删改内容
+psql -d kevi_nya
+
+# 常用操作示例：
+# 加一条笔记
+kevi_nya=# INSERT INTO little_notes (content, note_date, sort_order) VALUES ('新发现了一家很棒的猫咖 🐱', '2025-07-27', 4);
+
+# 改一个链接
+kevi_nya=# UPDATE links SET url = 'https://github.com/kevi-nya' WHERE platform = 'GitHub';
+
+# 删一个技能
+kevi_nya=# DELETE FROM skills WHERE name = 'Travel';
+
+# 换排序
+kevi_nya=# UPDATE skills SET sort_order = sort_order + 1 WHERE sort_order >= 3;
+kevi_nya=# \q
+
+# 重新导出 JSON 并部署
+python3 tools/export.py
+git add data.json && git commit -m "更新网站内容" && git push
+```
+
+也支持一行命令：
+
+```bash
+psql -d kevi_nya -c "INSERT INTO little_notes (content, note_date, sort_order) VALUES ('新笔记', '2025-07-27', 4);"
+python3 tools/export.py
+```
+
+### 数据库表
+
+| 表名 | 用途 | 字段 |
+|------|------|------|
+| `about_tags` | About Me 兴趣标签 | emoji, label, sort_order |
+| `life_cards` | My Life 生活卡片 | emoji, title, description, sort_order |
+| `little_notes` | Little Notes 短文字 | content, note_date, sort_order |
+| `thoughts` | Thoughts 思考/随笔 | tag_type, tag_label, title, summary, thought_date, sort_order |
+| `skills` | Skills 技能标签 | emoji, name, sort_order |
+| `links` | Links 社交链接 | platform, url, icon_class, sort_order |
+
+通过修改数据库中的内容并重新导出 `data.json`，即可更新网站显示，无需编辑 HTML。
 
 ## 🛠 技术栈
 

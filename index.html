@@ -59,73 +59,33 @@
         <p class="hero-message">你好，来自 X 的朋友！<br>这里记录我的生活、兴趣和一些小小的想法。</p>
       </section>
 
-      <!-- About Me -->
+      <!-- About Me（动态渲染，数据来自 data.json） -->
       <section class="card fade-in-up delay-1">
         <h2 class="card-title">
           <span class="card-icon">🌸</span> About Me
         </h2>
-        <div class="about-tags">
-          <span class="tag">🤖 AI 爱好者</span>
-          <span class="tag">🐱 猫咪</span>
-          <span class="tag">📷 摄影</span>
-          <span class="tag">✈️ 旅行</span>
-          <span class="tag">🎵 音乐</span>
-          <span class="tag">🔍 探索新事物</span>
+        <div class="about-tags" id="about-tags-container">
+          <!-- 由 JavaScript 动态渲染 -->
         </div>
       </section>
 
-      <!-- My Life -->
+      <!-- My Life（动态渲染，数据来自 data.json） -->
       <section class="card fade-in-up delay-2">
         <h2 class="card-title">
           <span class="card-icon">🌿</span> My Life
         </h2>
-        <div class="life-grid">
-          <div class="life-card">
-            <span class="life-emoji">📷</span>
-            <h3>Photography</h3>
-            <p>用镜头捕捉生活中的温柔瞬间</p>
-          </div>
-          <div class="life-card">
-            <span class="life-emoji">🎵</span>
-            <h3>Music</h3>
-            <p>耳机里的世界，是我的避风港</p>
-          </div>
-          <div class="life-card">
-            <span class="life-emoji">🐱</span>
-            <h3>Cats</h3>
-            <p>猫咪是世界上最美好的存在</p>
-          </div>
-          <div class="life-card">
-            <span class="life-emoji">✈️</span>
-            <h3>Travel</h3>
-            <p>探索未知，收集世界各地的日落</p>
-          </div>
-          <div class="life-card">
-            <span class="life-emoji">☕</span>
-            <h3>Coffee</h3>
-            <p>一杯咖啡，一段代码，一个下午</p>
-          </div>
+        <div class="life-grid" id="life-cards-container">
+          <!-- 由 JavaScript 动态渲染 -->
         </div>
       </section>
 
-      <!-- Little Notes -->
+      <!-- Little Notes（动态渲染，数据来自 data.json） -->
       <section class="card fade-in-up delay-3">
         <h2 class="card-title">
           <span class="card-icon">📝</span> Little Notes
         </h2>
-        <div class="notes-grid">
-          <div class="note-card">
-            <p>今天的阳光很好，猫咪在窗台上睡着了 🌤️</p>
-            <span class="note-date">2025.01.15</span>
-          </div>
-          <div class="note-card">
-            <p>写了一个新的 AI 小工具，感觉离梦想又近了一步 ✨</p>
-            <span class="note-date">2025.01.10</span>
-          </div>
-          <div class="note-card">
-            <p>旅行中拍到了一张很喜欢的照片，想分享给你 📸</p>
-            <span class="note-date">2025.01.05</span>
-          </div>
+        <div class="notes-grid" id="notes-container">
+          <!-- 由 JavaScript 动态渲染 -->
         </div>
       </section>
 
@@ -219,71 +179,33 @@
         </div>
       </section>
 
-      <!-- Thoughts -->
+      <!-- Thoughts（动态渲染，数据来自 data.json） -->
       <section class="card fade-in-up delay-3">
         <h2 class="card-title">
           <span class="card-icon">💭</span> Thoughts
         </h2>
-        <div class="thoughts-list">
-          <div class="thought-item">
-            <div class="thought-tag tag-essay">随笔</div>
-            <h3>关于 AI 与创造力的思考</h3>
-            <p>AI 不是替代创造力的工具，而是放大创造力的伙伴……</p>
-            <span class="thought-date">2025.01.12</span>
-          </div>
-          <div class="thought-item">
-            <div class="thought-tag tag-tech">技术学习</div>
-            <h3>Python 装饰器的优雅之道</h3>
-            <p>深入理解 Python 装饰器的原理与实战应用……</p>
-            <span class="thought-date">2025.01.08</span>
-          </div>
-          <div class="thought-item">
-            <div class="thought-tag tag-life">生活记录</div>
-            <h3>京都的秋天，与猫咪的邂逅</h3>
-            <p>在京都的小巷里，遇见了一只特别的三花猫……</p>
-            <span class="thought-date">2025.01.01</span>
-          </div>
+        <div class="thoughts-list" id="thoughts-container">
+          <!-- 由 JavaScript 动态渲染 -->
         </div>
       </section>
 
-      <!-- Skills -->
+      <!-- Skills（动态渲染，数据来自 data.json） -->
       <section class="card fade-in-up delay-4">
         <h2 class="card-title">
           <span class="card-icon">⚡</span> Skills
         </h2>
-        <div class="skills-cloud">
-          <span class="skill-tag">🤖 AI</span>
-          <span class="skill-tag">🐍 Python</span>
-          <span class="skill-tag">👁️ Computer Vision</span>
-          <span class="skill-tag">🧠 LLM</span>
-          <span class="skill-tag">📷 Photography</span>
-          <span class="skill-tag">✈️ Travel</span>
-          <span class="skill-tag">🎵 Music</span>
+        <div class="skills-cloud" id="skills-container">
+          <!-- 由 JavaScript 动态渲染 -->
         </div>
       </section>
 
-      <!-- Links -->
+      <!-- Links（动态渲染，数据来自 data.json） -->
       <section class="card fade-in-up delay-5">
         <h2 class="card-title">
           <span class="card-icon">🔗</span> Links
         </h2>
-        <div class="connect-links">
-          <a href="#" class="connect-link" aria-label="X (Twitter)">
-            <i class="fa-brands fa-x-twitter"></i>
-            <span>X</span>
-          </a>
-          <a href="#" class="connect-link" aria-label="GitHub">
-            <i class="fa-brands fa-github"></i>
-            <span>GitHub</span>
-          </a>
-          <a href="#" class="connect-link" aria-label="Instagram">
-            <i class="fa-brands fa-instagram"></i>
-            <span>Instagram</span>
-          </a>
-          <a href="#" class="connect-link" aria-label="Email">
-            <i class="fa-solid fa-envelope"></i>
-            <span>Email</span>
-          </a>
+        <div class="connect-links" id="links-container">
+          <!-- 由 JavaScript 动态渲染 -->
         </div>
       </section>
 
