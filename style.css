@@ -2001,7 +2001,7 @@ body {
   background: var(--glass-bg);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  color: var(--accent-purple);
+  color: var(--text-primary);  /* 深色图标，与半透明白色背景形成强对比 */
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -2027,7 +2027,7 @@ body {
 
 .sound-toggle:hover {
   background: var(--glass-hover-bg);
-  color: var(--accent-pink);
+  color: var(--accent-pink-strong);  /* hover 时变粉，与默认深色形成区分 */
   transform: scale(1.1);
   box-shadow: var(--shadow-md), var(--shadow-glow-sm);
 }
@@ -2042,7 +2042,7 @@ body {
 .sound-toggle.active .sound-icon-off { display: block; }
 
 .sound-toggle.active {
-  color: var(--accent-pink);
+  color: var(--accent-pink-strong);  /* 静音状态：深粉色醒目提示 */
   border-color: var(--glass-border-hover);
   box-shadow: var(--shadow-sm), var(--shadow-glow-sm);
 }
@@ -2080,7 +2080,7 @@ body {
   background: var(--glass-bg);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  color: var(--text-secondary);
+  color: var(--text-primary);  /* 深色图标，与半透明白色背景形成强对比 */
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -2106,7 +2106,7 @@ body {
 
 .bgm-toggle:hover {
   background: var(--glass-hover-bg);
-  color: var(--accent-purple);
+  color: var(--accent-purple-strong);  /* hover 时变深紫，与默认深色形成区分 */
   transform: scale(1.1);
   box-shadow: var(--shadow-md), var(--shadow-glow-sm);
 }
@@ -2120,6 +2120,10 @@ body {
 .bgm-toggle.muted .bgm-icon-on     { display: none; }
 .bgm-toggle.muted .bgm-icon-muted  { display: block; }
 
+.bgm-toggle.muted {
+  color: var(--text-muted);  /* 静音状态：灰色，弱化视觉存在感 */
+}
+
 .bgm-toggle:not(.muted):not(.playing) .bgm-icon-playing,
 .bgm-toggle:not(.muted):not(.playing) .bgm-icon-muted { display: none; }
 .bgm-toggle:not(.muted):not(.playing) .bgm-icon-on     { display: block; }
@@ -2130,7 +2134,7 @@ body {
 
 /* 播放中状态 — 音符脉动 + 主题色 */
 .bgm-toggle.playing {
-  color: var(--accent-pink);
+  color: var(--accent-pink-strong);  /* 播放中：深粉色醒目，与白色背景强对比 */
   border-color: var(--glass-border-hover);
   box-shadow: var(--shadow-sm), var(--shadow-glow-sm);
 }
@@ -2219,15 +2223,16 @@ body {
   .sound-toggle {
     background: rgba(40, 35, 50, 0.65);
     border-color: var(--glass-border);
-    color: var(--accent-purple);
+    color: var(--text-primary);  /* 暗色模式下仍用亮色文字保证对比度 */
   }
   .sound-toggle:hover {
     background: rgba(50, 44, 60, 0.88);
+    color: var(--accent-pink-strong);
   }
   .bgm-toggle {
     background: rgba(40, 35, 50, 0.65);
     border-color: var(--glass-border);
-    color: var(--text-secondary);
+    color: var(--text-primary);
   }
   .bgm-toggle:hover {
     background: rgba(50, 44, 60, 0.88);

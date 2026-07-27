@@ -2081,7 +2081,7 @@
 
     // 从 localStorage 读取 BGM 偏好
     try {
-      muted = localStorage.getItem('kevi_bgm_muted') !== 'false'; // 默认静音
+      muted = localStorage.getItem('kevi_bgm_muted') === 'true'; // 默认播放（仅显式设为 true 时静音）
       var savedVol = parseFloat(localStorage.getItem('kevi_bgm_volume'));
       if (!isNaN(savedVol) && savedVol >= 0 && savedVol <= 1) {
         volume = savedVol;
@@ -2701,7 +2701,14 @@
       // 在首次用户手势（点击/触摸/键盘）后才创建 AudioContext
       function initAudioOnFirstGesture() {
         SoundEngine.init();
-        BgmEngine.init(); // 预初始化 BGM 引擎（不自动播放，需用户手动点击按钮开启）
+        BgmEngine.init();
+        // 首次手势后自动开始播放 BGM（用户可随时通过按钮关闭）
+        if (!BgmEngine.isMuted()) {
+          var page = (pageA && !pageA.classList.contains('hidden')) ? 'a' : 'b';
+          BgmEngine.play(page);
+          var bgmToggle = document.getElementById('bgm-toggle');
+          if (bgmToggle) updateBgmToggleState(bgmToggle);
+        }
         document.removeEventListener('click', initAudioOnFirstGesture);
         document.removeEventListener('touchstart', initAudioOnFirstGesture);
         document.removeEventListener('keydown', initAudioOnFirstGesture);
