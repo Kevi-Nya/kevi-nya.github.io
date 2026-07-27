@@ -142,7 +142,118 @@
     });
   }
 
-  // ==================== 动态数据加载与渲染 ====================
+  // ==================== 背景视差跟随（鼠标交互） ====================
+
+  /**
+   * 背景视差跟随系统
+   * 鼠标移动时，不同层级元素产生不同强度的轻柔偏移（10-25px），
+   * 使用 requestAnimationFrame 确保流畅，移动端优雅降级。
+   *
+   * 设计说明：
+   * - .bg-image-parallax（包装层）接收 JS 视差偏移
+   * - .bg-image-layer（内层）保留 CSS ken-burns 呼吸动画，互不冲突
+   * - .bg-decorations 及其子元素各自有 CSS 漂浮动画，仅容器级视差
+   */
+  function initBackgroundParallax() {
+    // 检测是否为移动设备（触摸屏 + 小屏幕）
+    var isMobile = /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent) ||
+                   ('ontouchstart' in window && window.innerWidth < 768);
+
+    // 移动端：使用极弱强度
+    var mobileMultiplier = isMobile ? 0.2 : 1.0;
+
+    // 各层视差强度配置（单位：px，最终值会乘以移动端系数）
+    var layers = [
+      { selector: '.bg-image-parallax', intensity: 20 },  // 最深层：20px
+      { selector: '.bg-decorations',    intensity: 12 },  // 中层：12px
+    ];
+
+    // 当前鼠标位置（归一化到 [-1, 1]）
+    var targetX = 0;
+    var targetY = 0;
+
+    // 当前平滑位置（用于 lerp 插值）
+    var currentX = 0;
+    var currentY = 0;
+
+    // 平滑因子（越小越慢越梦幻，0.04 提供丝滑的跟手感）
+    var smoothingFactor = 0.04;
+
+    // 缓存 DOM 引用
+    var cachedLayers = [];
+
+    /**
+     * 初始化：缓存所有层的 DOM 引用
+     */
+    function cacheLayerRefs() {
+      layers.forEach(function (layer) {
+        var el = document.querySelector(layer.selector);
+        if (el) {
+          cachedLayers.push({ el: el, intensity: layer.intensity });
+        }
+      });
+    }
+
+    /**
+     * 鼠标移动处理 — 计算目标位置（以视口中心为原点，归一化到 [-1, 1]）
+     */
+    function onMouseMove(e) {
+      targetX = (e.clientX / window.innerWidth) * 2 - 1;
+      targetY = (e.clientY / window.innerHeight) * 2 - 1;
+    }
+
+    /**
+     * 触摸移动处理（移动端轻量跟随）
+     */
+    function onTouchMove(e) {
+      if (!e.touches || e.touches.length === 0) return;
+      targetX = (e.touches[0].clientX / window.innerWidth) * 2 - 1;
+      targetY = (e.touches[0].clientY / window.innerHeight) * 2 - 1;
+    }
+
+    /**
+     * 动画循环 — 使用 requestAnimationFrame 平滑插值
+     * Lerp 实现丝滑的"惯性"跟手效果
+     */
+    function animateParallax() {
+      // Lerp 平滑插值：当前值逐渐靠近目标值
+      currentX += (targetX - currentX) * smoothingFactor;
+      currentY += (targetY - currentY) * smoothingFactor;
+
+      // 应用偏移到各背景层
+      for (var i = 0; i < cachedLayers.length; i++) {
+        var layer = cachedLayers[i];
+        var offsetX = currentX * layer.intensity * mobileMultiplier;
+        var offsetY = currentY * layer.intensity * mobileMultiplier;
+        layer.el.style.transform =
+          'translate3d(' + offsetX + 'px, ' + offsetY + 'px, 0)';
+      }
+
+      requestAnimationFrame(animateParallax);
+    }
+
+    /**
+     * 鼠标/触摸离开时，缓慢回中
+     */
+    function onMouseLeave() {
+      targetX = 0;
+      targetY = 0;
+    }
+
+    // --- 执行初始化 ---
+    cacheLayerRefs();
+
+    // 绑定事件（passive: true 优化滚动性能）
+    document.addEventListener('mousemove', onMouseMove, { passive: true });
+    document.addEventListener('mouseleave', onMouseLeave);
+    if (isMobile) {
+      document.addEventListener('touchmove', onTouchMove, { passive: true });
+      document.addEventListener('touchend', onMouseLeave);
+    }
+
+    // 启动动画循环
+    requestAnimationFrame(animateParallax);
+  }
 
   /**
    * 从 data.json 加载内容数据
@@ -710,6 +821,7 @@
       initPageRouting();
       initScrollAnimation();
       initAvatarEffect();
+      initBackgroundParallax();
     });
   }
 

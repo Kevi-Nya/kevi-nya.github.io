@@ -48,6 +48,43 @@ body {
 }
 
 /* -------------------- 背景装饰层 -------------------- */
+
+/* 背景图视差包装层 — 接收 JS 视差偏移，不参与 CSS 动画 */
+.bg-image-parallax {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  z-index: -2;
+  pointer-events: none;
+  will-change: transform;
+}
+
+/* 背景图片 Ken Burns 呼吸层 — 缓慢缩放+平移 */
+.bg-image-layer {
+  position: absolute;
+  top: -5%; left: -5%;
+  width: 110%; height: 110%;
+  pointer-events: none;
+  /* 使用网站主题色生成的颜色渐变作为"伪背景图"，
+     实际项目中可替换为真实背景图片 url() */
+  background:
+    radial-gradient(ellipse 40% 30% at 30% 20%, rgba(243, 222, 230, 0.3) 0%, transparent 60%),
+    radial-gradient(ellipse 35% 25% at 70% 75%, rgba(221, 214, 254, 0.3) 0%, transparent 60%),
+    radial-gradient(ellipse 25% 20% at 60% 40%, rgba(255, 158, 190, 0.15) 0%, transparent 50%),
+    var(--bg-primary);
+  /* Ken Burns 呼吸动画：微缩放 + 平移，120s 一循环 */
+  animation: ken-burns 120s ease-in-out infinite;
+  will-change: transform;
+}
+
+@keyframes ken-burns {
+  0%   { transform: scale(1) translate(0, 0); }
+  25%  { transform: scale(1.03) translate(-1%, -0.5%); }
+  50%  { transform: scale(1.06) translate(1%, 0.5%); }
+  75%  { transform: scale(1.03) translate(0.5%, -1%); }
+  100% { transform: scale(1) translate(0, 0); }
+}
+
 .bg-overlay {
   position: fixed;
   top: 0; left: 0;
@@ -69,88 +106,171 @@ body {
   z-index: 0;
   pointer-events: none;
   overflow: hidden;
+  will-change: transform;
 }
 
-/* 云朵 */
+/* 云朵 — 缓慢梦幻漂浮 (80-180s 一循环) */
 .cloud {
   position: absolute;
   background: rgba(255, 255, 255, 0.5);
   border-radius: 50%;
-  filter: blur(20px);
-  animation: float-cloud linear infinite;
+  filter: blur(24px);
+  will-change: transform;
 }
 
+/* 各云朵独立动画时长与延迟 */
 .cloud-1 {
-  width: 200px; height: 80px;
-  top: 10%; left: -5%;
-  animation-duration: 25s;
+  width: 220px; height: 90px;
+  top: 8%; left: -6%;
+  animation: float-cloud-slow 140s linear infinite;
+  opacity: 0.35;
 }
 .cloud-2 {
-  width: 160px; height: 60px;
-  top: 25%; right: -5%;
-  animation-duration: 30s;
-  animation-delay: -8s;
+  width: 180px; height: 70px;
+  top: 22%; right: -6%;
+  animation: float-cloud-reverse 160s linear infinite;
+  animation-delay: -40s;
+  opacity: 0.30;
 }
 .cloud-3 {
-  width: 120px; height: 50px;
-  top: 55%; left: 30%;
-  animation-duration: 22s;
-  animation-delay: -15s;
+  width: 140px; height: 55px;
+  top: 50%; left: 25%;
+  animation: float-cloud-slow 120s linear infinite;
+  animation-delay: -60s;
+  opacity: 0.25;
+}
+.cloud-4 {
+  width: 160px; height: 65px;
+  top: 65%; right: 20%;
+  animation: float-cloud-reverse 150s linear infinite;
+  animation-delay: -90s;
+  opacity: 0.28;
+}
+.cloud-5 {
+  width: 100px; height: 40px;
+  top: 78%; left: 60%;
+  animation: float-cloud-slow 180s linear infinite;
+  animation-delay: -30s;
+  opacity: 0.22;
+}
+.cloud-6 {
+  width: 200px; height: 80px;
+  top: 38%; right: -8%;
+  animation: float-cloud-reverse 130s linear infinite;
+  animation-delay: -110s;
+  opacity: 0.26;
 }
 
-@keyframes float-cloud {
-  from { transform: translateX(0); }
-  50%  { transform: translateX(calc(100vw + 300px)); }
-  50.01% { transform: translateX(calc(-100vw - 300px)); }
-  to   { transform: translateX(0); }
+/* 云朵漂浮动画 — 正向（左→右） */
+@keyframes float-cloud-slow {
+  from { transform: translateX(-120px); }
+  50%  { transform: translateX(calc(100vw + 200px)); }
+  50.01% { transform: translateX(calc(-100vw - 200px)); }
+  to   { transform: translateX(-120px); }
 }
 
-/* 星星 */
+/* 云朵漂浮动画 — 反向（右→左） */
+@keyframes float-cloud-reverse {
+  from { transform: translateX(calc(100vw + 200px)); }
+  50%  { transform: translateX(-120px); }
+  50.01% { transform: translateX(calc(100vw + 200px)); }
+  to   { transform: translateX(calc(100vw + 200px)); }
+}
+
+/* 星星 — 闪烁 + 缓慢飘浮 */
 .star {
   position: absolute;
   color: var(--accent-purple);
-  opacity: 0.35;
+  opacity: 0.30;
   font-size: 14px;
-  animation: twinkle 3s ease-in-out infinite;
+  animation: star-float-twinkle var(--star-duration, 12s) ease-in-out infinite;
+  will-change: transform, opacity;
 }
-.star-1 { top: 8%; left: 12%; animation-delay: 0s; }
-.star-2 { top: 15%; right: 18%; animation-delay: 1.2s; font-size: 10px; }
-.star-3 { top: 45%; left: 8%; animation-delay: 2.1s; font-size: 12px; }
-.star-4 { top: 70%; right: 12%; animation-delay: 0.7s; }
-.star-5 { top: 35%; right: 25%; animation-delay: 1.8s; font-size: 10px; }
+.star-1  { top: 6%;  left: 10%;  --star-duration: 14s; animation-delay: 0s; }
+.star-2  { top: 14%; right: 15%; --star-duration: 11s; animation-delay: 2.5s; font-size: 10px; }
+.star-3  { top: 40%; left: 6%;  --star-duration: 13s; animation-delay: 4.8s; font-size: 12px; }
+.star-4  { top: 68%; right: 10%; --star-duration: 10s; animation-delay: 1.2s; }
+.star-5  { top: 32%; right: 22%; --star-duration: 15s; animation-delay: 6.1s; font-size: 10px; }
+.star-6  { top: 55%; left: 20%; --star-duration: 12s; animation-delay: 3.2s; font-size: 11px; opacity: 0.22; }
+.star-7  { top: 80%; left: 35%; --star-duration: 14s; animation-delay: 7.5s; font-size: 9px;  opacity: 0.25; }
+.star-8  { top: 22%; left: 45%; --star-duration: 11s; animation-delay: 5.0s; font-size: 10px; opacity: 0.20; }
+.star-9  { top: 48%; right: 5%; --star-duration: 13s; animation-delay: 8.2s; font-size: 12px; opacity: 0.28; }
+.star-10 { top: 72%; right: 30%;--star-duration: 16s; animation-delay: 0.8s; font-size: 11px; opacity: 0.22; }
 
-@keyframes twinkle {
-  0%, 100% { opacity: 0.2; transform: scale(1); }
-  50%      { opacity: 0.55; transform: scale(1.2); }
+/* 星星闪烁 + 飘浮组合动画 */
+@keyframes star-float-twinkle {
+  0%, 100% { opacity: 0.15; transform: translateY(0) scale(1); }
+  25%      { opacity: 0.45; transform: translateY(-6px) scale(1.15); }
+  50%      { opacity: 0.22; transform: translateY(-2px) scale(1.05); }
+  75%      { opacity: 0.50; transform: translateY(-8px) scale(1.2); }
 }
 
-/* 猫爪 */
+/* 猫爪 — 漂浮 + 旋转 */
 .paw {
   position: absolute;
   font-size: 18px;
-  opacity: 0.25;
-  animation: paw-float 5s ease-in-out infinite;
+  opacity: 0.22;
+  animation: paw-drift var(--paw-duration, 14s) ease-in-out infinite;
+  will-change: transform, opacity;
 }
-.paw-1 { top: 60%; left: 15%; animation-delay: 0s; }
-.paw-2 { top: 30%; right: 10%; animation-delay: 2.5s; }
-.paw-3 { bottom: 15%; right: 20%; animation-delay: 1s; }
+.paw-1 { top: 58%; left: 12%;  --paw-duration: 15s; animation-delay: 0s; }
+.paw-2 { top: 28%; right: 8%;  --paw-duration: 13s; animation-delay: 3.5s; }
+.paw-3 { top: 78%; right: 18%; --paw-duration: 14s; animation-delay: 1.8s; font-size: 15px; }
+.paw-4 { top: 42%; left: 35%; --paw-duration: 16s; animation-delay: 6.2s; font-size: 14px; opacity: 0.18; }
+.paw-5 { top: 15%; left: 55%; --paw-duration: 12s; animation-delay: 9.1s; font-size: 16px; opacity: 0.20; }
+.paw-6 { top: 85%; left: 60%; --paw-duration: 17s; animation-delay: 4.5s; font-size: 13px; opacity: 0.16; }
+.paw-7 { top: 50%; right: 5%; --paw-duration: 15s; animation-delay: 7.8s; font-size: 17px; opacity: 0.19; }
 
-@keyframes paw-float {
-  0%, 100% { transform: translateY(0) rotate(0deg); }
-  50%      { transform: translateY(-8px) rotate(5deg); }
+/* 猫爪漂浮 + 轻微旋转动画 */
+@keyframes paw-drift {
+  0%, 100% { transform: translateY(0) rotate(0deg); opacity: 0.18; }
+  25%      { transform: translateY(-12px) rotate(4deg); opacity: 0.30; }
+  50%      { transform: translateY(-5px) rotate(-2deg); opacity: 0.22; }
+  75%      { transform: translateY(-15px) rotate(6deg); opacity: 0.32; }
 }
 
 /* 代码符号装饰 */
 .code-symbol {
   position: absolute;
   color: var(--accent-purple);
-  opacity: 0.2;
+  opacity: 0.18;
   font-family: "SF Mono", "Fira Code", monospace;
   font-size: 20px;
   font-weight: 700;
+  animation: code-drift 18s ease-in-out infinite;
+  will-change: transform;
 }
-.code-symbol-1 { top: 20%; left: 5%; }
-.code-symbol-2 { bottom: 20%; right: 8%; }
+.code-symbol-1 { top: 18%; left: 4%;  animation-delay: 0s; }
+.code-symbol-2 { top: 75%; right: 6%; animation-delay: -6s; }
+.code-symbol-3 { top: 45%; left: 75%; animation-delay: -12s; font-size: 16px; opacity: 0.15; }
+
+@keyframes code-drift {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  33%      { transform: translateY(-10px) rotate(3deg); }
+  66%      { transform: translateY(5px) rotate(-3deg); }
+}
+
+/* 爱心装饰 — 缓慢飘浮 */
+.heart {
+  position: absolute;
+  color: var(--accent-pink);
+  font-size: 16px;
+  opacity: 0.20;
+  animation: heart-float var(--heart-duration, 20s) ease-in-out infinite;
+  will-change: transform, opacity;
+}
+.heart-1 { top: 10%; left: 30%; --heart-duration: 22s; animation-delay: 0s;  font-size: 18px; }
+.heart-2 { top: 35%; right: 28%;--heart-duration: 19s; animation-delay: -5s;  font-size: 14px; opacity: 0.18; }
+.heart-3 { top: 60%; left: 50%; --heart-duration: 24s; animation-delay: -10s; font-size: 15px; opacity: 0.16; }
+.heart-4 { top: 82%; left: 18%; --heart-duration: 20s; animation-delay: -15s; font-size: 16px; opacity: 0.22; }
+.heart-5 { top: 48%; right: 12%;--heart-duration: 21s; animation-delay: -3s;  font-size: 13px; opacity: 0.17; }
+
+@keyframes heart-float {
+  0%, 100% { transform: translateY(0) scale(1); opacity: 0.15; }
+  25%      { transform: translateY(-14px) scale(1.08); opacity: 0.28; }
+  50%      { transform: translateY(-6px) scale(0.95); opacity: 0.20; }
+  75%      { transform: translateY(-18px) scale(1.05); opacity: 0.30; }
+}
 
 /* -------------------- 页面容器 -------------------- */
 .page-container {
@@ -1120,15 +1240,31 @@ body {
   }
 
   /* 隐藏部分背景装饰以提升性能 */
-  .cloud-3,
+  .cloud-4,
+  .cloud-5,
+  .cloud-6,
   .paw-2,
-  .code-symbol-2 {
+  .paw-4,
+  .paw-5,
+  .paw-6,
+  .paw-7,
+  .star-6,
+  .star-7,
+  .star-8,
+  .star-9,
+  .star-10,
+  .heart-3,
+  .heart-4,
+  .heart-5,
+  .code-symbol-2,
+  .code-symbol-3 {
     display: none;
   }
 
   /* 减小装饰元素尺寸 */
   .cloud-1 { width: 120px; height: 50px; }
   .cloud-2 { width: 100px; height: 40px; }
+  .cloud-3 { width: 90px; height: 35px; }
 }
 
 /* 大型桌面端优化 (>1200px) */
