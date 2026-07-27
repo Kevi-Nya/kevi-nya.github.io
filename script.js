@@ -190,6 +190,7 @@
       ],
       links: [
         { platform: 'GitHub', url: 'https://github.com/Kevi-Nya', icon_class: 'fa-brands fa-github' },
+        { platform: 'Bilibili', url: 'https://space.bilibili.com/456988162?spm_id_from=333.1007.0.0', icon_class: 'fa-brands fa-bilibili' },
         { platform: 'Email', url: 'mailto:1447954419@qq.com', icon_class: 'fa-solid fa-envelope' },
       ],
     };
