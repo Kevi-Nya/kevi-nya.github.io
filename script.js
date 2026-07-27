@@ -189,8 +189,8 @@
         { emoji: '🐍', name: 'Python' },
       ],
       links: [
-        { platform: 'GitHub', url: '#', icon_class: 'fa-brands fa-github' },
-        { platform: 'Email', url: '#', icon_class: 'fa-solid fa-envelope' },
+        { platform: 'GitHub', url: 'https://github.com/Kevi-Nya', icon_class: 'fa-brands fa-github' },
+        { platform: 'Email', url: 'mailto:1447954419@qq.com', icon_class: 'fa-solid fa-envelope' },
       ],
     };
   }
