@@ -17,8 +17,44 @@
   <meta name="twitter:title" content="Kevi_Nya — 猫耳少年的数字花园">
   <meta name="twitter:description" content="用代码记录想法，用镜头记录世界。">
   <meta name="twitter:image" content="https://kevi-nya.github.io/pics/SH.JPG">
+  <!-- TODO: og:image 建议替换为 1200×630 专属社交分享卡片设计（品牌色背景 + 标题 + 头像 + 装饰元素） -->
+  <!-- Canonical URL -->
+  <link rel="canonical" href="https://kevi-nya.github.io">
   <!-- PWA Manifest -->
   <link rel="manifest" href="manifest.json">
+  <!-- JSON-LD 结构化数据（SEO） -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Person",
+    "name": "Kevi_Nya",
+    "alternateName": "kevi_nya",
+    "description": "AI Explorer | Creator | Life Recorder — 用代码记录想法，用镜头记录世界。",
+    "url": "https://kevi-nya.github.io",
+    "image": "https://kevi-nya.github.io/pics/SH.JPG",
+    "sameAs": [
+      "https://github.com/Kevi-Nya",
+      "https://x.com/Kevi_Nya",
+      "https://space.bilibili.com/456988162"
+    ],
+    "knowsAbout": ["Artificial Intelligence", "Photography", "Music", "Open Source"],
+    "nationality": "CN"
+  }
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "Kevi_Nya — 猫耳少年的数字花园",
+    "url": "https://kevi-nya.github.io",
+    "description": "用代码记录想法，用镜头记录世界。属于 kevi_nya 的温柔、治愈、有猫系灵魂的个人数字花园。",
+    "inLanguage": "zh-CN",
+    "author": {
+      "@type": "Person",
+      "name": "Kevi_Nya"
+    }
+  }
+  </script>
   <title>Kevi_Nya</title>
   <link rel="icon" type="image/png" href="favicon.png">
   <link rel="stylesheet" href="style.css">
@@ -28,6 +64,12 @@
   <!-- SVG 图标（内联，无需 Font Awesome CDN） -->
 </head>
 <body>
+
+  <!-- 键盘用户跳过导航链接（WCAG 2.4.1） -->
+  <a href="#main-content" class="skip-link" aria-label="跳到主内容">跳到主内容</a>
+
+  <!-- 键盘用户跳过导航链接（WCAG 2.4.1） -->
+  <a href="#main-content" class="skip-link" aria-label="跳到主内容">跳到主内容</a>
 
   <!-- ==================== 背景装饰层 ==================== -->
   <!-- 背景图片 Ken Burns 呼吸层（外层视差包裹 + 内层动画） -->
@@ -57,7 +99,7 @@
   </div>
 
   <!-- ==================== 页面容器 ==================== -->
-  <div class="page-container">
+  <div class="page-container" id="main-content">
 
     <!-- ==================== 页面 A - X访客专属页面 ==================== -->
     <main id="page-a" class="page page-a hidden" role="main" aria-label="X访客专属页面">
@@ -65,11 +107,7 @@
       <section class="hero-a fade-in-up">
         <div class="avatar-wrapper">
           <div class="avatar-glow"></div>
-          <picture>
-            <source srcset="pics/SH.webp" type="image/webp">
-            <source srcset="pics/SH.avif" type="image/avif">
-            <img src="pics/SH.JPG" alt="kevi_nya 头像" class="avatar" width="150" height="150" loading="eager" decoding="async">
-          </picture>
+          <img src="pics/SH.JPG" alt="kevi_nya 头像" class="avatar" width="150" height="150" loading="eager" decoding="async">
           <!-- 头像装饰 -->
           <span class="avatar-decoration dec-star-1">✦</span>
           <span class="avatar-decoration dec-paw">🐾</span>
@@ -155,11 +193,7 @@
       <section class="hero-b fade-in-up">
         <div class="avatar-wrapper">
           <div class="avatar-glow"></div>
-          <picture>
-            <source srcset="pics/SH.webp" type="image/webp">
-            <source srcset="pics/SH.avif" type="image/avif">
-            <img src="pics/SH.JPG" alt="kevi_nya 头像" class="avatar" width="150" height="150" loading="eager" decoding="async">
-          </picture>
+          <img src="pics/SH.JPG" alt="kevi_nya 头像" class="avatar" width="150" height="150" loading="eager" decoding="async">
           <!-- 头像装饰 -->
           <span class="avatar-decoration dec-star-1">✦</span>
           <span class="avatar-decoration dec-paw">🐾</span>

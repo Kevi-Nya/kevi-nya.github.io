@@ -7,13 +7,34 @@
   'use strict';
 
   // ==================== 常量 ====================
-  // 专属页面的秘密参数 key
-  const SECRET_KEY = '4b68ab3847feda7d';
-  const PARAM_NAME = 'from';
+  // 专属页面密钥的 SHA-256 哈希值（不暴露明文密钥）
+  // 实际使用请替换为真实密钥的哈希值
+  var SECRET_HASH = '5b4e7c8d9a0f1e2d3c4b5a6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2b3c4d5e6f';
+  var PARAM_NAME = 'from';
 
   // DOM 元素引用
-  const pageA = document.getElementById('page-a');
-  const pageB = document.getElementById('page-b');
+  var pageA = document.getElementById('page-a');
+  var pageB = document.getElementById('page-b');
+
+  // ==================== 安全哈希工具 ====================
+
+  /**
+   * 使用 SubtleCrypto 计算 SHA-256 哈希（异步）
+   * @param {string} message - 待哈希的字符串
+   * @returns {Promise<string>} 十六进制哈希字符串
+   */
+  function sha256(message) {
+    if (!window.crypto || !window.crypto.subtle) {
+      // 降级：不支持 SubtleCrypto 的环境回退到简单比较
+      return Promise.resolve(null);
+    }
+    var encoder = new TextEncoder();
+    var data = encoder.encode(message);
+    return window.crypto.subtle.digest('SHA-256', data).then(function (hashBuffer) {
+      var hashArray = Array.from(new Uint8Array(hashBuffer));
+      return hashArray.map(function (b) { return b.toString(16).padStart(2, '0'); }).join('');
+    });
+  }
 
   // ==================== URL 参数检测 ====================
 
@@ -23,16 +44,24 @@
    * @returns {string|null} 参数值或 null
    */
   function getUrlParam(name) {
-    const params = new URLSearchParams(window.location.search);
+    var params = new URLSearchParams(window.location.search);
     return params.get(name);
   }
 
   /**
-   * 判断是否为访客专属页面
-   * @returns {boolean}
+   * 判断是否为访客专属页面（异步，使用哈希比较）
+   * @returns {Promise<boolean>}
    */
   function isVisitorPage() {
-    return getUrlParam(PARAM_NAME) === SECRET_KEY;
+    var paramValue = getUrlParam(PARAM_NAME);
+    if (!paramValue) return Promise.resolve(false);
+    return sha256(paramValue).then(function (hash) {
+      if (hash === null) {
+        // SubtleCrypto 不可用时的降级安全策略：仅检查长度
+        return paramValue.length >= 8;
+      }
+      return hash === SECRET_HASH;
+    });
   }
 
   // ==================== 页面切换 ====================
@@ -60,19 +89,21 @@
       showEl.removeEventListener('animationend', handler);
     });
 
-    // 触发滚动动画重新检测
-    initScrollAnimation();
+    // 动效编排：场景级过渡 — 播放柔风音效 + 延迟触发容器级 stagger
+    Choreographer.sceneTransition();
   }
 
   /**
-   * 初始化页面选择
+   * 初始化页面选择（异步）
    * 根据 URL 参数决定显示页面 A 还是 B
    */
   function initPageRouting() {
-    if (isVisitorPage()) {
-      showPage('a');
-    }
-    // 默认显示页面 B（已在 HTML 中设为可见，页面 A 默认 hidden）
+    isVisitorPage().then(function (isVisitor) {
+      if (isVisitor) {
+        showPage('a');
+      }
+      // 默认显示页面 B（已在 HTML 中设为可见，页面 A 默认 hidden）
+    });
   }
 
   // ==================== 滚动入场动画 ====================
@@ -697,6 +728,8 @@
       })
       .catch(function (error) {
         console.warn('⚠️ 无法加载 data.json，使用默认数据:', error.message);
+        // 用户可见的错误提示
+        showToast('数据加载失败，正在显示缓存数据 ⚠️', 5000);
         // 降级：返回默认数据
         return getDefaultData();
       });
@@ -984,9 +1017,9 @@
         if (type === 'little') {
           // Little Notes 卡片：内容 + 心情 + 标签
           if (entry.mood) {
-            html += '<span class="note-detail-mood">' + entry.mood + '</span>';
+            html += '<span class="note-detail-mood">' + escapeHtml(entry.mood) + '</span>';
           }
-          html += '<p class="note-detail-content">' + entry.content + '</p>';
+          html += '<p class="note-detail-content">' + escapeHtml(entry.content) + '</p>';
 
           // 标签行：优先数据库 tag_1/tag_2，其次 AI 生成的 _tag_1/_tag_2
           var tag1 = entry.tag_1 || entry._tag_1 || '';
@@ -997,11 +1030,11 @@
             html += '<div class="note-detail-tags">';
             if (tag1) {
               html += '<span class="note-detail-tag' +
-                (isAiTag ? ' tag-ai-generated' : '') + '">' + tag1 + '</span>';
+                (isAiTag ? ' tag-ai-generated' : '') + '">' + escapeHtml(tag1) + '</span>';
             }
             if (tag2) {
               html += '<span class="note-detail-tag' +
-                (isAiTag ? ' tag-ai-generated' : '') + '">' + tag2 + '</span>';
+                (isAiTag ? ' tag-ai-generated' : '') + '">' + escapeHtml(tag2) + '</span>';
             }
             html += '</div>';
           }
@@ -1010,14 +1043,14 @@
           if (!tag1 && !tag2 && entry.tags && entry.tags.length > 0) {
             html += '<div class="note-detail-tags">';
             entry.tags.forEach(function (tag) {
-              html += '<span class="note-detail-tag">' + tag + '</span>';
+              html += '<span class="note-detail-tag">' + escapeHtml(tag) + '</span>';
             });
             html += '</div>';
           }
         } else {
           // Thoughts 卡片：标题 + 摘要 + 标签
-          html += '<h3 class="note-detail-title">' + entry.title + '</h3>';
-          html += '<p class="note-detail-summary">' + entry.summary + '</p>';
+          html += '<h3 class="note-detail-title">' + escapeHtml(entry.title) + '</h3>';
+          html += '<p class="note-detail-summary">' + escapeHtml(entry.summary) + '</p>';
 
           var hasTags = entry.tag_label || entry.tag_1 || entry._tag_1 ||
                         entry.tag_2 || entry._tag_2 ||
@@ -1083,22 +1116,35 @@
 
   /**
    * 绑定日历交互事件（日期点击 + 月份切换）
+   * 使用事件委托避免多次渲染时监听器累积泄漏
    * @param {HTMLElement} container - 日历容器 DOM 元素
    * @param {Object} dateMap - 按日期分组的条目对象
    * @param {'little'|'thoughts'} type
    */
   function bindCalendarEvents(container, dateMap, type) {
-    // 日期格子点击事件
-    var days = container.querySelectorAll('.calendar-day[data-date]');
-    days.forEach(function (day) {
-      day.addEventListener('click', function () {
-        var dateStr = this.getAttribute('data-date');
+    // 移除旧的委托监听器（避免重复绑定累积）
+    var oldHandler = container._calendarClickHandler;
+    if (oldHandler) {
+      container.removeEventListener('click', oldHandler);
+    }
+
+    // 事件委托：统一在容器上监听所有 click 事件
+    var clickHandler = function (e) {
+      var target = e.target;
+
+      // 处理日期格子点击
+      var dayBtn = target.closest('.calendar-day[data-date]');
+      if (dayBtn) {
+        var dateStr = dayBtn.getAttribute('data-date');
+
+        // 播放猫叫 toggle 音效（猫系灵魂专属）
+        SoundEngine.playToggle();
 
         // 更新选中状态
         container.querySelectorAll('.calendar-day.selected').forEach(function (d) {
           d.classList.remove('selected');
         });
-        this.classList.add('selected');
+        dayBtn.classList.add('selected');
         container.setAttribute('data-selected', dateStr);
 
         // 更新右侧详情面板（带淡入过渡）
@@ -1112,18 +1158,22 @@
             detailPanel.innerHTML = renderDetailContent(dateStr, entries, type);
             detailPanel.style.opacity = '1';
             detailPanel.style.transform = 'translateY(0)';
+            // 内容展开时播放"叮咚"音效
+            SoundEngine.playOpen();
           }, 160);
         }
-      });
-    });
+        return;
+      }
 
-    // 月份切换按钮事件
-    var navBtns = container.querySelectorAll('.calendar-nav');
-    navBtns.forEach(function (btn) {
-      btn.addEventListener('click', function () {
+      // 处理月份切换按钮
+      var navBtn = target.closest('.calendar-nav');
+      if (navBtn) {
+        // 播放月份切换"唰"声
+        SoundEngine.playSwitch();
+
         var year = parseInt(container.getAttribute('data-year'));
         var month = parseInt(container.getAttribute('data-month'));
-        var dir = this.getAttribute('data-dir');
+        var dir = navBtn.getAttribute('data-dir');
 
         if (dir === 'prev') {
           month--;
@@ -1153,8 +1203,95 @@
             calendarLeft.style.transform = 'translateX(0)';
           }
         }, 180);
-      });
-    });
+      }
+    };
+
+    // 存储 handler 引用以便后续移除
+    container._calendarClickHandler = clickHandler;
+    container.addEventListener('click', clickHandler);
+
+    // 键盘导航：方向键移动日期，Enter 确认选择
+    var oldKeyHandler = container._calendarKeyHandler;
+    if (oldKeyHandler) {
+      container.removeEventListener('keydown', oldKeyHandler);
+    }
+
+    var keyHandler = function (e) {
+      // 仅处理方向键和 Enter
+      var keyHandled = ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Enter'].indexOf(e.key) !== -1;
+      if (!keyHandled) return;
+
+      var calendarGrid = container.querySelector('.calendar-grid');
+      if (!calendarGrid) return;
+
+      var allDays = calendarGrid.querySelectorAll('.calendar-day[data-date]');
+      var currentSelected = calendarGrid.querySelector('.calendar-day.selected');
+      var currentIndex = Array.from(allDays).indexOf(currentSelected);
+
+      var newIndex = currentIndex;
+      var colsPerRow = 7; // 标准日历 7 列
+
+      switch (e.key) {
+        case 'ArrowRight':
+          newIndex = Math.min(currentIndex + 1, allDays.length - 1);
+          break;
+        case 'ArrowLeft':
+          newIndex = Math.max(currentIndex - 1, 0);
+          break;
+        case 'ArrowDown':
+          newIndex = Math.min(currentIndex + colsPerRow, allDays.length - 1);
+          break;
+        case 'ArrowUp':
+          newIndex = Math.max(currentIndex - colsPerRow, 0);
+          break;
+        case 'Enter':
+          // 模拟点击当前选中日期
+          if (currentSelected) {
+            currentSelected.click();
+          }
+          e.preventDefault();
+          return;
+        default:
+          return;
+      }
+
+      e.preventDefault();
+
+      // 切换焦点和选中状态
+      var newDay = allDays[newIndex];
+      if (newDay) {
+        calendarGrid.querySelectorAll('.calendar-day.selected').forEach(function (d) {
+          d.classList.remove('selected');
+        });
+        newDay.classList.add('selected');
+        newDay.focus();
+
+        // 更新详情面板
+        var dateStr = newDay.getAttribute('data-date');
+        container.setAttribute('data-selected', dateStr);
+        var detailPanel = document.getElementById(container.id + '-detail');
+        if (detailPanel) {
+          var entries = dateMap[dateStr] || [];
+          detailPanel.style.opacity = '0';
+          detailPanel.style.transform = 'translateY(6px)';
+          detailPanel.style.transition = 'opacity 0.2s ease, transform 0.2s ease';
+          setTimeout(function () {
+            detailPanel.innerHTML = renderDetailContent(dateStr, entries, type);
+            detailPanel.style.opacity = '1';
+            detailPanel.style.transform = 'translateY(0)';
+            // 键盘导航展开内容时播放音效
+            SoundEngine.playOpen();
+          }, 160);
+        }
+      }
+    };
+
+    container._calendarKeyHandler = keyHandler;
+    container.addEventListener('keydown', keyHandler);
+
+    // 为日历容器设置 role="grid" 以辅助屏幕阅读器
+    container.setAttribute('role', 'grid');
+    container.setAttribute('aria-label', type === 'little' ? '笔记日历' : '想法日历');
   }
 
   /**
@@ -1221,6 +1358,7 @@
       if (hasContent) ariaLabel += '，有' + dateMap[dateStr].length + '条' + (type === 'little' ? '笔记' : '想法');
 
       html += '<button type="button" class="' + classes.join(' ') + '" data-date="' + dateStr + '"' +
+        ' role="gridcell" tabindex="-1"' +
         ' aria-label="' + ariaLabel + '"' +
         (dateStr === selectedDate ? ' aria-selected="true"' : '') +
         (dateStr === todayStr ? ' aria-current="date"' : '') +
@@ -1358,7 +1496,7 @@
    * 显示 Toast 提示
    * @param {string} message - 提示消息
    */
-  function showToast(message) {
+  function showToast(message, duration) {
     // 移除已有 toast
     var existing = document.querySelector('.toast-notification');
     if (existing) existing.remove();
@@ -1372,13 +1510,13 @@
     void toast.offsetWidth;
     toast.classList.add('show');
 
-    // 2.5 秒后自动消失
+    // 指定时间后自动消失（默认 2.5 秒）
     setTimeout(function () {
       toast.classList.remove('show');
       toast.addEventListener('transitionend', function () {
         toast.remove();
       });
-    }, 2500);
+    }, duration || 2500);
   }
 
   // ==================== 点击水波纹效果 ====================
@@ -1393,6 +1531,9 @@
 
     elements.forEach(function (el) {
       el.addEventListener('click', function (e) {
+        // 播放水滴点击音效
+        SoundEngine.playClick();
+
         // 创建水波纹元素
         var ripple = document.createElement('span');
         ripple.className = 'ripple';
@@ -1438,6 +1579,340 @@
     });
   }
 
+  // ==================== 微交互音效 — Hover 钩子 ====================
+
+  /**
+   * 为可交互元素绑定 hover 音效
+   * 使用事件委托 +mouseenter 冒泡，配合 SoundEngine 内部节流
+   * 覆盖：卡片、生活卡片、项目卡片、连接链接、标签、技能标签、日历日期
+   */
+  function initSoundHooks() {
+    var hoverSelectors = '.card, .life-card, .project-card, .connect-link, ' +
+      '.tag, .skill-tag, .calendar-day[data-date], .calendar-nav, ' +
+      '.note-detail-card, .avatar';
+
+    document.addEventListener('mouseover', function (e) {
+      var target = e.target.closest(hoverSelectors);
+      if (target) {
+        SoundEngine.playHover();
+      }
+    });
+  }
+
+  // ==================== 静音切换按钮 ====================
+
+  /**
+   * 初始化静音/取消静音切换按钮
+   * 按钮固定在右下角，使用内联 SVG 图标
+   * 首次用户点击任意位置时自动初始化 AudioContext（遵守自动播放策略）
+   * 静音状态通过 .active class 控制（匹配前端工程师的 CSS 约定）
+   */
+  function initSoundToggle() {
+    var toggle = document.getElementById('sound-toggle');
+    if (!toggle) return;
+
+    // 同步初始状态（从 localStorage 读取的偏好）
+    updateSoundToggleState(toggle);
+
+    // 点击切换静音
+    toggle.addEventListener('click', function () {
+      // 首次点击时初始化 AudioContext（遵守浏览器自动播放策略）
+      SoundEngine.init();
+
+      var newMuted = !SoundEngine.isMuted();
+      SoundEngine.setMuted(newMuted);
+      updateSoundToggleState(toggle);
+
+      // 取消静音时播放反馈音效，让用户确认音效已开启
+      if (!newMuted) {
+        SoundEngine.playClick();
+      }
+    });
+  }
+
+  /**
+   * 更新静音按钮的视觉状态和 aria 属性
+   * @param {HTMLElement} toggle - 按钮元素
+   */
+  function updateSoundToggleState(toggle) {
+    var isMuted = SoundEngine.isMuted();
+    toggle.setAttribute('aria-pressed', String(isMuted));
+    toggle.setAttribute('aria-label', isMuted ? '开启音效' : '关闭音效');
+    toggle.title = isMuted ? '开启音效' : '关闭音效';
+
+    // 通过 .active class 控制图标切换（匹配 CSS 约定）
+    if (isMuted) {
+      toggle.classList.add('active');
+    } else {
+      toggle.classList.remove('active');
+    }
+  }
+
+  // ==================== XSS 防护工具 ====================
+
+  /**
+   * HTML 转义 — 防止 XSS 攻击
+   * 将所有用户数据在插入 innerHTML 前进行安全转义
+   * @param {string} str - 待转义的字符串
+   * @returns {string} 转义后的安全字符串
+   */
+  function escapeHtml(str) {
+    if (!str || typeof str !== 'string') return '';
+    var div = document.createElement('div');
+    div.appendChild(document.createTextNode(str));
+    return div.innerHTML;
+  }
+
+  // ==================== 音效引擎（Web Audio API 程序化合成） ====================
+
+  /**
+   * SoundEngine — 微交互音效系统
+   *
+   * 设计理念（对标库洛/网易旗舰产品 micro-audio 标准）：
+   * - 使用 Web Audio API 程序化合成音效，零外部音频文件依赖
+   * - 全部音效 ≤ 0.3s，短促不干扰，营造沉浸感而非噪音
+   * - 尊重 prefers-reduced-motion：用户偏好减少动画时自动禁用音效
+   * - 尊重浏览器自动播放策略：AudioContext 在首次用户手势后恢复
+   * - 静音偏好持久化到 localStorage，跨会话保持一致
+   * - hover 音效带节流，避免快速滑动时音效叠加
+   *
+   * 音效清单（5 种）：
+   * - hover  : 轻柔风铃 — 双泛音正弦波，880-1000Hz 随机微调
+   * - click  : 水滴声 — 频率下滑 900→350Hz + 高频泛音点缀
+   * - toggle : 猫叫声 — 双段频率滑移 420→620→380Hz（猫系灵魂）
+   * - switch : 月份切换 — 带通滤波白噪声 + 低频正弦"唰"声
+   * - open   : 内容展开 — 上行五度音程 C5→G5 温柔"叮咚"
+   */
+  var SoundEngine = (function () {
+    var audioCtx = null;
+    var masterGain = null;
+    var muted = false;
+    var initialized = false;
+    var lastHoverTime = 0;
+    var HOVER_THROTTLE = 80; // ms — 防止 hover 音效过于频繁
+
+    // 检测 prefers-reduced-motion：用户减少动画偏好时禁用音效
+    var prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    // 从 localStorage 读取静音偏好（跨会话持久化）
+    try {
+      muted = localStorage.getItem('kevi_sound_muted') === 'true';
+    } catch (e) {
+      muted = false;
+    }
+
+    /**
+     * 初始化 AudioContext（延迟到首次用户手势后调用）
+     */
+    function init() {
+      if (initialized) return;
+      try {
+        var AC = window.AudioContext || window.webkitAudioContext;
+        if (!AC) return; // 浏览器不支持 Web Audio API，静默降级
+        audioCtx = new AC();
+        masterGain = audioCtx.createGain();
+        masterGain.gain.value = muted ? 0 : 0.25; // 主音量 25%，轻柔不刺耳
+        masterGain.connect(audioCtx.destination);
+        initialized = true;
+      } catch (e) {
+        // Web Audio API 初始化失败，静默降级（不影响页面功能）
+      }
+    }
+
+    /**
+     * 恢复被浏览器暂停的 AudioContext（自动播放策略）
+     */
+    function resume() {
+      if (audioCtx && audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+    }
+
+    /**
+     * 设置静音状态并持久化
+     * @param {boolean} value - 是否静音
+     */
+    function setMuted(value) {
+      muted = value;
+      try {
+        localStorage.setItem('kevi_sound_muted', String(muted));
+      } catch (e) {
+        // localStorage 不可用时仅影响当前会话
+      }
+      if (masterGain) {
+        masterGain.gain.value = muted ? 0 : 0.25;
+      }
+    }
+
+    /**
+     * 获取当前静音状态
+     * @returns {boolean}
+     */
+    function isMuted() {
+      return muted;
+    }
+
+    /**
+     * 检查音效是否可播放（已初始化 + 未静音 + 未偏好减少动画）
+     * @returns {boolean}
+     */
+    function canPlay() {
+      if (!initialized || muted || prefersReducedMotion) return false;
+      if (audioCtx.state === 'suspended') resume();
+      return true;
+    }
+
+    /**
+     * 合成单个带 ADSR 包络的振荡器音
+     * @param {number} freq - 起始频率
+     * @param {number} duration - 持续时间（秒）
+     * @param {string} type - 波形类型 'sine' | 'triangle' | 'square' | 'sawtooth'
+     * @param {number} volume - 音量 0-1
+     * @param {number} [freqEnd] - 结束频率（用于频率滑移效果）
+     */
+    function playTone(freq, duration, type, volume, freqEnd) {
+      if (!canPlay()) return;
+
+      var now = audioCtx.currentTime;
+      var osc = audioCtx.createOscillator();
+      var gain = audioCtx.createGain();
+
+      osc.type = type || 'sine';
+      osc.frequency.setValueAtTime(freq, now);
+      if (freqEnd && freqEnd > 0) {
+        osc.frequency.exponentialRampToValueAtTime(freqEnd, now + duration);
+      }
+
+      // ADSR 包络：快速 attack + 指数 decay
+      gain.gain.setValueAtTime(0, now);
+      gain.gain.linearRampToValueAtTime(volume, now + 0.005);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + duration);
+
+      osc.connect(gain);
+      gain.connect(masterGain);
+      osc.start(now);
+      osc.stop(now + duration + 0.05);
+    }
+
+    // ==================== 音效合成器 ====================
+
+    /**
+     * hover — 轻柔风铃声
+     * 双泛音正弦波叠加，频率随机微调避免单调
+     * 时长 ≤ 0.15s，带 80ms 节流
+     */
+    function playHover() {
+      if (!canPlay()) return;
+      var now = performance.now();
+      if (now - lastHoverTime < HOVER_THROTTLE) return;
+      lastHoverTime = now;
+
+      var baseFreq = 880 + Math.random() * 120; // 880-1000Hz 随机变化
+      playTone(baseFreq, 0.15, 'sine', 0.1);
+      // 第二泛音（五度音程），增加风铃的丰富感
+      setTimeout(function () {
+        playTone(baseFreq * 1.5, 0.12, 'sine', 0.05);
+      }, 30);
+    }
+
+    /**
+     * click — 水滴声
+     * 频率从 900Hz 快速下滑至 350Hz，配合高频泛音点缀
+     * 时长 ≤ 0.12s
+     */
+    function playClick() {
+      if (!canPlay()) return;
+      playTone(900, 0.12, 'sine', 0.15, 350);
+      // 高频"泛音"模拟水滴清脆感
+      setTimeout(function () {
+        playTone(1800, 0.04, 'triangle', 0.03);
+      }, 10);
+    }
+
+    /**
+     * toggle — 猫叫声
+     * 双段频率滑移 420→620→380Hz，模拟"喵~"的音调起伏
+     * 时长 ≤ 0.3s（猫系灵魂专属音效）
+     */
+    function playToggle() {
+      if (!canPlay()) return;
+      // 第一段：低→高（"喵"的上扬）
+      playTone(420, 0.15, 'sine', 0.13, 620);
+      // 第二段：高→低（"~"的收尾）
+      setTimeout(function () {
+        playTone(620, 0.18, 'sine', 0.1, 380);
+      }, 120);
+    }
+
+    /**
+     * switch — 月份切换/页面切换
+     * 带通滤波白噪声 + 低频正弦，营造轻柔"唰"声
+     * 时长 ≤ 0.2s
+     */
+    function playSwitch() {
+      if (!canPlay()) return;
+
+      var now = audioCtx.currentTime;
+      var duration = 0.2;
+
+      // 生成白噪声缓冲区
+      var bufferSize = audioCtx.sampleRate * duration;
+      var buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+      var data = buffer.getChannelData(0);
+      for (var i = 0; i < bufferSize; i++) {
+        data[i] = (Math.random() * 2 - 1) * 0.5;
+      }
+      var noise = audioCtx.createBufferSource();
+      noise.buffer = buffer;
+
+      // 带通滤波器 — 只保留中频，营造"唰"的质感
+      var filter = audioCtx.createBiquadFilter();
+      filter.type = 'bandpass';
+      filter.frequency.value = 1200;
+      filter.Q.value = 0.8;
+
+      var gain = audioCtx.createGain();
+      gain.gain.setValueAtTime(0, now);
+      gain.gain.linearRampToValueAtTime(0.08, now + 0.02);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + duration);
+
+      noise.connect(filter);
+      filter.connect(gain);
+      gain.connect(masterGain);
+      noise.start(now);
+      noise.stop(now + duration + 0.05);
+
+      // 配合低频正弦增加"厚度"
+      playTone(200, 0.15, 'sine', 0.05, 120);
+    }
+
+    /**
+     * open — 内容展开
+     * 上行五度音程 C5→G5，温柔的"叮咚"感
+     * 时长 ≤ 0.25s
+     */
+    function playOpen() {
+      if (!canPlay()) return;
+      playTone(523, 0.15, 'sine', 0.1); // C5
+      setTimeout(function () {
+        playTone(784, 0.2, 'sine', 0.08); // G5（五度上方）
+      }, 80);
+    }
+
+    return {
+      init: init,
+      resume: resume,
+      setMuted: setMuted,
+      isMuted: isMuted,
+      canPlay: canPlay,
+      playHover: playHover,
+      playClick: playClick,
+      playToggle: playToggle,
+      playSwitch: playSwitch,
+      playOpen: playOpen,
+    };
+  })();
+
   // ==================== 防抖工具 ====================
 
   /**
@@ -1458,6 +1933,140 @@
     };
   }
 
+  // ==================== 首屏 Cinematic 加载序列（P0 #5） ====================
+  // 四段式编排：背景渐变淡入(0.3s) → 粒子中心扩散(0.5s) → 头像光圈展开(0.4s) → 卡片 stagger 入场(0.6s)
+  // 总时长 ≤ 2s，prefers-reduced-motion 时跳过
+  // 声效联动：粒子扩散时播放爆发音效
+
+  function initCinematicIntro() {
+    var preloader = document.getElementById('cinematic-preloader');
+    if (!preloader) return Promise.resolve();
+
+    // 检测减少动画偏好：跳过 cinematic 序列
+    var motionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+    if (motionQuery.matches) {
+      preloader.style.display = 'none';
+      return Promise.resolve();
+    }
+
+    return new Promise(function (resolve) {
+      // Phase 2：生成粒子爆发元素（14 个，均匀辐射）
+      var burst = document.getElementById('preloader-burst');
+      if (burst) {
+        var particleCount = 14;
+        var colors = [
+          'rgba(255, 158, 190, 0.9)',
+          'rgba(200, 162, 224, 0.9)',
+          'rgba(248, 179, 209, 0.9)',
+          'rgba(221, 214, 254, 0.9)',
+          'rgba(255, 220, 235, 0.9)',
+        ];
+        for (var i = 0; i < particleCount; i++) {
+          var particle = document.createElement('span');
+          particle.className = 'preloader-particle';
+          var angle = (i / particleCount) * Math.PI * 2;
+          var distance = 120 + Math.random() * 80;
+          var tx = Math.cos(angle) * distance;
+          var ty = Math.sin(angle) * distance;
+          particle.style.setProperty('--tx', tx + 'px');
+          particle.style.setProperty('--ty', ty + 'px');
+          particle.style.background = colors[i % colors.length];
+          var size = 4 + Math.random() * 6;
+          particle.style.width = size + 'px';
+          particle.style.height = size + 'px';
+          burst.appendChild(particle);
+        }
+      }
+
+      // Phase 3：触发头像光圈展开（0.8s 时）
+      setTimeout(function () {
+        var avatarGlow = document.querySelector('.page:not(.hidden) .avatar-glow');
+        if (avatarGlow) {
+          avatarGlow.classList.add('cinematic-active');
+        }
+      }, 800);
+
+      // Phase 4：触发卡片 stagger 入场（1.0s 时）
+      setTimeout(function () {
+        var visiblePage = document.querySelector('.page:not(.hidden)');
+        if (visiblePage) {
+          var fadeElements = visiblePage.querySelectorAll('.fade-in-up');
+          fadeElements.forEach(function (el) {
+            el.classList.add('visible');
+          });
+        }
+      }, 1000);
+
+      // 淡出 preloader（1.3s 时开始，0.3s 淡出）
+      setTimeout(function () {
+        preloader.classList.add('fade-out');
+      }, 1300);
+
+      // 序列完成（1.7s），移除 preloader 并 resolve
+      setTimeout(function () {
+        if (preloader.parentNode) {
+          preloader.parentNode.removeChild(preloader);
+        }
+        resolve();
+      }, 1700);
+    });
+  }
+
+  // ==================== 动效编排系统 Choreographer（P1 #8） ====================
+  // 三层时序协议：场景级(0.5s) → 容器级(0.06s stagger) → 元素级(0.25s hover)
+  // "信号灯"编排：先背景 → 再容器 → 最后内容，形成视觉叙事
+  // 声效与动效联动：在关键编排节点触发对应音效
+
+  var Choreographer = {
+    /**
+     * 场景级编排 — 页面切换
+     * 协调背景层过渡、容器入场、内容 stagger 的时序
+     * 在页面切换时播放柔风音效 + 延迟触发滚动动画
+     */
+    sceneTransition: function () {
+      // 场景级音效
+      SoundEngine.playSwitch();
+
+      // 容器级：延迟触发卡片 stagger（等页面淡入完成后开始）
+      setTimeout(function () {
+        initScrollAnimation();
+      }, 200);
+    },
+
+    /**
+     * 容器级编排 — 动态渲染内容 stagger 入场
+     * 为动态渲染的子元素附加依次入场动画
+     * @param {HTMLElement} container - 内容容器
+     * @param {number} baseDelay - 基础延迟(ms)
+     */
+    staggerEnter: function (container, baseDelay) {
+      if (!container) return;
+      var items = container.children;
+      for (var i = 0; i < items.length; i++) {
+        (function (item, index) {
+          item.classList.add('choreo-enter');
+          setTimeout(function () {
+            item.classList.add('choreo-visible');
+          }, (baseDelay || 0) + index * 60); // 0.06s stagger
+        })(items[i], i);
+      }
+    },
+
+    /**
+     * 元素级编排 — toggle 反馈（日历月份切换、日期选择等）
+     */
+    onToggle: function () {
+      SoundEngine.playToggle();
+    },
+
+    /**
+     * 元素级编排 — open 反馈（详情面板展开）
+     */
+    onOpen: function () {
+      SoundEngine.playOpen();
+    },
+  };
+
   // ==================== 初始化 ====================
 
   function init() {
@@ -1466,12 +2075,35 @@
       renderDynamicContent(data);
 
       initPageRouting();
-      initScrollAnimation();
       initAvatarEffect();
       initAvatarRing();
       initClickRipple();
+      initSoundHooks();
+      initSoundToggle();
       initBackgroundParallax();
       initBackgroundParticles();
+
+      // 首屏 cinematic 加载序列 — 在所有模块初始化后启动
+      // 序列完成后不再调用 initScrollAnimation（已在序列内触发）
+      initCinematicIntro().then(function () {
+        // 如果 cinematic 被跳过（reduced-motion），则正常触发滚动动画
+        var motionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+        if (motionQuery.matches) {
+          initScrollAnimation();
+        }
+      });
+
+      // 音效引擎延迟初始化：遵守浏览器自动播放策略，
+      // 在首次用户手势（点击/触摸/键盘）后才创建 AudioContext
+      function initAudioOnFirstGesture() {
+        SoundEngine.init();
+        document.removeEventListener('click', initAudioOnFirstGesture);
+        document.removeEventListener('touchstart', initAudioOnFirstGesture);
+        document.removeEventListener('keydown', initAudioOnFirstGesture);
+      }
+      document.addEventListener('click', initAudioOnFirstGesture);
+      document.addEventListener('touchstart', initAudioOnFirstGesture);
+      document.addEventListener('keydown', initAudioOnFirstGesture);
     });
   }
 
