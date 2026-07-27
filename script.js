@@ -252,7 +252,16 @@
     }
 
     // 启动动画循环
-    requestAnimationFrame(animateParallax);
+    var parallaxRafId = requestAnimationFrame(animateParallax);
+
+    // 页面不可见时暂停
+    document.addEventListener('visibilitychange', function () {
+      if (document.hidden) {
+        cancelAnimationFrame(parallaxRafId);
+      } else {
+        parallaxRafId = requestAnimationFrame(animateParallax);
+      }
+    });
   }
 
   // ==================== Canvas 粒子系统 ====================
@@ -272,25 +281,25 @@
   function initBackgroundParticles() {
     // --- 可配置参数（通过此对象轻松开关/调节） ---
     var CONFIG = {
-      particleCount: 100,        // 桌面端粒子总数（精简数量，提升单粒质量）
-      mobileCount: 35,           // 移动端粒子总数
+      particleCount: 40,         // 桌面端粒子总数（精简，氛围而非内容）
+      mobileCount: 20,           // 移动端粒子总数
       starRatio: 0.45,           // 星星粒子比例
-      glowRatio: 0.30,           // 微光粒子比例（提高微光占比）
-      pawRatio: 0.08,            // 猫爪粒子比例
+      glowRatio: 0.30,           // 微光粒子比例
+      pawRatio: 0.10,            // 猫爪粒子比例
       heartRatio: 0.07,          // 爱心粒子比例
-      catEarRatio: 0.10,         // 猫耳轮廓粒子比例
-      minSize: 1.2,              // 基础粒子最小半径(px) — 略增大
-      maxSize: 4.5,              // 基础粒子最大半径(px) — 增大辉光尺寸
-      pawHeartSize: 16,          // 猫爪/爱心显示字号(px)
-      minOpacity: 0.12,          // 粒子最低透明度
-      maxOpacity: 0.50,          // 粒子最高透明度（大幅提高微光感）
-      mouseForce: 0.20,          // 鼠标吸引力（降低，让粒子更自然地漂浮）
-      mouseRadius: 200,          // 鼠标影响半径(px) — 增大，更柔和
-      floatBaseSpeed: 0.10,      // 基础漂浮速度（放慢，更梦幻）
-      swayAmplitude: 0.5,        // 摇摆幅度（增大）
+      catEarRatio: 0.08,         // 猫耳轮廓粒子比例
+      minSize: 1.2,              // 基础粒子最小半径(px)
+      maxSize: 4.5,              // 基础粒子最大半径(px)
+      pawHeartSize: 14,          // 猫爪/爱心显示字号(px)
+      minOpacity: 0.08,          // 粒子最低透明度（降低，更柔和）
+      maxOpacity: 0.35,          // 粒子最高透明度（降低，不抢眼）
+      mouseForce: 0.20,          // 鼠标吸引力
+      mouseRadius: 200,          // 鼠标影响半径(px)
+      floatBaseSpeed: 0.10,      // 基础漂浮速度
+      swayAmplitude: 0.5,        // 摇摆幅度
       pawHeartLifetime: 7000,    // 猫爪/爱心存活时间(ms)
-      catEarLifetime: 10000,     // 猫耳轮廓存活时间(ms) — 更久停留
-      glowRiseSpeed: 0.22,       // 微光上升速度（放慢）
+      catEarLifetime: 10000,     // 猫耳轮廓存活时间(ms)
+      glowRiseSpeed: 0.22,       // 微光上升速度
     };
 
     // --- 检测环境 ---
@@ -664,11 +673,21 @@
     // --- 启动 ---
     resizeCanvas();
     createParticles();
-    requestAnimationFrame(animate);
+    var rafId = requestAnimationFrame(animate);
+
+    // 页面不可见时暂停 rAF，节省电池
+    document.addEventListener('visibilitychange', function () {
+      if (document.hidden) {
+        cancelAnimationFrame(rafId);
+      } else {
+        lastTime = performance.now(); // 重置时间基准，防止跳帧
+        rafId = requestAnimationFrame(animate);
+      }
+    });
   }
   function loadData() {
-    // 添加时间戳参数避免浏览器/CDN 缓存旧版本的 data.json
-    var cacheBuster = '?v=' + Date.now();
+    // 使用静态版本号替代 Date.now()，允许浏览器缓存
+    var cacheBuster = '?v=2.1';
     return fetch('data.json' + cacheBuster)
       .then(function (response) {
         if (!response.ok) {
@@ -1161,21 +1180,21 @@
 
     // 月份切换栏
     html += '<div class="calendar-month-header">';
-    html += '<button class="calendar-nav calendar-nav-prev" data-dir="prev" aria-label="上个月">‹</button>';
-    html += '<span class="calendar-month-label">' + currentYear + '年' + (currentMonth + 1) + '月</span>';
-    html += '<button class="calendar-nav calendar-nav-next" data-dir="next" aria-label="下个月">›</button>';
+    html += '<button class="calendar-nav calendar-nav-prev" data-dir="prev" aria-label="上一个月">‹</button>';
+    html += '<span class="calendar-month-label" aria-live="polite">' + currentYear + '年' + (currentMonth + 1) + '月</span>';
+    html += '<button class="calendar-nav calendar-nav-next" data-dir="next" aria-label="下一个月">›</button>';
     html += '</div>';
 
-    // 星期标题行
+    // 星期标题行 (role="row")
     var weekdays = ['日', '一', '二', '三', '四', '五', '六'];
-    html += '<div class="calendar-weekdays">';
+    html += '<div class="calendar-weekdays" role="row">';
     weekdays.forEach(function (w) {
       html += '<span>' + w + '</span>';
     });
     html += '</div>';
 
-    // 日期网格 (7 列 x 最多 6 行)
-    html += '<div class="calendar-grid">';
+    // 日期网格 (7 列 x 最多 6 行) — role="grid" 语义
+    html += '<div class="calendar-grid" role="grid">';
 
     var firstDay = firstDayOfMonth(currentYear, currentMonth);
     var totalDays = daysInMonth(currentYear, currentMonth);
@@ -1184,10 +1203,10 @@
     // 填充上月末尾日期
     for (var i = firstDay - 1; i >= 0; i--) {
       var pDay = prevMonthDays - i;
-      html += '<div class="calendar-day other-month">' + pDay + '</div>';
+      html += '<div class="calendar-day other-month" aria-hidden="true">' + pDay + '</div>';
     }
 
-    // 当月日期
+    // 当月日期 (使用 button 确保可访问性)
     for (var d = 1; d <= totalDays; d++) {
       var dateStr = formatDate(currentYear, currentMonth, d);
       var classes = ['calendar-day'];
@@ -1197,14 +1216,22 @@
       if (hasContent) classes.push('has-notes');
       if (dateStr === selectedDate) classes.push('selected');
 
-      html += '<div class="' + classes.join(' ') + '" data-date="' + dateStr + '">' + d + '</div>';
+      var ariaLabel = (currentMonth + 1) + '月' + d + '日';
+      if (dateStr === todayStr) ariaLabel += '，今天';
+      if (hasContent) ariaLabel += '，有' + dateMap[dateStr].length + '条' + (type === 'little' ? '笔记' : '想法');
+
+      html += '<button type="button" class="' + classes.join(' ') + '" data-date="' + dateStr + '"' +
+        ' aria-label="' + ariaLabel + '"' +
+        (dateStr === selectedDate ? ' aria-selected="true"' : '') +
+        (dateStr === todayStr ? ' aria-current="date"' : '') +
+        '>' + d + '</button>';
     }
 
     // 填充下月开头日期（补满最后一行）
     var remaining = 7 - ((firstDay + totalDays) % 7);
     if (remaining < 7) {
       for (var nd = 1; nd <= remaining; nd++) {
-        html += '<div class="calendar-day other-month">' + nd + '</div>';
+        html += '<div class="calendar-day other-month" aria-hidden="true">' + nd + '</div>';
       }
     }
 

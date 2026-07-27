@@ -13,6 +13,9 @@
   <title>Kevi_Nya</title>
   <link rel="icon" type="image/png" href="favicon.png">
   <link rel="stylesheet" href="style.css">
+  <!-- 品牌 Web 字体：霞鹜文楷（治愈手写楷体感） -->
+  <link rel="preconnect" href="https://cdn.jsdelivr.net">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lxgw-wenkai-webfont@1.7.0/style.css">
   <!-- Font Awesome 图标库 -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 </head>
@@ -27,46 +30,22 @@
   <canvas id="bg-canvas" aria-hidden="true"></canvas>
   <div class="bg-overlay"></div>
   <div class="bg-decorations" aria-hidden="true">
-    <!-- 命运光带（3条细长渐变光束缓慢流动） -->
-    <div class="fate-light-band fate-light-band-1"></div>
-    <div class="fate-light-band fate-light-band-2"></div>
-    <div class="fate-light-band fate-light-band-3"></div>
+    <!-- 命运光带（1条细长渐变光束缓慢流动） -->
+    <div class="fate-light-band"></div>
     <!-- 浮动云朵（6朵，不同大小和位置） -->
     <div class="cloud cloud-1"></div>
     <div class="cloud cloud-2"></div>
-    <div class="cloud cloud-3"></div>
-    <div class="cloud cloud-4"></div>
-    <div class="cloud cloud-5"></div>
-    <div class="cloud cloud-6"></div>
-    <!-- 星星装饰（10颗，闪烁+缓慢飘浮） -->
+    <!-- 星星装饰（4颗，闪烁+缓慢飘浮） -->
     <div class="star star-1">✦</div>
     <div class="star star-2">✧</div>
     <div class="star star-3">✦</div>
     <div class="star star-4">✧</div>
-    <div class="star star-5">✦</div>
-    <div class="star star-6">✧</div>
-    <div class="star star-7">✦</div>
-    <div class="star star-8">✧</div>
-    <div class="star star-9">✦</div>
-    <div class="star star-10">✧</div>
-    <!-- 猫爪装饰（7个，漂浮旋转） -->
+    <!-- 猫爪装饰（2个，漂浮旋转） -->
     <div class="paw paw-1">🐾</div>
     <div class="paw paw-2">🐾</div>
-    <div class="paw paw-3">🐾</div>
-    <div class="paw paw-4">🐾</div>
-    <div class="paw paw-5">🐾</div>
-    <div class="paw paw-6">🐾</div>
-    <div class="paw paw-7">🐾</div>
-    <!-- 爱心装饰（5个，缓慢飘浮） -->
+    <!-- 爱心装饰（2个，缓慢飘浮） -->
     <div class="heart heart-1">♡</div>
     <div class="heart heart-2">♥</div>
-    <div class="heart heart-3">♡</div>
-    <div class="heart heart-4">♥</div>
-    <div class="heart heart-5">♡</div>
-    <!-- 代码符号装饰 -->
-    <div class="code-symbol code-symbol-1">&lt;/&gt;</div>
-    <div class="code-symbol code-symbol-2">{ }</div>
-    <div class="code-symbol code-symbol-3">//</div>
   </div>
 
   <!-- ==================== 页面容器 ==================== -->
@@ -95,7 +74,10 @@
           <span class="card-icon">🌸</span> About Me
         </h2>
         <div class="about-tags" id="about-tags-container">
-          <!-- 由 JavaScript 动态渲染 -->
+          <!-- Skeleton 加载占位 -->
+          <span class="skeleton skeleton-tag"></span>
+          <span class="skeleton skeleton-tag" style="width:100px"></span>
+          <span class="skeleton skeleton-tag" style="width:70px"></span>
         </div>
       </section>
 
@@ -105,7 +87,8 @@
           <span class="card-icon">🌿</span> My Life
         </h2>
         <div class="life-grid" id="life-cards-container">
-          <!-- 由 JavaScript 动态渲染 -->
+          <div class="life-card skeleton skeleton-card"></div>
+          <div class="life-card skeleton skeleton-card"></div>
         </div>
       </section>
 
@@ -229,7 +212,9 @@
           <span class="card-icon">⚡</span> Skills
         </h2>
         <div class="skills-cloud" id="skills-container">
-          <!-- 由 JavaScript 动态渲染 -->
+          <span class="skeleton skeleton-tag" style="width:90px"></span>
+          <span class="skeleton skeleton-tag" style="width:110px"></span>
+          <span class="skeleton skeleton-tag" style="width:75px"></span>
         </div>
       </section>
 
@@ -239,7 +224,9 @@
           <span class="card-icon">🔗</span> Links
         </h2>
         <div class="connect-links" id="links-container">
-          <!-- 由 JavaScript 动态渲染 -->
+          <span class="skeleton skeleton-tag" style="width:100px;border-radius:28px"></span>
+          <span class="skeleton skeleton-tag" style="width:100px;border-radius:28px"></span>
+          <span class="skeleton skeleton-tag" style="width:100px;border-radius:28px"></span>
         </div>
       </section>
 
