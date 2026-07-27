@@ -6,39 +6,73 @@
 
 /* -------------------- CSS 变量与基础重置 -------------------- */
 :root {
-  --bg-primary: #F8F0E8;
-  --bg-pink-light: #F3DEE6;
-  --accent-pink: #FF9EBE;
-  --bg-purple-light: #DDD6FE;
-  --accent-purple: #C8A2E0;
-  --gray-light: #E5E7EB;
+  /* ========== 命运光主题 — Design Token 系统 ========== */
+
+  /* --- 基础背景色 --- */
+  --bg-primary: #FFF8F0;                /* 主背景：暖光象牙白，比旧版 #F8F0E8 更明亮 */
+  --bg-pink-light: #FDE4EC;             /* 浅粉底衬 */
+  --bg-purple-light: #E8E0F5;           /* 浅紫底衬 */
+
+  /* --- 主色调层级 --- */
+  --accent-pink: #FF9EBE;               /* 主粉（一级强调） */
+  --accent-pink-strong: #F08CB0;        /* 主粉加深（hover/active） */
+  --accent-purple: #C8A2E0;             /* 辅紫（二级强调） */
+  --accent-purple-strong: #B086D0;      /* 辅紫加深 */
+  --glow-color: #F8B3D1;               /* 辉光色 — 呼吸高亮用 */
+  --glow-color-soft: rgba(248, 179, 209, 0.35); /* 柔和辉光 */
+
+  /* --- 中性色 --- */
+  --gray-light: #EDEAE7;
   --text-primary: #2B2B2B;
   --text-secondary: #6B7280;
-  --gradient-btn: linear-gradient(135deg, #FBCFE8, #DDD6FE);
-  --gradient-card: linear-gradient(135deg, rgba(251, 207, 232, 0.3), rgba(221, 214, 254, 0.3));
+
+  /* --- 渐变 --- */
+  --gradient-btn: linear-gradient(135deg, #FDD5E8, #E0D4F5);
+  --gradient-hero: linear-gradient(135deg, var(--accent-pink), var(--accent-purple), var(--glow-color));
+  --gradient-fate: linear-gradient(90deg, transparent, rgba(200, 162, 224, 0.25), rgba(248, 179, 209, 0.2), transparent);
+
+  /* --- 阴影层级 --- */
   --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.06);
   --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.08);
   --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.1);
+  --shadow-glow-sm: 0 0 12px rgba(248, 179, 209, 0.3);
+  --shadow-glow-md: 0 0 24px rgba(248, 179, 209, 0.4);
+  --shadow-glow-lg: 0 0 40px rgba(200, 162, 224, 0.35), 0 0 16px rgba(248, 179, 209, 0.3);
+
+  /* --- 圆角 --- */
   --radius-sm: 12px;
   --radius-md: 16px;
   --radius-lg: 24px;
-  --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  --radius-xl: 32px;
 
-  /* ========== 毛玻璃效果变量（Glassmorphism） ========== */
+  /* --- 动画曲线（米哈游风格柔和回弹） --- */
+  --ease-bounce: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-smooth: cubic-bezier(0.4, 0, 0.2, 1);
+  --transition: 0.35s var(--ease-bounce);
+  --transition-smooth: 0.3s var(--ease-smooth);
+
+  /* --- 文字阴影（提升可读性） --- */
+  --text-shadow-subtle: 0 1px 2px rgba(0, 0, 0, 0.04);
+  --text-shadow-glow: 0 0 12px rgba(248, 179, 209, 0.25);
+
+  /* ========== 毛玻璃效果变量（Glassmorphism v2 — 强化辉光） ========== */
   /* 主卡片层 */
-  --glass-bg: rgba(255, 255, 255, 0.65);                     /* 卡片背景透明度 */
-  --glass-blur: 20px;                                         /* backdrop-filter 模糊强度 */
-  --glass-border: rgba(200, 162, 224, 0.28);                  /* 浅粉紫半透明边框 */
-  --glass-border-hover: rgba(200, 162, 224, 0.45);            /* hover 时边框加深 */
-  --glass-shadow-inner: inset 0 1px 2px rgba(255, 255, 255, 0.55);   /* 玻璃顶光内阴影 */
-  --glass-shadow-outer: 0 4px 20px rgba(200, 162, 224, 0.1), 0 1px 3px rgba(0, 0, 0, 0.04);  /* 立体外阴影 */
-  --glass-hover-bg: rgba(255, 255, 255, 0.85);                /* hover 时背景加亮 */
-  --glass-hover-shadow: 0 12px 36px rgba(200, 162, 224, 0.18), 0 3px 8px rgba(0, 0, 0, 0.06); /* hover 阴影增强 */
+  --glass-bg: rgba(255, 255, 255, 0.65);
+  --glass-blur: 24px;
+  --glass-border: rgba(200, 162, 224, 0.25);
+  --glass-border-glow: 0 0 10px rgba(248, 179, 209, 0.12);  /* 边框辉光 */
+  --glass-border-hover: rgba(200, 162, 224, 0.45);
+  --glass-shadow-inner: inset 0 1px 3px rgba(255, 255, 255, 0.6);  /* 顶光内阴影 */
+  --glass-shadow-outer: 0 4px 20px rgba(200, 162, 224, 0.1), 0 1px 3px rgba(0, 0, 0, 0.04);
+  --glass-hover-bg: rgba(255, 255, 255, 0.85);
+  --glass-hover-shadow: 0 12px 40px rgba(200, 162, 224, 0.2), 0 0 20px rgba(248, 179, 209, 0.15), 0 3px 8px rgba(0, 0, 0, 0.06);
   /* 子卡片 / 小元素层 */
-  --glass-bg-sub: rgba(255, 255, 255, 0.62);                  /* 子卡片背景 */
-  --glass-blur-sub: 18px;                                     /* 子卡片模糊 */
-  --glass-border-sub: rgba(200, 162, 224, 0.22);              /* 子卡片边框 */
-  --glass-border-sub-hover: rgba(200, 162, 224, 0.38);        /* 子卡片 hover 边框 */
+  --glass-bg-sub: rgba(255, 255, 255, 0.62);
+  --glass-blur-sub: 18px;
+  --glass-border-sub: rgba(200, 162, 224, 0.2);
+  --glass-border-sub-hover: rgba(200, 162, 224, 0.38);
+  /* figure/装饰描边 */
+  --stroke-glow: 0 0 6px rgba(248, 179, 209, 0.35);
 }
 
 *, *::before, *::after {
@@ -85,46 +119,56 @@ body {
   pointer-events: none;
 }
 
-/* 背景图片 Ken Burns 呼吸层 — 缓慢缩放+平移 */
+/* 背景图片呼吸层 — 缓慢缩放+平移 + 亮度脉冲 */
 .bg-image-layer {
   position: absolute;
   top: -5%; left: -5%;
   width: 110%; height: 110%;
   pointer-events: none;
-  /* 使用网站主题色生成的颜色渐变作为"伪背景图"，
-     实际项目中可替换为真实背景图片 url() */
+  /* 命运光主题渐变背景 */
   background:
-    radial-gradient(ellipse 40% 30% at 30% 20%, rgba(243, 222, 230, 0.3) 0%, transparent 60%),
-    radial-gradient(ellipse 35% 25% at 70% 75%, rgba(221, 214, 254, 0.3) 0%, transparent 60%),
-    radial-gradient(ellipse 25% 20% at 60% 40%, rgba(255, 158, 190, 0.15) 0%, transparent 50%),
+    radial-gradient(ellipse 45% 30% at 30% 20%, rgba(253, 228, 236, 0.4) 0%, transparent 65%),
+    radial-gradient(ellipse 40% 25% at 70% 75%, rgba(232, 224, 245, 0.4) 0%, transparent 65%),
+    radial-gradient(ellipse 30% 22% at 60% 40%, rgba(248, 179, 209, 0.2) 0%, transparent 55%),
+    radial-gradient(ellipse 35% 20% at 15% 65%, rgba(255, 158, 190, 0.12) 0%, transparent 50%),
     var(--bg-primary);
-  /* Ken Burns 呼吸动画：微缩放 + 平移，120s 一循环 */
-  animation: ken-burns 120s ease-in-out infinite;
-  will-change: transform;
+  /* 呼吸动画：微缩放 + 平移 + 亮度脉冲，120s + 15s 叠加 */
+  animation: ken-burns 120s var(--ease-bounce) infinite,
+             bg-breathe 15s ease-in-out infinite;
+  will-change: transform, opacity;
 }
 
 @keyframes ken-burns {
   0%   { transform: scale(1) translate(0, 0); }
-  25%  { transform: scale(1.03) translate(-1%, -0.5%); }
-  50%  { transform: scale(1.06) translate(1%, 0.5%); }
-  75%  { transform: scale(1.03) translate(0.5%, -1%); }
+  25%  { transform: scale(1.035) translate(-1.2%, -0.6%); }
+  50%  { transform: scale(1.07) translate(1.2%, 0.6%); }
+  75%  { transform: scale(1.035) translate(0.6%, -1.2%); }
   100% { transform: scale(1) translate(0, 0); }
+}
+
+/* 背景呼吸光脉冲 — 每 15 秒轻微亮度变化 */
+@keyframes bg-breathe {
+  0%, 100% { filter: brightness(1); }
+  30%      { filter: brightness(1.03); }
+  60%      { filter: brightness(1.01); }
 }
 
 .bg-overlay {
   position: fixed;
   top: 0; left: 0;
   width: 100%; height: 100%;
-  /* 增强渐变层次，让卡片后的背景更有纵深感，突出毛玻璃效果 */
+  /* 增强渐变层次 — 命运光氛围 */
   background:
-    /* 顶部大面积暖粉色光晕 — 提升卡片上方亮度对比 */
-    radial-gradient(ellipse 80% 60% at 50% 0%, rgba(243, 222, 230, 0.55) 0%, transparent 60%),
-    /* 右下角浅紫色光晕 — 增强层次 */
-    radial-gradient(ellipse 60% 50% at 85% 80%, rgba(221, 214, 254, 0.45) 0%, transparent 60%),
-    /* 左上角粉色微光 — 丰富色彩层次 */
-    radial-gradient(ellipse 50% 40% at 15% 30%, rgba(255, 158, 190, 0.2) 0%, transparent 50%),
-    /* 垂直渐变蒙层 — 增加整体层次感，底部偏紫让卡片更突出 */
-    linear-gradient(180deg, rgba(248, 240, 232, 0.9) 0%, rgba(248, 240, 232, 0.92) 50%, rgba(221, 214, 254, 0.3) 100%);
+    /* 顶部大面积暖粉光晕 */
+    radial-gradient(ellipse 90% 60% at 50% 0%, rgba(253, 228, 236, 0.55) 0%, transparent 65%),
+    /* 右下角梦幻紫光晕 */
+    radial-gradient(ellipse 65% 50% at 85% 80%, rgba(232, 224, 245, 0.5) 0%, transparent 65%),
+    /* 左上角辉光粉微光 */
+    radial-gradient(ellipse 55% 45% at 15% 30%, rgba(248, 179, 209, 0.25) 0%, transparent 55%),
+    /* 中央微微暖光 */
+    radial-gradient(ellipse 40% 30% at 50% 50%, rgba(255, 248, 240, 0.4) 0%, transparent 70%),
+    /* 垂直蒙层 — 底部偏紫让卡片更突出 */
+    linear-gradient(180deg, rgba(255, 248, 240, 0.88) 0%, rgba(255, 248, 240, 0.9) 40%, rgba(232, 224, 245, 0.35) 100%);
   z-index: 0;
   pointer-events: none;
 }
@@ -138,6 +182,48 @@ body {
   pointer-events: none;
   overflow: hidden;
   will-change: transform;
+}
+
+/* 命运光带 — 极慢的细长渐变光束 */
+.fate-light-band {
+  position: absolute;
+  width: 2px;
+  height: 60%;
+  background: linear-gradient(180deg,
+    transparent 0%,
+    rgba(248, 179, 209, 0.25) 20%,
+    rgba(200, 162, 224, 0.3) 50%,
+    rgba(248, 179, 209, 0.15) 80%,
+    transparent 100%);
+  border-radius: 1px;
+  filter: blur(3px);
+  animation: fate-light-flow 40s ease-in-out infinite;
+  will-change: transform, opacity;
+}
+.fate-light-band-1 {
+  top: 10%; left: 18%;
+  animation-delay: 0s;
+  height: 70%;
+}
+.fate-light-band-2 {
+  top: 15%; right: 22%;
+  animation-delay: -12s;
+  height: 55%;
+  opacity: 0.7;
+}
+.fate-light-band-3 {
+  top: 5%; left: 55%;
+  animation-delay: -25s;
+  height: 80%;
+  width: 1.5px;
+  opacity: 0.6;
+}
+
+@keyframes fate-light-flow {
+  0%, 100% { transform: translateX(0) scaleY(1); opacity: 0.4; }
+  25%      { transform: translateX(15px) scaleY(1.08); opacity: 0.7; }
+  50%      { transform: translateX(-8px) scaleY(0.95); opacity: 0.5; }
+  75%      { transform: translateX(12px) scaleY(1.05); opacity: 0.75; }
 }
 
 /* 云朵 — 缓慢梦幻漂浮 (80-180s 一循环) */
@@ -307,9 +393,9 @@ body {
 .page-container {
   position: relative;
   z-index: 1;
-  max-width: 720px;
+  max-width: 800px;
   margin: 0 auto;
-  padding: 40px 24px 60px;
+  padding: 48px 28px 72px;
 }
 
 /* -------------------- 页面切换 -------------------- */
@@ -336,76 +422,125 @@ body {
   to   { opacity: 1; transform: translateY(0); }
 }
 
-/* -------------------- 头像区域 -------------------- */
+/* -------------------- 头像区域 — 命运光强化 -------------------- */
 .avatar-wrapper {
   position: relative;
-  width: 140px;
-  height: 140px;
-  margin: 0 auto 24px;
+  width: 150px;
+  height: 150px;
+  margin: 0 auto 28px;
 }
 
 .avatar-glow {
   position: absolute;
-  top: -8px; left: -8px;
-  width: calc(100% + 16px);
-  height: calc(100% + 16px);
+  top: -12px; left: -12px;
+  width: calc(100% + 24px);
+  height: calc(100% + 24px);
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(255, 158, 190, 0.35) 0%, rgba(221, 214, 254, 0.25) 40%, transparent 70%);
-  animation: glow-pulse 3s ease-in-out infinite;
+  background: radial-gradient(circle, rgba(248, 179, 209, 0.45) 0%, rgba(200, 162, 224, 0.3) 35%, transparent 70%);
+  animation: glow-pulse 3s var(--ease-bounce) infinite;
   z-index: 0;
 }
 
 @keyframes glow-pulse {
-  0%, 100% { transform: scale(1); opacity: 0.7; }
-  50%      { transform: scale(1.08); opacity: 1; }
+  0%, 100% { transform: scale(1); opacity: 0.6; }
+  50%      { transform: scale(1.12); opacity: 1; }
 }
 
 .avatar {
   position: relative;
   z-index: 1;
-  width: 140px;
-  height: 140px;
+  width: 150px;
+  height: 150px;
   border-radius: 50%;
   object-fit: cover;
-  border: 3px solid rgba(255, 255, 255, 0.8);
+  border: 3px solid rgba(255, 255, 255, 0.85);
   box-shadow:
-    0 4px 20px rgba(0, 0, 0, 0.1),
-    0 0 0 8px rgba(243, 222, 230, 0.3);
-  transition: transform var(--transition), box-shadow var(--transition);
+    0 4px 24px rgba(0, 0, 0, 0.1),
+    0 0 0 10px rgba(253, 228, 236, 0.35),
+    0 0 30px rgba(248, 179, 209, 0.25);
+  transition: transform 0.5s var(--ease-bounce), box-shadow 0.5s var(--ease-bounce);
 }
 
 .avatar:hover {
-  transform: scale(1.08);
+  transform: scale(1.1);
   box-shadow:
-    0 8px 32px rgba(0, 0, 0, 0.15),
-    0 0 0 8px rgba(243, 222, 230, 0.5),
-    0 0 40px rgba(255, 158, 190, 0.3);
+    0 8px 36px rgba(0, 0, 0, 0.15),
+    0 0 0 12px rgba(253, 228, 236, 0.55),
+    0 0 50px rgba(248, 179, 209, 0.4),
+    0 0 80px rgba(200, 162, 224, 0.25);
 }
 
 /* 头像周围的装饰 */
 .avatar-decoration {
   position: absolute;
   z-index: 2;
-  font-size: 16px;
-  animation: dec-float 3s ease-in-out infinite;
+  font-size: 17px;
+  animation: dec-float 3s var(--ease-bounce) infinite;
+  filter: drop-shadow(0 0 4px rgba(248, 179, 209, 0.3));
 }
-.dec-star-1 { top: -4px; right: -4px; animation-delay: 0s; }
-.dec-paw     { bottom: -2px; left: -6px; animation-delay: 1.5s; font-size: 18px; }
-.dec-code    { top: 20px; left: -16px; animation-delay: 0.8s; font-size: 12px; color: var(--accent-purple); }
+.dec-star-1 { top: -6px; right: -6px;  animation-delay: 0s; }
+.dec-paw     { bottom: -4px; left: -8px; animation-delay: 1.5s; font-size: 20px; }
+.dec-code    { top: 22px; left: -18px; animation-delay: 0.8s; font-size: 13px; color: var(--accent-purple); }
+
+/* 头像环绕粒子光环（JS 动态注入） */
+.avatar-ring {
+  position: absolute;
+  top: -10px; left: -10px;
+  width: calc(100% + 20px);
+  height: calc(100% + 20px);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 0;
+}
+.avatar-ring-inner {
+  border: 2px dashed rgba(248, 179, 209, 0.3);
+  animation: ring-spin 8s linear infinite;
+}
+.avatar-ring-outer {
+  border: 1.5px solid rgba(200, 162, 224, 0.2);
+  animation: ring-spin 12s linear infinite reverse;
+}
+
+@keyframes ring-spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
 
 @keyframes dec-float {
   0%, 100% { transform: translateY(0); }
-  50%      { transform: translateY(-5px); }
+  50%      { transform: translateY(-6px); }
 }
 
-/* -------------------- Hero 区域文字 -------------------- */
+/* -------------------- Hero 区域文字 — 命运光渐变 -------------------- */
 .site-name {
   text-align: center;
-  font-size: 2rem;
-  font-weight: 700;
-  color: var(--text-primary);
+  font-size: 2.1rem;
+  font-weight: 800;
+  background: var(--gradient-hero);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
   letter-spacing: -0.02em;
-  margin-bottom: 8px;
+  margin-bottom: 12px;
+  text-shadow: none;
+  filter: drop-shadow(0 0 8px rgba(248, 179, 209, 0.2));
+}
+
+.hero-title {
+  text-align: center;
+  font-size: 0.95rem;
+  color: var(--accent-purple);
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  margin-bottom: 10px;
+  text-shadow: var(--text-shadow-subtle);
+}
+
+.hero-bio {
+  text-align: center;
+  font-size: 1rem;
+  color: var(--text-secondary);
+  text-shadow: var(--text-shadow-subtle);
 }
 
 .hero-subtitle {
@@ -420,80 +555,79 @@ body {
   font-size: 0.95rem;
   color: var(--text-secondary);
   line-height: 1.8;
-  max-width: 400px;
+  max-width: 420px;
   margin: 0 auto;
 }
 
-.hero-title {
-  text-align: center;
-  font-size: 0.95rem;
-  color: var(--accent-purple);
-  font-weight: 600;
-  letter-spacing: 0.05em;
-  margin-bottom: 8px;
+/* Section 之间 — 命运曲线装饰分割 */
+.section-divider {
+  display: block;
+  width: 100%;
+  height: 2px;
+  margin: 8px auto 34px;
+  background: var(--gradient-fate);
+  border: none;
+  border-radius: 1px;
 }
 
-.hero-bio {
-  text-align: center;
-  font-size: 1rem;
-  color: var(--text-secondary);
-}
-
-/* -------------------- 卡片通用样式 — 毛玻璃风格 -------------------- */
+/* -------------------- 卡片通用样式 — 毛玻璃 v2（辉光强化） -------------------- */
 .card {
-  /* 毛玻璃核心：半透明背景 + 强模糊 + 浅粉紫边框 */
+  /* 毛玻璃核心：半透明背景 + 强模糊 + 粉紫边框 + 辉光 */
   background: var(--glass-bg);
   backdrop-filter: blur(var(--glass-blur));
   -webkit-backdrop-filter: blur(var(--glass-blur));
   border: 1px solid var(--glass-border);
   border-radius: var(--radius-lg);
-  padding: 28px 32px;
-  margin-bottom: 20px;
-  /* 玻璃质感：内阴影模拟顶光 + 外阴影增加立体感 */
-  box-shadow: var(--glass-shadow-inner), var(--glass-shadow-outer);
-  transition: transform var(--transition), box-shadow var(--transition),
-              background var(--transition), border-color var(--transition);
+  padding: 32px 36px;
+  margin-bottom: 34px;
+  /* 玻璃质感：内阴影 + 外阴影 + 边框辉光 */
+  box-shadow: var(--glass-shadow-inner), var(--glass-shadow-outer), var(--glass-border-glow);
+  transition: transform 0.4s var(--ease-bounce), box-shadow 0.4s var(--ease-bounce),
+              background 0.35s var(--ease-bounce), border-color 0.35s var(--ease-bounce);
+  position: relative;
 }
 
 .card:hover {
   background: var(--glass-hover-bg);
-  transform: translateY(-3px);
+  transform: translateY(-4px) scale(1.008);
   box-shadow: var(--glass-shadow-inner), var(--glass-hover-shadow);
   border-color: var(--glass-border-hover);
 }
 
 .card-title {
-  font-size: 1.15rem;
+  font-size: 1.2rem;
   font-weight: 700;
   color: var(--text-primary);
-  margin-bottom: 20px;
+  margin-bottom: 24px;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
+  text-shadow: var(--text-shadow-subtle);
 }
 
 .card-icon {
-  font-size: 1.25rem;
+  font-size: 1.35rem;
+  filter: drop-shadow(0 0 4px rgba(248, 179, 209, 0.3));
 }
 
-/* -------------------- 动画类 -------------------- */
+/* -------------------- 动画类 — 米哈游风格 stagger 入场 -------------------- */
 .fade-in-up {
   opacity: 0;
-  transform: translateY(30px);
-  transition: opacity 0.7s ease, transform 0.7s ease;
+  transform: translateY(40px);
+  transition: opacity 0.8s var(--ease-bounce), transform 0.8s var(--ease-bounce);
 }
 .fade-in-up.visible {
   opacity: 1;
   transform: translateY(0);
 }
 
-/* 延迟 */
-.delay-1 { transition-delay: 0.1s; }
-.delay-2 { transition-delay: 0.2s; }
-.delay-3 { transition-delay: 0.3s; }
-.delay-4 { transition-delay: 0.4s; }
-.delay-5 { transition-delay: 0.5s; }
-.delay-6 { transition-delay: 0.6s; }
+/* Stagger 延迟（间隔 0.06s，营造依次弹入的节奏感） */
+.delay-1 { transition-delay: 0.00s; }
+.delay-2 { transition-delay: 0.06s; }
+.delay-3 { transition-delay: 0.12s; }
+.delay-4 { transition-delay: 0.18s; }
+.delay-5 { transition-delay: 0.24s; }
+.delay-6 { transition-delay: 0.30s; }
 
 /* -------------------- Page A - About Me 标签 -------------------- */
 .about-tags {
@@ -502,29 +636,30 @@ body {
   gap: 10px;
 }
 
-.tag {
+.tag, .skill-tag {
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  padding: 8px 16px;
-  /* 小标签毛玻璃效果：略低于卡片但保持可见 */
+  padding: 10px 18px;
+  /* 标签毛玻璃 */
   background: var(--glass-bg-sub);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   border: 1px solid var(--glass-border-sub);
-  border-radius: 20px;
+  border-radius: 24px;
   font-size: 0.9rem;
   color: var(--text-primary);
-  box-shadow: var(--glass-shadow-inner), 0 2px 8px rgba(0, 0, 0, 0.04);
-  transition: transform var(--transition), box-shadow var(--transition),
-              background var(--transition), border-color var(--transition);
+  font-weight: 500;
+  box-shadow: var(--glass-shadow-inner), 0 2px 8px rgba(0, 0, 0, 0.04), var(--glass-border-glow);
+  transition: transform 0.35s var(--ease-bounce), box-shadow 0.35s var(--ease-bounce),
+              background 0.3s var(--ease-bounce), border-color 0.3s var(--ease-bounce);
 }
 
-.tag:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--glass-shadow-inner), var(--shadow-md);
-  background: rgba(255, 255, 255, 0.82);
+.tag:hover, .skill-tag:hover {
+  background: rgba(255, 255, 255, 0.85);
   border-color: var(--glass-border-sub-hover);
+  transform: translateY(-2px) scale(1.04);
+  box-shadow: var(--glass-shadow-inner), var(--shadow-md), var(--shadow-glow-sm);
 }
 
 /* -------------------- Page A - My Life 卡片网格 -------------------- */
@@ -535,24 +670,8 @@ body {
 }
 
 .life-card {
-  /* 子卡片毛玻璃：统一使用子卡片变量 */
-  background: var(--glass-bg-sub);
-  backdrop-filter: blur(var(--glass-blur-sub));
-  -webkit-backdrop-filter: blur(var(--glass-blur-sub));
-  border: 1px solid var(--glass-border-sub);
-  border-radius: var(--radius-md);
   padding: 20px 16px;
   text-align: center;
-  box-shadow: var(--glass-shadow-inner), 0 2px 12px rgba(0, 0, 0, 0.04);
-  transition: transform var(--transition), box-shadow var(--transition),
-              background var(--transition), border-color var(--transition);
-}
-
-.life-card:hover {
-  background: var(--glass-hover-bg);
-  transform: translateY(-5px);
-  box-shadow: var(--glass-shadow-inner), var(--glass-hover-shadow);
-  border-color: var(--glass-border-sub-hover);
 }
 
 .life-emoji {
@@ -580,23 +699,23 @@ body {
   gap: 12px;
 }
 
-.note-card {
-  /* 笔记卡片毛玻璃：与 thought-item 保持一致风格 */
+.note-card, .thought-item {
+  /* 共用毛玻璃风格 */
   background: var(--glass-bg-sub);
   backdrop-filter: blur(var(--glass-blur-sub));
   -webkit-backdrop-filter: blur(var(--glass-blur-sub));
   border: 1px solid var(--glass-border-sub);
   border-radius: var(--radius-sm);
   padding: 18px 20px;
-  box-shadow: var(--glass-shadow-inner), 0 2px 10px rgba(0, 0, 0, 0.03);
-  transition: transform var(--transition), box-shadow var(--transition),
-              background var(--transition), border-color var(--transition);
+  box-shadow: var(--glass-shadow-inner), 0 2px 10px rgba(0, 0, 0, 0.03), var(--glass-border-glow);
+  transition: transform 0.35s var(--ease-bounce), box-shadow 0.35s var(--ease-bounce),
+              background 0.3s var(--ease-bounce), border-color 0.3s var(--ease-bounce);
 }
 
-.note-card:hover {
+.note-card:hover, .thought-item:hover {
   background: var(--glass-hover-bg);
-  transform: translateX(4px);
-  box-shadow: var(--glass-shadow-inner), var(--shadow-md);
+  transform: translateX(4px) scale(1.01);
+  box-shadow: var(--glass-shadow-inner), var(--shadow-md), var(--glass-border-glow);
   border-color: var(--glass-border-sub-hover);
 }
 
@@ -619,7 +738,25 @@ body {
   line-height: 1.9;
 }
 
-/* -------------------- Page B - Projects 网格 -------------------- */
+/* 生命卡片 / 项目卡片 — 增强辉光 hover */
+.life-card, .project-card {
+  /* 子卡片毛玻璃 */
+  background: var(--glass-bg-sub);
+  backdrop-filter: blur(var(--glass-blur-sub));
+  -webkit-backdrop-filter: blur(var(--glass-blur-sub));
+  border: 1px solid var(--glass-border-sub);
+  border-radius: var(--radius-md);
+  box-shadow: var(--glass-shadow-inner), 0 2px 14px rgba(0, 0, 0, 0.04), var(--glass-border-glow);
+  transition: transform 0.4s var(--ease-bounce), box-shadow 0.4s var(--ease-bounce),
+              background 0.35s var(--ease-bounce), border-color 0.35s var(--ease-bounce);
+}
+
+.life-card:hover, .project-card:hover {
+  background: var(--glass-hover-bg);
+  transform: translateY(-6px) scale(1.02);
+  box-shadow: var(--glass-shadow-inner), var(--glass-hover-shadow);
+  border-color: var(--glass-border-sub-hover);
+}
 .projects-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(145px, 1fr));
@@ -627,24 +764,8 @@ body {
 }
 
 .project-card {
-  /* 项目卡片毛玻璃：与 life-card 风格一致 */
-  background: var(--glass-bg-sub);
-  backdrop-filter: blur(var(--glass-blur-sub));
-  -webkit-backdrop-filter: blur(var(--glass-blur-sub));
-  border: 1px solid var(--glass-border-sub);
-  border-radius: var(--radius-md);
   padding: 22px 18px;
   text-align: center;
-  box-shadow: var(--glass-shadow-inner), 0 2px 12px rgba(0, 0, 0, 0.04);
-  transition: transform var(--transition), box-shadow var(--transition),
-              background var(--transition), border-color var(--transition);
-}
-
-.project-card:hover {
-  background: var(--glass-hover-bg);
-  transform: translateY(-5px);
-  box-shadow: var(--glass-shadow-inner), var(--glass-hover-shadow);
-  border-color: var(--glass-border-sub-hover);
 }
 
 .project-icon {
@@ -673,23 +794,7 @@ body {
 }
 
 .thought-item {
-  /* 想法条目毛玻璃：与 note-card 风格一致 */
-  background: var(--glass-bg-sub);
-  backdrop-filter: blur(var(--glass-blur-sub));
-  -webkit-backdrop-filter: blur(var(--glass-blur-sub));
-  border: 1px solid var(--glass-border-sub);
-  border-radius: var(--radius-sm);
   padding: 18px 20px;
-  box-shadow: var(--glass-shadow-inner), 0 2px 10px rgba(0, 0, 0, 0.03);
-  transition: transform var(--transition), box-shadow var(--transition),
-              background var(--transition), border-color var(--transition);
-}
-
-.thought-item:hover {
-  background: var(--glass-hover-bg);
-  transform: translateX(4px);
-  box-shadow: var(--glass-shadow-inner), var(--shadow-md);
-  border-color: var(--glass-border-sub-hover);
 }
 
 .thought-tag {
@@ -731,32 +836,6 @@ body {
   gap: 10px;
 }
 
-.skill-tag {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  padding: 10px 18px;
-  /* 技能标签毛玻璃：与 .tag 保持一致 */
-  background: var(--glass-bg-sub);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid var(--glass-border-sub);
-  border-radius: 24px;
-  font-size: 0.9rem;
-  color: var(--text-primary);
-  font-weight: 500;
-  box-shadow: var(--glass-shadow-inner), 0 2px 8px rgba(0, 0, 0, 0.04);
-  transition: transform var(--transition), box-shadow var(--transition),
-              background var(--transition), border-color var(--transition);
-}
-
-.skill-tag:hover {
-  background: rgba(255, 255, 255, 0.82);
-  border-color: var(--glass-border-sub-hover);
-  transform: translateY(-2px) scale(1.05);
-  box-shadow: var(--glass-shadow-inner), var(--shadow-md);
-}
-
 /* -------------------- Connect 链接区域 -------------------- */
 .connect-links {
   display: flex;
@@ -770,7 +849,7 @@ body {
   align-items: center;
   gap: 8px;
   padding: 12px 24px;
-  /* 链接按钮毛玻璃：略高于子卡片，更接近主卡片风格 */
+  /* 链接按钮毛玻璃 + 辉光 */
   background: var(--glass-bg-sub);
   backdrop-filter: blur(var(--glass-blur-sub));
   -webkit-backdrop-filter: blur(var(--glass-blur-sub));
@@ -780,33 +859,36 @@ body {
   color: var(--text-primary);
   font-size: 0.9rem;
   font-weight: 500;
-  box-shadow: var(--glass-shadow-inner), 0 2px 10px rgba(0, 0, 0, 0.04);
-  transition: all var(--transition);
+  box-shadow: var(--glass-shadow-inner), 0 2px 10px rgba(0, 0, 0, 0.04), var(--glass-border-glow);
+  transition: all 0.35s var(--ease-bounce);
 }
 
 .connect-link:hover {
   background: var(--glass-hover-bg);
   border-color: var(--glass-border-hover);
-  transform: translateY(-2px);
-  box-shadow: var(--glass-shadow-inner), var(--shadow-md);
+  transform: translateY(-2px) scale(1.03);
+  box-shadow: var(--glass-shadow-inner), var(--shadow-md), var(--shadow-glow-sm);
 }
 
 .connect-link i {
   font-size: 1.1rem;
   color: var(--accent-purple);
-  transition: color var(--transition);
+  transition: color 0.3s var(--ease-bounce);
+  filter: drop-shadow(0 0 3px rgba(200, 162, 224, 0.25));
 }
 
 .connect-link:hover i {
   color: var(--accent-pink);
+  filter: drop-shadow(0 0 6px rgba(248, 179, 209, 0.4));
 }
 
 /* -------------------- 页脚 -------------------- */
 .footer {
   text-align: center;
-  padding: 32px 0 16px;
+  padding: 40px 0 20px;
   font-size: 0.85rem;
   color: var(--text-secondary);
+  text-shadow: var(--text-shadow-subtle);
 }
 
 .heart {
@@ -932,7 +1014,7 @@ body {
   color: var(--text-primary);
   border-radius: var(--radius-sm);
   cursor: pointer;
-  transition: all 0.25s ease;
+  transition: all 0.25s var(--ease-bounce);
   user-select: none;
   background: transparent;
   border: none;
@@ -940,9 +1022,9 @@ body {
 }
 
 .calendar-day:hover {
-  background: rgba(243, 222, 230, 0.4);
-  box-shadow: 0 0 12px rgba(255, 158, 190, 0.2);
-  transform: translateY(-1px);
+  background: rgba(253, 228, 236, 0.45);
+  box-shadow: 0 0 14px rgba(248, 179, 209, 0.25);
+  transform: translateY(-2px);
 }
 
 /* 非本月日期 */
@@ -1005,8 +1087,8 @@ body {
   display: flex;
   flex-direction: column;
   min-height: 300px;
-  box-shadow: var(--glass-shadow-inner), 0 2px 12px rgba(0, 0, 0, 0.04);
-  transition: all 0.35s ease;
+  box-shadow: var(--glass-shadow-inner), 0 2px 12px rgba(0, 0, 0, 0.04), var(--glass-border-glow);
+  transition: all 0.35s var(--ease-bounce);
 }
 
 /* 详情面板日期标题 */
@@ -1041,7 +1123,7 @@ body {
   border-radius: 4px;
 }
 
-/* -------------------- 单条笔记/想法卡片 -------------------- */
+/* 单条笔记/想法卡片 */
 .note-detail-card {
   /* 详情卡片毛玻璃：保持在面板内可见 */
   background: rgba(255, 255, 255, 0.76);
@@ -1051,18 +1133,18 @@ body {
   border-radius: var(--radius-sm);
   padding: 14px 16px;
   position: relative;
-  /* 左侧粉色细线装饰 */
+  /* 左侧粉紫渐变细线装饰 */
   border-left: 3px solid var(--accent-pink);
-  box-shadow: var(--glass-shadow-inner), var(--shadow-sm);
-  transition: all var(--transition);
-  animation: detailFadeIn 0.4s ease;
+  box-shadow: var(--glass-shadow-inner), var(--shadow-sm), var(--glass-border-glow);
+  transition: all 0.35s var(--ease-bounce);
+  animation: detailFadeIn 0.45s var(--ease-bounce);
 }
 
 .note-detail-card:hover {
   background: var(--glass-hover-bg);
-  transform: translateX(3px);
+  transform: translateX(4px) scale(1.01);
   border-color: var(--glass-border-sub-hover);
-  box-shadow: var(--shadow-md);
+  box-shadow: var(--shadow-md), var(--shadow-glow-sm);
   border-left-color: var(--accent-purple);
 }
 
@@ -1187,13 +1269,14 @@ body {
 /* 平板端 (768px 以下) */
 @media (max-width: 768px) {
   .page-container {
-    padding: 32px 20px 48px;
+    max-width: 100%;
+    padding: 32px 22px 52px;
   }
 
   .avatar-wrapper {
     width: 120px;
     height: 120px;
-    margin-bottom: 20px;
+    margin-bottom: 22px;
   }
 
   .avatar {
@@ -1202,19 +1285,18 @@ body {
   }
 
   .site-name {
-    font-size: 1.65rem;
+    font-size: 1.7rem;
   }
 
   .card {
-    padding: 22px 20px;
+    padding: 24px 22px;
+    margin-bottom: 28px;
     border-radius: var(--radius-md);
-    /* 平板端提高不透明度，确保文字清晰 — 毛玻璃仍可见但更柔和 */
     background: rgba(255, 255, 255, 0.78);
     backdrop-filter: blur(22px);
     -webkit-backdrop-filter: blur(22px);
   }
 
-  /* 平板端子卡片背景也相应提高 */
   .life-card, .project-card {
     background: rgba(255, 255, 255, 0.72);
   }
@@ -1223,7 +1305,6 @@ body {
     background: rgba(255, 255, 255, 0.74);
   }
 
-  /* 卡片网格改为 2 列 */
   .life-grid {
     grid-template-columns: repeat(2, 1fr);
   }
@@ -1232,7 +1313,6 @@ body {
     grid-template-columns: repeat(2, 1fr);
   }
 
-  /* 日历组件平板适配 */
   .calendar-wrapper {
     flex-direction: column;
     gap: 20px;
@@ -1248,13 +1328,13 @@ body {
 /* 手机端 (480px 以下) */
 @media (max-width: 480px) {
   .page-container {
-    padding: 24px 16px 40px;
+    padding: 24px 16px 44px;
   }
 
   .avatar-wrapper {
     width: 100px;
     height: 100px;
-    margin-bottom: 16px;
+    margin-bottom: 18px;
   }
 
   .avatar {
@@ -1273,7 +1353,7 @@ body {
   }
 
   .site-name {
-    font-size: 1.4rem;
+    font-size: 1.45rem;
   }
 
   .hero-subtitle,
@@ -1287,16 +1367,14 @@ body {
   }
 
   .card {
-    padding: 18px 16px;
+    padding: 20px 18px;
     border-radius: var(--radius-sm);
-    margin-bottom: 14px;
-    /* 手机端进一步提高不透明度，确保小屏文字清晰 — 毛玻璃效果更柔和 */
+    margin-bottom: 20px;
     background: rgba(255, 255, 255, 0.85);
     backdrop-filter: blur(28px);
     -webkit-backdrop-filter: blur(28px);
   }
 
-  /* 手机端子卡片同样提高不透明度 */
   .life-card, .project-card {
     background: rgba(255, 255, 255, 0.8);
   }
@@ -1307,10 +1385,9 @@ body {
 
   .card-title {
     font-size: 1rem;
-    margin-bottom: 14px;
+    margin-bottom: 16px;
   }
 
-  /* 手机端单列布局 */
   .life-grid {
     grid-template-columns: 1fr;
     gap: 10px;
@@ -1321,7 +1398,6 @@ body {
     gap: 10px;
   }
 
-  /* 日历组件手机端适配 */
   .calendar-wrapper {
     flex-direction: column;
     gap: 16px;
@@ -1397,22 +1473,22 @@ body {
 /* 大型桌面端优化 (>1200px) */
 @media (min-width: 1200px) {
   .page-container {
-    max-width: 780px;
-    padding: 48px 24px 72px;
+    max-width: 820px;
+    padding: 56px 28px 80px;
   }
 
   .avatar-wrapper {
-    width: 160px;
-    height: 160px;
+    width: 170px;
+    height: 170px;
   }
 
   .avatar {
-    width: 160px;
-    height: 160px;
+    width: 170px;
+    height: 170px;
   }
 
   .site-name {
-    font-size: 2.2rem;
+    font-size: 2.3rem;
   }
 }
 
@@ -1452,9 +1528,9 @@ body {
   border-radius: 28px;
   font-size: 0.9rem;
   font-weight: 500;
-  box-shadow: var(--shadow-lg);
+  box-shadow: var(--shadow-lg), var(--shadow-glow-sm);
   opacity: 0;
-  transition: opacity 0.3s ease, transform 0.3s ease;
+  transition: opacity 0.35s var(--ease-bounce), transform 0.35s var(--ease-bounce);
   z-index: 1000;
   pointer-events: none;
   white-space: nowrap;
@@ -1463,4 +1539,22 @@ body {
 .toast-notification.show {
   opacity: 1;
   transform: translateX(-50%) translateY(0);
+}
+
+/* -------------------- 点击水波纹反馈 -------------------- */
+.ripple {
+  position: absolute;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(248, 179, 209, 0.5) 0%, rgba(200, 162, 224, 0.2) 50%, transparent 70%);
+  transform: scale(0);
+  animation: ripple-expand 0.6s var(--ease-bounce) forwards;
+  pointer-events: none;
+  z-index: 0;
+}
+
+@keyframes ripple-expand {
+  to {
+    transform: scale(4);
+    opacity: 0;
+  }
 }

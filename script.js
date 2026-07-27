@@ -272,22 +272,24 @@
   function initBackgroundParticles() {
     // --- 可配置参数（通过此对象轻松开关/调节） ---
     var CONFIG = {
-      particleCount: 120,        // 桌面端粒子总数
-      mobileCount: 40,          // 移动端粒子总数
-      starRatio: 0.55,          // 星星粒子比例
-      glowRatio: 0.30,          // 微光粒子比例
-      pawRatio: 0.08,           // 猫爪粒子比例
+      particleCount: 140,        // 桌面端粒子总数（增加猫耳粒子）
+      mobileCount: 50,          // 移动端粒子总数
+      starRatio: 0.48,          // 星星粒子比例
+      glowRatio: 0.28,          // 微光粒子比例
+      pawRatio: 0.07,           // 猫爪粒子比例
       heartRatio: 0.07,         // 爱心粒子比例
+      catEarRatio: 0.10,        // 猫耳轮廓粒子比例（新增）
       minSize: 1,               // 基础粒子最小半径(px)
       maxSize: 3.5,             // 基础粒子最大半径(px)
       pawHeartSize: 15,         // 猫爪/爱心显示字号(px)
       minOpacity: 0.10,         // 粒子最低透明度
-      maxOpacity: 0.38,         // 粒子最高透明度
+      maxOpacity: 0.40,         // 粒子最高透明度（提高微光感）
       mouseForce: 0.25,         // 鼠标吸引力（0=无，0.5=强）
       mouseRadius: 180,         // 鼠标影响半径(px)
       floatBaseSpeed: 0.12,     // 基础漂浮速度
       swayAmplitude: 0.4,       // 摇摆幅度
       pawHeartLifetime: 6000,   // 猫爪/爱心存活时间(ms)
+      catEarLifetime: 8000,     // 猫耳轮廓存活时间(ms)
       glowRiseSpeed: 0.3,       // 微光上升速度
     };
 
@@ -356,12 +358,17 @@
       this.swaySpeed = 0.3 + Math.random() * 0.7;       // 摇摆速度
       this.floatSpeed = CONFIG.floatBaseSpeed * (0.6 + Math.random() * 0.8);
 
-      // 猫爪/爱心特有
+      // 猫爪/爱心/猫耳特有
       if (this.type === 'paw' || this.type === 'heart') {
         this.birthTime = performance.now();
         this.lifetime = CONFIG.pawHeartLifetime * (0.5 + Math.random());
         this.opacity = 0; // 从淡入开始
         this.scale = 0.6 + Math.random() * 0.4;
+      } else if (this.type === 'catEar') {
+        this.birthTime = performance.now();
+        this.lifetime = CONFIG.catEarLifetime * (0.5 + Math.random());
+        this.opacity = 0;
+        this.scale = 0.5 + Math.random() * 0.5;
       } else {
         this.opacity = this.baseOpacity;
         this.lifetime = Infinity;
@@ -398,8 +405,8 @@
         }
       }
 
-      // 猫爪/爱心：计算淡入淡出
-      if (this.type === 'paw' || this.type === 'heart') {
+      // 猫爪/爱心/猫耳：计算淡入淡出
+      if (this.type === 'paw' || this.type === 'heart' || this.type === 'catEar') {
         var elapsed = performance.now() - this.birthTime;
         var progress = elapsed / this.lifetime;
         if (progress > 1) {
@@ -490,6 +497,12 @@
         ctx.fillText(symbol, this.x, this.y);
       }
 
+      // 猫耳轮廓粒子：极简猫耳三角形
+      else if (this.type === 'catEar') {
+        ctx.globalAlpha = this.opacity * 0.7;
+        drawCatEar(this.x, this.y, this.baseSize * 4, this.color);
+      }
+
       ctx.restore();
     };
 
@@ -522,6 +535,38 @@
       ctx.fill();
     }
 
+    /**
+     * 绘制猫耳轮廓（简单三角形 + 光晕）
+     */
+    function drawCatEar(cx, cy, size, color) {
+      var halfW = size * 0.45;
+      var h = size * 0.8;
+      var alpha = 0.35;
+      ctx.strokeStyle = rgbaStr(color, alpha);
+      ctx.lineWidth = 1.2;
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+      ctx.beginPath();
+      // 左耳
+      ctx.moveTo(cx - size * 0.3, cy + h * 0.1);
+      ctx.lineTo(cx - halfW, cy - h);
+      ctx.lineTo(cx - size * 0.05, cy + h * 0.05);
+      // 右耳
+      ctx.moveTo(cx + size * 0.3, cy + h * 0.1);
+      ctx.lineTo(cx + halfW, cy - h);
+      ctx.lineTo(cx + size * 0.05, cy + h * 0.05);
+      ctx.stroke();
+
+      // 猫耳光晕
+      var glowGrad = ctx.createRadialGradient(cx, cy - h * 0.6, 0, cx, cy - h * 0.6, size * 1.5);
+      glowGrad.addColorStop(0, rgbaStr(color, 0.15));
+      glowGrad.addColorStop(1, rgbaStr(color, 0));
+      ctx.fillStyle = glowGrad;
+      ctx.beginPath();
+      ctx.arc(cx, cy - h * 0.6, size * 1.5, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
     // --- 初始化粒子池 ---
     function createParticles() {
       particles = [];
@@ -530,6 +575,7 @@
         { type: 'glow', ratio: CONFIG.glowRatio },
         { type: 'paw', ratio: CONFIG.pawRatio },
         { type: 'heart', ratio: CONFIG.heartRatio },
+        { type: 'catEar', ratio: CONFIG.catEarRatio },
       ];
 
       // 按比例分配
@@ -1298,6 +1344,63 @@
     }, 2500);
   }
 
+  // ==================== 点击水波纹效果 ====================
+
+  /**
+   * 为卡片和按钮添加点击水波纹反馈
+   */
+  function initClickRipple() {
+    var rippableSelectors = '.card, .life-card, .project-card, .note-card, .thought-item, ' +
+      '.note-detail-card, .connect-link, .tag, .skill-tag, .calendar-day';
+    var elements = document.querySelectorAll(rippableSelectors);
+
+    elements.forEach(function (el) {
+      el.addEventListener('click', function (e) {
+        // 创建水波纹元素
+        var ripple = document.createElement('span');
+        ripple.className = 'ripple';
+
+        var rect = el.getBoundingClientRect();
+        var size = Math.max(rect.width, rect.height);
+        ripple.style.width = size + 'px';
+        ripple.style.height = size + 'px';
+        ripple.style.left = (e.clientX - rect.left - size / 2) + 'px';
+        ripple.style.top = (e.clientY - rect.top - size / 2) + 'px';
+
+        el.appendChild(ripple);
+
+        // 动画结束后移除
+        ripple.addEventListener('animationend', function () {
+          ripple.remove();
+        });
+      });
+    });
+  }
+
+  // ==================== 头像环绕粒子光环 ====================
+
+  /**
+   * 为头像区域添加 CSS 光环旋转动画
+   * 通过 JavaScript 动态创建光环元素
+   */
+  function initAvatarRing() {
+    var wrappers = document.querySelectorAll('.avatar-wrapper');
+    wrappers.forEach(function (wrapper) {
+      // 添加内光环
+      var ringInner = document.createElement('div');
+      ringInner.className = 'avatar-ring avatar-ring-inner';
+      ringInner.setAttribute('aria-hidden', 'true');
+
+      // 添加外光环
+      var ringOuter = document.createElement('div');
+      ringOuter.className = 'avatar-ring avatar-ring-outer';
+      ringOuter.setAttribute('aria-hidden', 'true');
+
+      wrapper.appendChild(ringInner);
+      wrapper.appendChild(ringOuter);
+    });
+  }
+
   // ==================== 防抖工具 ====================
 
   /**
@@ -1328,6 +1431,8 @@
       initPageRouting();
       initScrollAnimation();
       initAvatarEffect();
+      initAvatarRing();
+      initClickRipple();
       initBackgroundParallax();
       initBackgroundParticles();
     });
