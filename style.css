@@ -807,14 +807,15 @@ body {
   box-shadow: var(--glass-shadow-inner), var(--shadow-md), var(--shadow-glow-sm);
 }
 
-.connect-link i {
-  font-size: 1.1rem;
+.connect-link .connect-icon {
+  width: 18px; height: 18px;
   color: var(--accent-purple);
   transition: color 0.3s var(--ease-bounce);
   filter: drop-shadow(0 0 3px rgba(200, 162, 224, 0.25));
+  flex-shrink: 0;
 }
 
-.connect-link:hover i {
+.connect-link:hover .connect-icon {
   color: var(--accent-pink);
   filter: drop-shadow(0 0 6px rgba(248, 179, 209, 0.4));
 }
