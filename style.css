@@ -1847,6 +1847,74 @@ body {
   }
 }
 
+/* ===== 启动动画头像 — 粒子中心浮现（0.5s） ===== */
+.preloader-avatar {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  /*
+   * 偏移：头像向上偏移以在品牌名上方留出空间。
+   * 品牌名位置：50% + 6px（副标题间距），头像在其上方。
+   * 头像在 50% 再向上偏移 100px（120px头像 / 2 + 品牌名高度 / 2 + 间距）。
+   */
+  transform: translate(-50%, calc(-50% - 100px));
+  z-index: 3;
+  opacity: 0;
+  animation: preloader-avatar-in 0.5s var(--ease-bounce) forwards;
+  animation-delay: 0.5s; /* 粒子扩散中期浮现 */
+}
+
+.preloader-avatar picture,
+.preloader-avatar img {
+  display: block;
+  width: 120px;
+  height: 120px;
+  border-radius: 28px;
+  object-fit: cover;
+  box-shadow:
+    0 0 40px rgba(248, 179, 209, 0.45),   /* 粉色辉光 */
+    0 0 80px rgba(200, 162, 224, 0.25),   /* 紫色外环辉光 */
+    0 4px 24px rgba(200, 162, 224, 0.25); /* 柔和投影 */
+  border: 3px solid rgba(255, 255, 255, 0.85);
+}
+
+/* 头像光圈脉冲 — 辉光呼吸感 */
+.preloader-avatar::after {
+  content: "";
+  position: absolute;
+  top: -16px; left: -16px;
+  width: 152px; height: 152px;
+  border-radius: 36px;
+  border: 2px solid rgba(200, 162, 224, 0.3);
+  animation: preloader-avatar-ring 2s ease-in-out infinite;
+  pointer-events: none;
+}
+
+/* 头像浮现动画 */
+@keyframes preloader-avatar-in {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, calc(-50% - 100px)) scale(0.3);
+    filter: blur(8px);
+  }
+  60% {
+    opacity: 1;
+    transform: translate(-50%, calc(-50% - 100px)) scale(1.05);
+    filter: blur(0);
+  }
+  100% {
+    opacity: 1;
+    transform: translate(-50%, calc(-50% - 100px)) scale(1);
+    filter: blur(0);
+  }
+}
+
+/* 头像光圈呼吸循环 */
+@keyframes preloader-avatar-ring {
+  0%, 100% { opacity: 0.5; transform: scale(1); }
+  50%      { opacity: 1;   transform: scale(1.06); }
+}
+
 /* Phase 3：品牌名浮现（0.6~1.0s，与粒子扩散尾部重叠） */
 .preloader-logo {
   position: relative;
@@ -1932,6 +2000,12 @@ body {
     opacity: 0;
     visibility: hidden;
   }
+}
+
+/* 淡出时头像跟随消失 */
+.cinematic-preloader.fade-out .preloader-avatar {
+  opacity: 0;
+  transition: opacity 0.3s var(--ease-smooth);
 }
 
 /* 首屏 hero 区域强化入场 — 配合 preloader 揭示 */
@@ -2225,6 +2299,20 @@ body {
   .preloader-name {
     filter: drop-shadow(0 0 16px rgba(200, 162, 224, 0.5));
   }
+
+  /* 暗色模式 — 头像辉光强度调整 */
+  .preloader-avatar img {
+    box-shadow:
+      0 0 50px rgba(200, 162, 224, 0.5),
+      0 0 100px rgba(200, 162, 224, 0.3),
+      0 4px 24px rgba(0, 0, 0, 0.4);
+    border-color: rgba(255, 255, 255, 0.6);
+  }
+
+  .preloader-avatar::after {
+    border-color: rgba(200, 162, 224, 0.5);
+  }
+
   .sound-toggle {
     background: rgba(40, 35, 50, 0.65);
     border-color: var(--glass-border);
