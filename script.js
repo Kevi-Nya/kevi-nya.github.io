@@ -102,8 +102,8 @@
         });
       },
       {
-        threshold: 0.1,
-        rootMargin: '0px 0px -40px 0px',
+        threshold: 0.08,
+        rootMargin: '0px 0px -50px 0px',
       }
     );
 
@@ -272,25 +272,25 @@
   function initBackgroundParticles() {
     // --- 可配置参数（通过此对象轻松开关/调节） ---
     var CONFIG = {
-      particleCount: 140,        // 桌面端粒子总数（增加猫耳粒子）
-      mobileCount: 50,          // 移动端粒子总数
-      starRatio: 0.48,          // 星星粒子比例
-      glowRatio: 0.28,          // 微光粒子比例
-      pawRatio: 0.07,           // 猫爪粒子比例
-      heartRatio: 0.07,         // 爱心粒子比例
-      catEarRatio: 0.10,        // 猫耳轮廓粒子比例（新增）
-      minSize: 1,               // 基础粒子最小半径(px)
-      maxSize: 3.5,             // 基础粒子最大半径(px)
-      pawHeartSize: 15,         // 猫爪/爱心显示字号(px)
-      minOpacity: 0.10,         // 粒子最低透明度
-      maxOpacity: 0.40,         // 粒子最高透明度（提高微光感）
-      mouseForce: 0.25,         // 鼠标吸引力（0=无，0.5=强）
-      mouseRadius: 180,         // 鼠标影响半径(px)
-      floatBaseSpeed: 0.12,     // 基础漂浮速度
-      swayAmplitude: 0.4,       // 摇摆幅度
-      pawHeartLifetime: 6000,   // 猫爪/爱心存活时间(ms)
-      catEarLifetime: 8000,     // 猫耳轮廓存活时间(ms)
-      glowRiseSpeed: 0.3,       // 微光上升速度
+      particleCount: 100,        // 桌面端粒子总数（精简数量，提升单粒质量）
+      mobileCount: 35,           // 移动端粒子总数
+      starRatio: 0.45,           // 星星粒子比例
+      glowRatio: 0.30,           // 微光粒子比例（提高微光占比）
+      pawRatio: 0.08,            // 猫爪粒子比例
+      heartRatio: 0.07,          // 爱心粒子比例
+      catEarRatio: 0.10,         // 猫耳轮廓粒子比例
+      minSize: 1.2,              // 基础粒子最小半径(px) — 略增大
+      maxSize: 4.5,              // 基础粒子最大半径(px) — 增大辉光尺寸
+      pawHeartSize: 16,          // 猫爪/爱心显示字号(px)
+      minOpacity: 0.12,          // 粒子最低透明度
+      maxOpacity: 0.50,          // 粒子最高透明度（大幅提高微光感）
+      mouseForce: 0.20,          // 鼠标吸引力（降低，让粒子更自然地漂浮）
+      mouseRadius: 200,          // 鼠标影响半径(px) — 增大，更柔和
+      floatBaseSpeed: 0.10,      // 基础漂浮速度（放慢，更梦幻）
+      swayAmplitude: 0.5,        // 摇摆幅度（增大）
+      pawHeartLifetime: 7000,    // 猫爪/爱心存活时间(ms)
+      catEarLifetime: 10000,     // 猫耳轮廓存活时间(ms) — 更久停留
+      glowRiseSpeed: 0.22,       // 微光上升速度（放慢）
     };
 
     // --- 检测环境 ---

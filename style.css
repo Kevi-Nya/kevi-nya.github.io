@@ -55,24 +55,24 @@
   --text-shadow-subtle: 0 1px 2px rgba(0, 0, 0, 0.04);
   --text-shadow-glow: 0 0 12px rgba(248, 179, 209, 0.25);
 
-  /* ========== 毛玻璃效果变量（Glassmorphism v2 — 强化辉光） ========== */
+  /* ========== 毛玻璃效果变量（Glassmorphism v3 — 通透玻璃感） ========== */
   /* 主卡片层 */
-  --glass-bg: rgba(255, 255, 255, 0.65);
-  --glass-blur: 24px;
-  --glass-border: rgba(200, 162, 224, 0.25);
-  --glass-border-glow: 0 0 10px rgba(248, 179, 209, 0.12);  /* 边框辉光 */
-  --glass-border-hover: rgba(200, 162, 224, 0.45);
-  --glass-shadow-inner: inset 0 1px 3px rgba(255, 255, 255, 0.6);  /* 顶光内阴影 */
-  --glass-shadow-outer: 0 4px 20px rgba(200, 162, 224, 0.1), 0 1px 3px rgba(0, 0, 0, 0.04);
-  --glass-hover-bg: rgba(255, 255, 255, 0.85);
-  --glass-hover-shadow: 0 12px 40px rgba(200, 162, 224, 0.2), 0 0 20px rgba(248, 179, 209, 0.15), 0 3px 8px rgba(0, 0, 0, 0.06);
+  --glass-bg: rgba(255, 255, 255, 0.62);                     /* 降低透明度，增强玻璃通透感 */
+  --glass-blur: 28px;                                         /* 加大模糊强度 */
+  --glass-border: rgba(200, 162, 224, 0.22);
+  --glass-border-glow: 0 0 14px rgba(248, 179, 209, 0.15);   /* 增强边框辉光 */
+  --glass-border-hover: rgba(200, 162, 224, 0.5);             /* hover 边框更明显 */
+  --glass-shadow-inner: inset 0 1px 4px rgba(255, 255, 255, 0.7), inset 0 -1px 2px rgba(0, 0, 0, 0.03);  /* 强化顶光内阴影 + 底部微暗 */
+  --glass-shadow-outer: 0 4px 24px rgba(200, 162, 224, 0.12), 0 1px 4px rgba(0, 0, 0, 0.05);
+  --glass-hover-bg: rgba(255, 255, 255, 0.88);                /* hover 明显变亮 */
+  --glass-hover-shadow: 0 16px 48px rgba(200, 162, 224, 0.22), 0 0 28px rgba(248, 179, 209, 0.2), 0 4px 10px rgba(0, 0, 0, 0.06);
   /* 子卡片 / 小元素层 */
-  --glass-bg-sub: rgba(255, 255, 255, 0.62);
-  --glass-blur-sub: 18px;
-  --glass-border-sub: rgba(200, 162, 224, 0.2);
-  --glass-border-sub-hover: rgba(200, 162, 224, 0.38);
+  --glass-bg-sub: rgba(255, 255, 255, 0.58);                 /* 子卡片更通透 */
+  --glass-blur-sub: 20px;
+  --glass-border-sub: rgba(200, 162, 224, 0.18);
+  --glass-border-sub-hover: rgba(200, 162, 224, 0.42);
   /* figure/装饰描边 */
-  --stroke-glow: 0 0 6px rgba(248, 179, 209, 0.35);
+  --stroke-glow: 0 0 8px rgba(248, 179, 209, 0.4);
 }
 
 *, *::before, *::after {
@@ -132,9 +132,9 @@ body {
     radial-gradient(ellipse 30% 22% at 60% 40%, rgba(248, 179, 209, 0.2) 0%, transparent 55%),
     radial-gradient(ellipse 35% 20% at 15% 65%, rgba(255, 158, 190, 0.12) 0%, transparent 50%),
     var(--bg-primary);
-  /* 呼吸动画：微缩放 + 平移 + 亮度脉冲，120s + 15s 叠加 */
+  /* 呼吸动画：微缩放 + 平移 + 亮度脉冲，120s + 12s 叠加 */
   animation: ken-burns 120s var(--ease-bounce) infinite,
-             bg-breathe 15s ease-in-out infinite;
+             bg-breathe 12s ease-in-out infinite;
   will-change: transform, opacity;
 }
 
@@ -146,11 +146,12 @@ body {
   100% { transform: scale(1) translate(0, 0); }
 }
 
-/* 背景呼吸光脉冲 — 每 15 秒轻微亮度变化 */
+/* 背景呼吸光脉冲 — 每 12 秒轻微亮度变化（更短周期，更容易感知） */
 @keyframes bg-breathe {
   0%, 100% { filter: brightness(1); }
-  30%      { filter: brightness(1.03); }
-  60%      { filter: brightness(1.01); }
+  25%      { filter: brightness(1.04); }
+  50%      { filter: brightness(1.01); }
+  75%      { filter: brightness(1.05); }
 }
 
 .bg-overlay {
@@ -187,43 +188,43 @@ body {
 /* 命运光带 — 极慢的细长渐变光束 */
 .fate-light-band {
   position: absolute;
-  width: 2px;
+  width: 3px;
   height: 60%;
   background: linear-gradient(180deg,
     transparent 0%,
-    rgba(248, 179, 209, 0.25) 20%,
-    rgba(200, 162, 224, 0.3) 50%,
-    rgba(248, 179, 209, 0.15) 80%,
+    rgba(248, 179, 209, 0.35) 15%,
+    rgba(200, 162, 224, 0.4) 45%,
+    rgba(248, 179, 209, 0.25) 75%,
     transparent 100%);
-  border-radius: 1px;
-  filter: blur(3px);
+  border-radius: 1.5px;
+  filter: blur(4px);
   animation: fate-light-flow 40s ease-in-out infinite;
   will-change: transform, opacity;
 }
 .fate-light-band-1 {
-  top: 10%; left: 18%;
+  top: 8%; left: 15%;
   animation-delay: 0s;
-  height: 70%;
+  height: 72%;
 }
 .fate-light-band-2 {
-  top: 15%; right: 22%;
+  top: 12%; right: 20%;
   animation-delay: -12s;
-  height: 55%;
-  opacity: 0.7;
+  height: 58%;
+  opacity: 0.75;
 }
 .fate-light-band-3 {
-  top: 5%; left: 55%;
+  top: 5%; left: 52%;
   animation-delay: -25s;
-  height: 80%;
-  width: 1.5px;
-  opacity: 0.6;
+  height: 82%;
+  width: 2px;
+  opacity: 0.65;
 }
 
 @keyframes fate-light-flow {
-  0%, 100% { transform: translateX(0) scaleY(1); opacity: 0.4; }
-  25%      { transform: translateX(15px) scaleY(1.08); opacity: 0.7; }
-  50%      { transform: translateX(-8px) scaleY(0.95); opacity: 0.5; }
-  75%      { transform: translateX(12px) scaleY(1.05); opacity: 0.75; }
+  0%, 100% { transform: translateX(0) scaleY(1); opacity: 0.35; }
+  25%      { transform: translateX(18px) scaleY(1.1); opacity: 0.7; }
+  50%      { transform: translateX(-10px) scaleY(0.92); opacity: 0.45; }
+  75%      { transform: translateX(14px) scaleY(1.08); opacity: 0.75; }
 }
 
 /* 云朵 — 缓慢梦幻漂浮 (80-180s 一循环) */
@@ -522,8 +523,7 @@ body {
   -webkit-text-fill-color: transparent;
   letter-spacing: -0.02em;
   margin-bottom: 12px;
-  text-shadow: none;
-  filter: drop-shadow(0 0 8px rgba(248, 179, 209, 0.2));
+  filter: drop-shadow(0 0 12px rgba(248, 179, 209, 0.3)) drop-shadow(0 0 4px rgba(200, 162, 224, 0.2));
 }
 
 .hero-title {
@@ -589,7 +589,7 @@ body {
 
 .card:hover {
   background: var(--glass-hover-bg);
-  transform: translateY(-4px) scale(1.008);
+  transform: translateY(-6px) scale(1.012);
   box-shadow: var(--glass-shadow-inner), var(--glass-hover-shadow);
   border-color: var(--glass-border-hover);
 }
@@ -607,14 +607,14 @@ body {
 
 .card-icon {
   font-size: 1.35rem;
-  filter: drop-shadow(0 0 4px rgba(248, 179, 209, 0.3));
+  filter: drop-shadow(0 0 6px rgba(248, 179, 209, 0.4));
 }
 
 /* -------------------- 动画类 — 米哈游风格 stagger 入场 -------------------- */
 .fade-in-up {
   opacity: 0;
-  transform: translateY(40px);
-  transition: opacity 0.8s var(--ease-bounce), transform 0.8s var(--ease-bounce);
+  transform: translateY(50px);
+  transition: opacity 0.9s var(--ease-bounce), transform 0.9s var(--ease-bounce);
 }
 .fade-in-up.visible {
   opacity: 1;
@@ -656,9 +656,9 @@ body {
 }
 
 .tag:hover, .skill-tag:hover {
-  background: rgba(255, 255, 255, 0.85);
+  background: rgba(255, 255, 255, 0.88);
   border-color: var(--glass-border-sub-hover);
-  transform: translateY(-2px) scale(1.04);
+  transform: translateY(-3px) scale(1.06);
   box-shadow: var(--glass-shadow-inner), var(--shadow-md), var(--shadow-glow-sm);
 }
 
@@ -714,7 +714,7 @@ body {
 
 .note-card:hover, .thought-item:hover {
   background: var(--glass-hover-bg);
-  transform: translateX(4px) scale(1.01);
+  transform: translateX(6px) scale(1.015);
   box-shadow: var(--glass-shadow-inner), var(--shadow-md), var(--glass-border-glow);
   border-color: var(--glass-border-sub-hover);
 }
@@ -753,7 +753,7 @@ body {
 
 .life-card:hover, .project-card:hover {
   background: var(--glass-hover-bg);
-  transform: translateY(-6px) scale(1.02);
+  transform: translateY(-8px) scale(1.03);
   box-shadow: var(--glass-shadow-inner), var(--glass-hover-shadow);
   border-color: var(--glass-border-sub-hover);
 }
@@ -866,7 +866,7 @@ body {
 .connect-link:hover {
   background: var(--glass-hover-bg);
   border-color: var(--glass-border-hover);
-  transform: translateY(-2px) scale(1.03);
+  transform: translateY(-3px) scale(1.05);
   box-shadow: var(--glass-shadow-inner), var(--shadow-md), var(--shadow-glow-sm);
 }
 
