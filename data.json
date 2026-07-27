@@ -53,45 +53,11 @@
     }
   ],
   "little_notes": [],
-  "thoughts": [
-    {
-      "tag_type": "essay",
-      "tag_label": "随笔",
-      "title": "关于 AI 与创造力的思考",
-      "summary": "AI 不是替代创造力的工具，而是放大创造力的伙伴……",
-      "thought_date": "2025.01.12"
-    },
-    {
-      "tag_type": "tech",
-      "tag_label": "技术学习",
-      "title": "Python 装饰器的优雅之道",
-      "summary": "深入理解 Python 装饰器的原理与实战应用……",
-      "thought_date": "2025.01.08"
-    },
-    {
-      "tag_type": "life",
-      "tag_label": "生活记录",
-      "title": "京都的秋天，与猫咪的邂逅",
-      "summary": "在京都的小巷里，遇见了一只特别的三花猫……",
-      "thought_date": "2025.01.01"
-    }
-  ],
+  "thoughts": [],
   "skills": [
-    {
-      "emoji": "🤖",
-      "name": "AI"
-    },
     {
       "emoji": "🐍",
       "name": "Python"
-    },
-    {
-      "emoji": "👁️",
-      "name": "Computer Vision"
-    },
-    {
-      "emoji": "🧠",
-      "name": "LLM"
     },
     {
       "emoji": "📷",
