@@ -70,7 +70,7 @@ def export_data(conn):
         data["skills"] = cur.fetchall()
 
         # Links 社交链接
-        cur.execute("SELECT platform, url, icon_class FROM links ORDER BY sort_order")
+        cur.execute("SELECT platform, url, icon_class, qq_number FROM links ORDER BY sort_order")
         data["links"] = cur.fetchall()
 
     return data

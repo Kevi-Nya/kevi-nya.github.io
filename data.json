@@ -52,20 +52,7 @@
       "description": "一杯咖啡，一段代码，一个下午"
     }
   ],
-  "little_notes": [
-    {
-      "content": "今天的阳光很好，猫咪在窗台上睡着了 🌤️",
-      "note_date": "2025.01.15"
-    },
-    {
-      "content": "写了一个新的 AI 小工具，感觉离梦想又近了一步 ✨",
-      "note_date": "2025.01.10"
-    },
-    {
-      "content": "旅行中拍到了一张很喜欢的照片，想分享给你 📸",
-      "note_date": "2025.01.05"
-    }
-  ],
+  "little_notes": [],
   "thoughts": [
     {
       "tag_type": "essay",
@@ -122,23 +109,27 @@
   "links": [
     {
       "platform": "X",
-      "url": "#",
-      "icon_class": "fa-brands fa-x-twitter"
+      "url": "https://x.com/Kevi_Nya",
+      "icon_class": "fa-brands fa-x-twitter",
+      "qq_number": null
     },
     {
       "platform": "GitHub",
-      "url": "#",
-      "icon_class": "fa-brands fa-github"
+      "url": "https://github.com/Kevi-Nya",
+      "icon_class": "fa-brands fa-github",
+      "qq_number": null
     },
     {
-      "platform": "Instagram",
+      "platform": "QQ",
       "url": "#",
-      "icon_class": "fa-brands fa-instagram"
+      "icon_class": "fa-brands fa-qq",
+      "qq_number": "1447954419"
     },
     {
       "platform": "Email",
-      "url": "#",
-      "icon_class": "fa-solid fa-envelope"
+      "url": "1447954419@qq.com",
+      "icon_class": "fa-solid fa-envelope",
+      "qq_number": null
     }
   ]
 }

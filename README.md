@@ -73,29 +73,6 @@ npx serve .
 
 `日系` `治愈` `猫系` `AI` `程序员` `Digital Garden`
 
-## 📄 页面说明
-
-### 页面 A — 访客专属（`?from=4b68ab3847feda7d`）
-
-面向特定渠道访客的温暖私人页面，包含：
-
-- 大圆头像 + 欢迎语
-- About Me 兴趣标签
-- My Life 生活卡片（摄影、音乐、猫咪、旅行、咖啡）
-- Little Notes 短文字卡片
-- Connect 社交链接
-
-### 页面 B — 公开个人主页（默认）
-
-面向所有人的公开主页，包含：
-
-- Hero 头像 + 身份标签 + 简介
-- About 自我介绍
-- Projects 项目卡片（AI / 笔记 / 开源 / 实验）
-- Thoughts 随笔列表（分类标签：随笔 / 技术 / 生活）
-- Skills 技能标签云
-- Links 社交链接
-
 ## 🗄 内容管理（PostgreSQL）
 
 网站的全部动态内容（About Me / My Life / Little Notes / Thoughts / Skills / Links）由 PostgreSQL 数据库管理。日常更新直接用 `psql` 操作数据库，然后重新导出即可，**无需编辑任何 .sql 文件**。

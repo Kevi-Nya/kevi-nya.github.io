@@ -795,3 +795,28 @@ body {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* -------------------- Toast 通知提示 -------------------- */
+.toast-notification {
+  position: fixed;
+  bottom: 30px;
+  left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  background: var(--gradient-btn);
+  color: var(--text-primary);
+  padding: 12px 24px;
+  border-radius: 28px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  box-shadow: var(--shadow-lg);
+  opacity: 0;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  z-index: 1000;
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+.toast-notification.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}

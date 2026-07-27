@@ -300,7 +300,7 @@
 
   /**
    * 渲染 Links 社交链接
-   * @param {Array} links - [{platform, url, icon_class}, ...]
+   * @param {Array} links - [{platform, url, icon_class, qq_number?}, ...]
    */
   function renderLinks(links) {
     var container = document.getElementById('links-container');
@@ -309,12 +309,85 @@
     var html = '';
     links.forEach(function (link) {
       html +=
-        '<a href="' + link.url + '" class="connect-link" aria-label="' + link.platform + '">' +
+        '<a href="' + link.url + '" class="connect-link" aria-label="' + link.platform + '"' +
+        (link.qq_number ? ' data-qq="' + link.qq_number + '"' : '') + '>' +
         '<i class="' + link.icon_class + '"></i>' +
         '<span>' + link.platform + '</span>' +
         '</a>';
     });
     container.innerHTML = html;
+
+    // 为 QQ 链接绑定点击复制事件
+    var qqLink = container.querySelector('[data-qq]');
+    if (qqLink) {
+      qqLink.addEventListener('click', function (e) {
+        e.preventDefault();
+        var qqNumber = this.getAttribute('data-qq');
+        copyToClipboard(qqNumber);
+        showToast('QQ 号 ' + qqNumber + ' 已复制到剪贴板 ✨');
+      });
+    }
+  }
+
+  /**
+   * 复制文本到剪贴板
+   * @param {string} text - 要复制的文本
+   */
+  function copyToClipboard(text) {
+    // 优先使用现代 Clipboard API
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).catch(function () {
+        fallbackCopy(text);
+      });
+    } else {
+      fallbackCopy(text);
+    }
+  }
+
+  /**
+   * 降级复制方案（使用 textarea）
+   * @param {string} text - 要复制的文本
+   */
+  function fallbackCopy(text) {
+    var textarea = document.createElement('textarea');
+    textarea.value = text;
+    textarea.style.position = 'fixed';
+    textarea.style.opacity = '0';
+    document.body.appendChild(textarea);
+    textarea.select();
+    try {
+      document.execCommand('copy');
+    } catch (e) {
+      console.warn('复制失败:', e);
+    }
+    document.body.removeChild(textarea);
+  }
+
+  /**
+   * 显示 Toast 提示
+   * @param {string} message - 提示消息
+   */
+  function showToast(message) {
+    // 移除已有 toast
+    var existing = document.querySelector('.toast-notification');
+    if (existing) existing.remove();
+
+    var toast = document.createElement('div');
+    toast.className = 'toast-notification';
+    toast.textContent = message;
+    document.body.appendChild(toast);
+
+    // 触发动画
+    void toast.offsetWidth;
+    toast.classList.add('show');
+
+    // 2.5 秒后自动消失
+    setTimeout(function () {
+      toast.classList.remove('show');
+      toast.addEventListener('transitionend', function () {
+        toast.remove();
+      });
+    }, 2500);
   }
 
   // ==================== 防抖工具 ====================
