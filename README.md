@@ -101,6 +101,9 @@ psql -d kevi_nya
 # 加一条笔记
 kevi_nya=# INSERT INTO little_notes (content, note_date, sort_order) VALUES ('新发现了一家很棒的猫咖 🐱', '2025-07-27', 4);
 
+# 加一个想法
+kevi_nya=# INSERT INTO thoughts (title, summary, tag_type, tag_label, thought_date, sort_order) VALUES ('关于猫咪的思考', '猫咪教会我们的：活在当下，享受每一刻的阳光。', 'life', '生活', '2025-07-27', 3);
+
 # 改一个链接
 kevi_nya=# UPDATE links SET url = 'https://github.com/kevi-nya' WHERE platform = 'GitHub';
 

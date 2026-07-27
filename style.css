@@ -23,6 +23,22 @@
   --radius-md: 16px;
   --radius-lg: 24px;
   --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* ========== 毛玻璃效果变量（Glassmorphism） ========== */
+  /* 主卡片层 */
+  --glass-bg: rgba(255, 255, 255, 0.65);                     /* 卡片背景透明度 */
+  --glass-blur: 20px;                                         /* backdrop-filter 模糊强度 */
+  --glass-border: rgba(200, 162, 224, 0.28);                  /* 浅粉紫半透明边框 */
+  --glass-border-hover: rgba(200, 162, 224, 0.45);            /* hover 时边框加深 */
+  --glass-shadow-inner: inset 0 1px 2px rgba(255, 255, 255, 0.55);   /* 玻璃顶光内阴影 */
+  --glass-shadow-outer: 0 4px 20px rgba(200, 162, 224, 0.1), 0 1px 3px rgba(0, 0, 0, 0.04);  /* 立体外阴影 */
+  --glass-hover-bg: rgba(255, 255, 255, 0.85);                /* hover 时背景加亮 */
+  --glass-hover-shadow: 0 12px 36px rgba(200, 162, 224, 0.18), 0 3px 8px rgba(0, 0, 0, 0.06); /* hover 阴影增强 */
+  /* 子卡片 / 小元素层 */
+  --glass-bg-sub: rgba(255, 255, 255, 0.62);                  /* 子卡片背景 */
+  --glass-blur-sub: 18px;                                     /* 子卡片模糊 */
+  --glass-border-sub: rgba(200, 162, 224, 0.22);              /* 子卡片边框 */
+  --glass-border-sub-hover: rgba(200, 162, 224, 0.38);        /* 子卡片 hover 边框 */
 }
 
 *, *::before, *::after {
@@ -99,11 +115,16 @@ body {
   position: fixed;
   top: 0; left: 0;
   width: 100%; height: 100%;
+  /* 增强渐变层次，让卡片后的背景更有纵深感，突出毛玻璃效果 */
   background:
-    radial-gradient(ellipse 80% 60% at 50% 0%, rgba(243, 222, 230, 0.45) 0%, transparent 60%),
-    radial-gradient(ellipse 60% 50% at 85% 80%, rgba(221, 214, 254, 0.35) 0%, transparent 60%),
-    radial-gradient(ellipse 50% 40% at 15% 30%, rgba(255, 158, 190, 0.15) 0%, transparent 50%),
-    linear-gradient(180deg, rgba(248, 240, 232, 0.88) 0%, rgba(248, 240, 232, 0.92) 50%, rgba(221, 214, 254, 0.25) 100%);
+    /* 顶部大面积暖粉色光晕 — 提升卡片上方亮度对比 */
+    radial-gradient(ellipse 80% 60% at 50% 0%, rgba(243, 222, 230, 0.55) 0%, transparent 60%),
+    /* 右下角浅紫色光晕 — 增强层次 */
+    radial-gradient(ellipse 60% 50% at 85% 80%, rgba(221, 214, 254, 0.45) 0%, transparent 60%),
+    /* 左上角粉色微光 — 丰富色彩层次 */
+    radial-gradient(ellipse 50% 40% at 15% 30%, rgba(255, 158, 190, 0.2) 0%, transparent 50%),
+    /* 垂直渐变蒙层 — 增加整体层次感，底部偏紫让卡片更突出 */
+    linear-gradient(180deg, rgba(248, 240, 232, 0.9) 0%, rgba(248, 240, 232, 0.92) 50%, rgba(221, 214, 254, 0.3) 100%);
   z-index: 0;
   pointer-events: none;
 }
@@ -420,23 +441,25 @@ body {
 
 /* -------------------- 卡片通用样式 — 毛玻璃风格 -------------------- */
 .card {
-  background: rgba(255, 255, 255, 0.72);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(200, 162, 224, 0.18);
+  /* 毛玻璃核心：半透明背景 + 强模糊 + 浅粉紫边框 */
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  border: 1px solid var(--glass-border);
   border-radius: var(--radius-lg);
   padding: 28px 32px;
   margin-bottom: 20px;
-  box-shadow: var(--shadow-sm);
+  /* 玻璃质感：内阴影模拟顶光 + 外阴影增加立体感 */
+  box-shadow: var(--glass-shadow-inner), var(--glass-shadow-outer);
   transition: transform var(--transition), box-shadow var(--transition),
               background var(--transition), border-color var(--transition);
 }
 
 .card:hover {
-  background: rgba(255, 255, 255, 0.82);
+  background: var(--glass-hover-bg);
   transform: translateY(-3px);
-  box-shadow: var(--shadow-lg);
-  border-color: rgba(200, 162, 224, 0.35);
+  box-shadow: var(--glass-shadow-inner), var(--glass-hover-shadow);
+  border-color: var(--glass-border-hover);
 }
 
 .card-title {
@@ -484,21 +507,24 @@ body {
   align-items: center;
   gap: 4px;
   padding: 8px 16px;
-  background: rgba(255, 255, 255, 0.6);
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
-  border: 1px solid rgba(200, 162, 224, 0.15);
+  /* 小标签毛玻璃效果：略低于卡片但保持可见 */
+  background: var(--glass-bg-sub);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--glass-border-sub);
   border-radius: 20px;
   font-size: 0.9rem;
   color: var(--text-primary);
-  transition: transform var(--transition), box-shadow var(--transition);
+  box-shadow: var(--glass-shadow-inner), 0 2px 8px rgba(0, 0, 0, 0.04);
+  transition: transform var(--transition), box-shadow var(--transition),
+              background var(--transition), border-color var(--transition);
 }
 
 .tag:hover {
   transform: translateY(-2px);
-  box-shadow: var(--shadow-sm);
-  background: rgba(255, 255, 255, 0.78);
-  border-color: rgba(200, 162, 224, 0.3);
+  box-shadow: var(--glass-shadow-inner), var(--shadow-md);
+  background: rgba(255, 255, 255, 0.82);
+  border-color: var(--glass-border-sub-hover);
 }
 
 /* -------------------- Page A - My Life 卡片网格 -------------------- */
@@ -509,22 +535,24 @@ body {
 }
 
 .life-card {
-  background: rgba(255, 255, 255, 0.68);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(200, 162, 224, 0.18);
+  /* 子卡片毛玻璃：统一使用子卡片变量 */
+  background: var(--glass-bg-sub);
+  backdrop-filter: blur(var(--glass-blur-sub));
+  -webkit-backdrop-filter: blur(var(--glass-blur-sub));
+  border: 1px solid var(--glass-border-sub);
   border-radius: var(--radius-md);
   padding: 20px 16px;
   text-align: center;
+  box-shadow: var(--glass-shadow-inner), 0 2px 12px rgba(0, 0, 0, 0.04);
   transition: transform var(--transition), box-shadow var(--transition),
               background var(--transition), border-color var(--transition);
 }
 
 .life-card:hover {
-  background: rgba(255, 255, 255, 0.82);
+  background: var(--glass-hover-bg);
   transform: translateY(-5px);
-  box-shadow: var(--shadow-lg);
-  border-color: rgba(200, 162, 224, 0.45);
+  box-shadow: var(--glass-shadow-inner), var(--glass-hover-shadow);
+  border-color: var(--glass-border-sub-hover);
 }
 
 .life-emoji {
@@ -553,20 +581,23 @@ body {
 }
 
 .note-card {
-  background: rgba(255, 255, 255, 0.7);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border: 1px solid rgba(200, 162, 224, 0.15);
+  /* 笔记卡片毛玻璃：与 thought-item 保持一致风格 */
+  background: var(--glass-bg-sub);
+  backdrop-filter: blur(var(--glass-blur-sub));
+  -webkit-backdrop-filter: blur(var(--glass-blur-sub));
+  border: 1px solid var(--glass-border-sub);
   border-radius: var(--radius-sm);
   padding: 18px 20px;
+  box-shadow: var(--glass-shadow-inner), 0 2px 10px rgba(0, 0, 0, 0.03);
   transition: transform var(--transition), box-shadow var(--transition),
-              background var(--transition);
+              background var(--transition), border-color var(--transition);
 }
 
 .note-card:hover {
-  background: rgba(255, 255, 255, 0.84);
+  background: var(--glass-hover-bg);
   transform: translateX(4px);
-  box-shadow: var(--shadow-md);
+  box-shadow: var(--glass-shadow-inner), var(--shadow-md);
+  border-color: var(--glass-border-sub-hover);
 }
 
 .note-card p {
@@ -596,22 +627,24 @@ body {
 }
 
 .project-card {
-  background: rgba(255, 255, 255, 0.68);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(200, 162, 224, 0.18);
+  /* 项目卡片毛玻璃：与 life-card 风格一致 */
+  background: var(--glass-bg-sub);
+  backdrop-filter: blur(var(--glass-blur-sub));
+  -webkit-backdrop-filter: blur(var(--glass-blur-sub));
+  border: 1px solid var(--glass-border-sub);
   border-radius: var(--radius-md);
   padding: 22px 18px;
   text-align: center;
+  box-shadow: var(--glass-shadow-inner), 0 2px 12px rgba(0, 0, 0, 0.04);
   transition: transform var(--transition), box-shadow var(--transition),
               background var(--transition), border-color var(--transition);
 }
 
 .project-card:hover {
-  background: rgba(255, 255, 255, 0.82);
+  background: var(--glass-hover-bg);
   transform: translateY(-5px);
-  box-shadow: var(--shadow-lg);
-  border-color: rgba(200, 162, 224, 0.45);
+  box-shadow: var(--glass-shadow-inner), var(--glass-hover-shadow);
+  border-color: var(--glass-border-sub-hover);
 }
 
 .project-icon {
@@ -640,20 +673,23 @@ body {
 }
 
 .thought-item {
-  background: rgba(255, 255, 255, 0.7);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border: 1px solid rgba(200, 162, 224, 0.15);
+  /* 想法条目毛玻璃：与 note-card 风格一致 */
+  background: var(--glass-bg-sub);
+  backdrop-filter: blur(var(--glass-blur-sub));
+  -webkit-backdrop-filter: blur(var(--glass-blur-sub));
+  border: 1px solid var(--glass-border-sub);
   border-radius: var(--radius-sm);
   padding: 18px 20px;
+  box-shadow: var(--glass-shadow-inner), 0 2px 10px rgba(0, 0, 0, 0.03);
   transition: transform var(--transition), box-shadow var(--transition),
-              background var(--transition);
+              background var(--transition), border-color var(--transition);
 }
 
 .thought-item:hover {
-  background: rgba(255, 255, 255, 0.84);
+  background: var(--glass-hover-bg);
   transform: translateX(4px);
-  box-shadow: var(--shadow-md);
+  box-shadow: var(--glass-shadow-inner), var(--shadow-md);
+  border-color: var(--glass-border-sub-hover);
 }
 
 .thought-tag {
@@ -700,23 +736,25 @@ body {
   align-items: center;
   gap: 4px;
   padding: 10px 18px;
-  background: rgba(255, 255, 255, 0.6);
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
-  border: 1px solid rgba(200, 162, 224, 0.15);
+  /* 技能标签毛玻璃：与 .tag 保持一致 */
+  background: var(--glass-bg-sub);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--glass-border-sub);
   border-radius: 24px;
   font-size: 0.9rem;
   color: var(--text-primary);
   font-weight: 500;
+  box-shadow: var(--glass-shadow-inner), 0 2px 8px rgba(0, 0, 0, 0.04);
   transition: transform var(--transition), box-shadow var(--transition),
               background var(--transition), border-color var(--transition);
 }
 
 .skill-tag:hover {
-  background: rgba(255, 255, 255, 0.78);
-  border-color: rgba(200, 162, 224, 0.3);
+  background: rgba(255, 255, 255, 0.82);
+  border-color: var(--glass-border-sub-hover);
   transform: translateY(-2px) scale(1.05);
-  box-shadow: var(--shadow-md);
+  box-shadow: var(--glass-shadow-inner), var(--shadow-md);
 }
 
 /* -------------------- Connect 链接区域 -------------------- */
@@ -732,23 +770,25 @@ body {
   align-items: center;
   gap: 8px;
   padding: 12px 24px;
-  background: rgba(255, 255, 255, 0.7);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  border: 1px solid rgba(200, 162, 224, 0.25);
+  /* 链接按钮毛玻璃：略高于子卡片，更接近主卡片风格 */
+  background: var(--glass-bg-sub);
+  backdrop-filter: blur(var(--glass-blur-sub));
+  -webkit-backdrop-filter: blur(var(--glass-blur-sub));
+  border: 1px solid var(--glass-border);
   border-radius: 28px;
   text-decoration: none;
   color: var(--text-primary);
   font-size: 0.9rem;
   font-weight: 500;
+  box-shadow: var(--glass-shadow-inner), 0 2px 10px rgba(0, 0, 0, 0.04);
   transition: all var(--transition);
 }
 
 .connect-link:hover {
-  background: rgba(255, 255, 255, 0.85);
-  border-color: rgba(200, 162, 224, 0.45);
+  background: var(--glass-hover-bg);
+  border-color: var(--glass-border-hover);
   transform: translateY(-2px);
-  box-shadow: var(--shadow-md);
+  box-shadow: var(--glass-shadow-inner), var(--shadow-md);
 }
 
 .connect-link i {
@@ -954,16 +994,18 @@ body {
 }
 
 .note-detail-panel {
-  background: rgba(255, 255, 255, 0.62);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  border: 1px solid rgba(200, 162, 224, 0.15);
+  /* 详情面板毛玻璃：背景稍亮以保证内部文字可读 */
+  background: rgba(255, 255, 255, 0.68);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  border: 1px solid var(--glass-border-sub);
   border-radius: var(--radius-md);
   padding: 20px;
   flex: 1;
   display: flex;
   flex-direction: column;
   min-height: 300px;
+  box-shadow: var(--glass-shadow-inner), 0 2px 12px rgba(0, 0, 0, 0.04);
   transition: all 0.35s ease;
 }
 
@@ -1001,23 +1043,25 @@ body {
 
 /* -------------------- 单条笔记/想法卡片 -------------------- */
 .note-detail-card {
-  background: rgba(255, 255, 255, 0.72);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  border: 1px solid rgba(200, 162, 224, 0.12);
+  /* 详情卡片毛玻璃：保持在面板内可见 */
+  background: rgba(255, 255, 255, 0.76);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--glass-border-sub);
   border-radius: var(--radius-sm);
   padding: 14px 16px;
   position: relative;
   /* 左侧粉色细线装饰 */
   border-left: 3px solid var(--accent-pink);
-  box-shadow: var(--shadow-sm);
+  box-shadow: var(--glass-shadow-inner), var(--shadow-sm);
   transition: all var(--transition);
   animation: detailFadeIn 0.4s ease;
 }
 
 .note-detail-card:hover {
-  background: rgba(255, 255, 255, 0.85);
+  background: var(--glass-hover-bg);
   transform: translateX(3px);
+  border-color: var(--glass-border-sub-hover);
   box-shadow: var(--shadow-md);
   border-left-color: var(--accent-purple);
 }
@@ -1164,10 +1208,19 @@ body {
   .card {
     padding: 22px 20px;
     border-radius: var(--radius-md);
-    /* 移动端提高不透明度，确保文字清晰 */
-    background: rgba(255, 255, 255, 0.82);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
+    /* 平板端提高不透明度，确保文字清晰 — 毛玻璃仍可见但更柔和 */
+    background: rgba(255, 255, 255, 0.78);
+    backdrop-filter: blur(22px);
+    -webkit-backdrop-filter: blur(22px);
+  }
+
+  /* 平板端子卡片背景也相应提高 */
+  .life-card, .project-card {
+    background: rgba(255, 255, 255, 0.72);
+  }
+
+  .note-card, .thought-item {
+    background: rgba(255, 255, 255, 0.74);
   }
 
   /* 卡片网格改为 2 列 */
@@ -1237,10 +1290,19 @@ body {
     padding: 18px 16px;
     border-radius: var(--radius-sm);
     margin-bottom: 14px;
-    /* 手机端进一步提高不透明度 */
+    /* 手机端进一步提高不透明度，确保小屏文字清晰 — 毛玻璃效果更柔和 */
     background: rgba(255, 255, 255, 0.85);
-    backdrop-filter: blur(24px);
-    -webkit-backdrop-filter: blur(24px);
+    backdrop-filter: blur(28px);
+    -webkit-backdrop-filter: blur(28px);
+  }
+
+  /* 手机端子卡片同样提高不透明度 */
+  .life-card, .project-card {
+    background: rgba(255, 255, 255, 0.8);
+  }
+
+  .note-card, .thought-item {
+    background: rgba(255, 255, 255, 0.82);
   }
 
   .card-title {
