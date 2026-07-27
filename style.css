@@ -378,6 +378,11 @@ body {
   animation: heart-float var(--heart-duration, 22s) ease-in-out infinite;
   will-change: transform, opacity;
 }
+.footer-heart {
+  display: inline-block;
+  font-size: 15px;
+  vertical-align: middle;
+}
 .heart-1 { top: 35%; right: 28%; --heart-duration: 22s; animation-delay: 0s; }
 .heart-2 { top: 65%; left: 50%;  --heart-duration: 24s; animation-delay: -8s; }
 
