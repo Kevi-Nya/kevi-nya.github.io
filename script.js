@@ -1445,17 +1445,6 @@
         '</a>';
     });
     container.innerHTML = html;
-
-    // 为 QQ 链接绑定点击复制事件
-    var qqLink = container.querySelector('[data-qq]');
-    if (qqLink) {
-      qqLink.addEventListener('click', function (e) {
-        e.preventDefault();
-        var qqNumber = this.getAttribute('data-qq');
-        copyToClipboard(qqNumber);
-        showToast('QQ 号 ' + qqNumber + ' 已复制到剪贴板 ✨');
-      });
-    }
   }
 
   /**
@@ -2104,6 +2093,17 @@
       document.addEventListener('click', initAudioOnFirstGesture);
       document.addEventListener('touchstart', initAudioOnFirstGesture);
       document.addEventListener('keydown', initAudioOnFirstGesture);
+
+      // 全局 QQ 号复制交互 — 事件委托，覆盖 Page A（静态）和 Page B（动态）的 [data-qq] 链接
+      document.addEventListener('click', function (e) {
+        var qqLink = e.target.closest('[data-qq]');
+        if (!qqLink) return;
+        e.preventDefault();
+        var qqNumber = qqLink.getAttribute('data-qq');
+        copyToClipboard(qqNumber);
+        showToast('QQ 号 ' + qqNumber + ' 已复制到剪贴板 ✨');
+        SoundEngine.playClick();
+      });
     });
   }
 

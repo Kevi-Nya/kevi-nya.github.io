@@ -583,6 +583,16 @@ body {
   text-shadow: var(--text-shadow-subtle);
 }
 
+/* Below-fold 卡片延迟渲染优化 — content-visibility 浏览器原生懒渲染 */
+.fade-in-up.delay-2,
+.fade-in-up.delay-3,
+.fade-in-up.delay-4,
+.fade-in-up.delay-5,
+.fade-in-up.delay-6 {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 320px;
+}
+
 .card-icon {
   font-size: 1.35rem;
   filter: drop-shadow(0 0 6px rgba(248, 179, 209, 0.4));
