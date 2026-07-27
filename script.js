@@ -1974,6 +1974,46 @@
       }, 80);
     }
 
+    /**
+     * playMeow — 猫爪彩蛋猫叫
+     * 活泼撒娇感：450→550→380Hz 主声线 + 1100→1600→900Hz 泛音层
+     * 时长 ~0.35s，音量 0.08，带三角形波泛音模拟真猫发声的毛发质感
+     */
+    function playMeow() {
+      if (!canPlay()) return;
+      var now = audioCtx.currentTime;
+
+      // 主声线：450Hz 上扬至 550Hz，再下滑至 380Hz（"喵↗↘"）
+      var osc1 = audioCtx.createOscillator();
+      var gain1 = audioCtx.createGain();
+      osc1.type = 'sine';
+      osc1.frequency.setValueAtTime(450, now);
+      osc1.frequency.linearRampToValueAtTime(550, now + 0.12);
+      osc1.frequency.linearRampToValueAtTime(380, now + 0.35);
+      gain1.gain.setValueAtTime(0, now);
+      gain1.gain.linearRampToValueAtTime(0.08, now + 0.02);
+      gain1.gain.exponentialRampToValueAtTime(0.001, now + 0.40);
+      osc1.connect(gain1);
+      gain1.connect(masterGain);
+      osc1.start(now);
+      osc1.stop(now + 0.42);
+
+      // 泛音层：高频毛发感，三角形波增加真实猫叫的"毛边"质感
+      var osc2 = audioCtx.createOscillator();
+      var gain2 = audioCtx.createGain();
+      osc2.type = 'triangle';
+      osc2.frequency.setValueAtTime(1100, now);
+      osc2.frequency.linearRampToValueAtTime(1600, now + 0.15);
+      osc2.frequency.linearRampToValueAtTime(900, now + 0.35);
+      gain2.gain.setValueAtTime(0, now);
+      gain2.gain.linearRampToValueAtTime(0.025, now + 0.03);
+      gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.38);
+      osc2.connect(gain2);
+      gain2.connect(masterGain);
+      osc2.start(now);
+      osc2.stop(now + 0.40);
+    }
+
     return {
       init: init,
       resume: resume,
@@ -1985,6 +2025,7 @@
       playToggle: playToggle,
       playSwitch: playSwitch,
       playOpen: playOpen,
+      playMeow: playMeow,
       // 暴露 AudioContext 供 BgmEngine 共用
       getContext: function () { return audioCtx; },
       isInitialized: function () { return initialized; },
@@ -2582,6 +2623,37 @@
     },
   };
 
+  // ==================== 猫爪彩蛋（P2） ====================
+
+  /**
+   * 猫爪彩蛋 — 点击背景猫爪触发猫叫 + 弹跳动画
+   * 使用事件委托 + 500ms 节流 + 尊重静音偏好
+   * 仅 .paw-1 / .paw-2 参与（头像旁 .dec-paw 排除）
+   */
+  function initPawEasterEgg() {
+    var lastMeowTime = 0;
+    var MEOW_THROTTLE = 500; // ms
+
+    document.addEventListener('click', function (e) {
+      var paw = e.target.closest('.paw-1, .paw-2');
+      if (!paw) return;
+
+      var now = Date.now();
+      if (now - lastMeowTime < MEOW_THROTTLE) return;
+      lastMeowTime = now;
+
+      // 播放彩蛋猫叫
+      SoundEngine.playMeow();
+
+      // 视觉反馈：弹跳动画
+      paw.classList.add('paw-bounce');
+      paw.addEventListener('animationend', function handler() {
+        paw.classList.remove('paw-bounce');
+        paw.removeEventListener('animationend', handler);
+      });
+    });
+  }
+
   // ==================== 初始化 ====================
 
   function init() {
@@ -2596,6 +2668,7 @@
       initSoundHooks();
       initSoundToggle();
       initBgmToggle();
+      initPawEasterEgg();
       initBackgroundParallax();
       initBackgroundParticles();
 

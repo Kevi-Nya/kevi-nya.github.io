@@ -60,8 +60,11 @@
   </script>
   <title>Kevi_Nya</title>
   <link rel="icon" type="image/png" href="favicon.png">
-  <!-- 头像 WebP 预加载（首屏关键资源，提前加载避免 LCP 延迟） -->
-  <link rel="preload" as="image" href="pics/avatar.webp" type="image/webp">
+  <!-- 头像预加载 — 首屏关键资源，使用 imagesrcset 匹配 <picture> 选择逻辑 -->
+  <link rel="preload" as="image"
+    imagesrcset="pics/avatar.webp 150w, pics/avatar.avif 150w, pics/SH.JPG 150w"
+    imagesizes="150px"
+    fetchpriority="high">
   <link rel="stylesheet" href="style.css">
   <!-- 品牌 Web 字体：霞鹜文楷（治愈手写楷体感） -->
   <link rel="preconnect" href="https://cdn.jsdelivr.net">
@@ -124,7 +127,7 @@
           <picture>
             <source srcset="pics/avatar.webp" type="image/webp">
             <source srcset="pics/avatar.avif" type="image/avif">
-            <img src="pics/SH.JPG" alt="kevi_nya 头像" class="avatar" width="150" height="150" loading="eager" decoding="async">
+            <img src="pics/SH.JPG" alt="kevi_nya 头像" class="avatar" width="150" height="150" loading="eager" decoding="sync" fetchpriority="high">
           </picture>
           <!-- 头像装饰 -->
           <span class="avatar-decoration dec-star-1">✦</span>
@@ -214,7 +217,7 @@
           <picture>
             <source srcset="pics/avatar.webp" type="image/webp">
             <source srcset="pics/avatar.avif" type="image/avif">
-            <img src="pics/SH.JPG" alt="kevi_nya 头像" class="avatar" width="150" height="150" loading="eager" decoding="async">
+            <img src="pics/SH.JPG" alt="kevi_nya 头像" class="avatar" width="150" height="150" loading="eager" decoding="sync" fetchpriority="high">
           </picture>
           <!-- 头像装饰 -->
           <span class="avatar-decoration dec-star-1">✦</span>

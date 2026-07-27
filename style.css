@@ -341,6 +341,26 @@ body {
 .paw-1 { top: 55%; left: 12%;  --paw-duration: 17s; animation-delay: 0s; }
 .paw-2 { top: 30%; right: 8%;  --paw-duration: 15s; animation-delay: 4s; }
 
+/* 猫爪彩蛋 — 点击弹跳动画 */
+.paw-bounce {
+  animation: paw-bounce-anim 0.5s var(--ease-bounce) forwards;
+}
+
+@keyframes paw-bounce-anim {
+  0%   { transform: scale(1) rotate(0deg);   opacity: 0.10; }
+  25%  { transform: scale(1.6) rotate(8deg);  opacity: 0.35; }
+  50%  { transform: scale(0.85) rotate(-4deg); opacity: 0.20; }
+  75%  { transform: scale(1.15) rotate(2deg);  opacity: 0.15; }
+  100% { transform: scale(1) rotate(0deg);     opacity: 0.10; }
+}
+
+/* prefers-reduced-motion 时跳过弹跳动画 */
+@media (prefers-reduced-motion: reduce) {
+  .paw-bounce {
+    animation: none;
+  }
+}
+
 /* 猫爪漂浮 + 轻微旋转动画 */
 @keyframes paw-drift {
   0%, 100% { transform: translateY(0) rotate(0deg); opacity: 0.18; }
@@ -1539,6 +1559,11 @@ body {
   /* Canvas 粒子层在减少动画时隐藏 */
   #bg-canvas {
     display: none;
+  }
+
+  /* 猫爪彩蛋弹跳动画禁用 */
+  .paw-bounce {
+    animation: none;
   }
 }
 
