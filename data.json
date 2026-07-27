@@ -101,6 +101,12 @@
       "url": "1447954419@qq.com",
       "icon_class": "fa-solid fa-envelope",
       "qq_number": null
+    },
+    {
+      "platform": "Bilibili",
+      "url": "https://space.bilibili.com/456988162?spm_id_from=333.1007.0.0",
+      "icon_class": "fa-brands fa-bilibili",
+      "qq_number": null
     }
   ]
 }
