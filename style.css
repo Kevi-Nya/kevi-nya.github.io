@@ -632,7 +632,11 @@ body {
 }
 
 .card-icon {
-  font-size: 1.35rem;
+  width: 1.35rem;
+  height: 1.35rem;
+  display: inline-block;
+  vertical-align: -0.15em;
+  flex-shrink: 0;
   filter: drop-shadow(0 0 6px rgba(248, 179, 209, 0.4));
 }
 
@@ -2202,6 +2206,37 @@ body {
 .sound-toggle:focus-visible {
   outline: 2px solid var(--accent-purple);
   outline-offset: 3px;
+}
+
+/* 音效首次使用提示气泡 */
+.sound-hint {
+  position: fixed;
+  bottom: 32px;
+  right: 76px;
+  background: var(--glass-bg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--glass-border);
+  border-radius: 12px;
+  padding: 8px 14px;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  z-index: 9001;
+  opacity: 0;
+  transform: translateX(8px);
+  transition: opacity 0.4s ease, transform 0.4s var(--ease-bounce);
+  pointer-events: none;
+}
+
+.sound-hint.visible {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.sound-hint.fading {
+  opacity: 0;
+  transform: translateX(8px);
 }
 
 /* 减少动画时隐藏音效按钮 */

@@ -1641,6 +1641,9 @@
       if (!newMuted) {
         SoundEngine.playClick();
       }
+
+      // 隐藏音效提示气泡
+      hideSoundHint();
     });
   }
 
@@ -1659,6 +1662,36 @@
       toggle.classList.add('active');
     } else {
       toggle.classList.remove('active');
+    }
+  }
+
+  /**
+   * 音效首次使用提示气泡
+   * 页面加载完成后延迟 1.5s 显示，4s 后自动淡出
+   * 仅在用户未主动操作音效时显示一次（基于 sessionStorage）
+   */
+  function showSoundHint() {
+    var HINT_KEY = 'kevi_sound_hint_shown';
+    try {
+      if (window.sessionStorage.getItem(HINT_KEY) === '1') return;
+      window.sessionStorage.setItem(HINT_KEY, '1');
+    } catch (e) { return; }
+
+    var hint = document.getElementById('sound-hint');
+    if (!hint) return;
+
+    setTimeout(function () {
+      hint.classList.add('visible');
+      setTimeout(function () {
+        hint.classList.add('fading');
+      }, 4000);
+    }, 1500);
+  }
+
+  function hideSoundHint() {
+    var hint = document.getElementById('sound-hint');
+    if (hint) {
+      hint.classList.add('fading');
     }
   }
 
@@ -2709,6 +2742,9 @@
         if (motionQuery.matches) {
           initScrollAnimation();
         }
+
+        // 音效首次使用提示 — 延迟 1.5s 后显示，4s 后淡出
+        showSoundHint();
       });
 
       // 音效引擎延迟初始化：遵守浏览器自动播放策略，
