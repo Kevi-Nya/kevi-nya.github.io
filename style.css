@@ -69,7 +69,7 @@
   --choreo-element-duration: 0.25s;      /* 元素级反馈持续 */
   --choreo-element-delay: 0s;            /* 元素级起始延迟 */
   /* 首屏 cinematic 序列总时长分配 */
-  --cinematic-phase-1: 0.3s;   /* 背景渐变淡入 */
+  --cinematic-phase-1: 0.4s;   /* 背景渐变淡入 */
   --cinematic-phase-2: 0.5s;   /* 粒子中心扩散 */
   --cinematic-phase-3: 0.4s;   /* 头像光圈展开 */
   --cinematic-phase-4: 0.6s;   /* 卡片 stagger 入场 */
@@ -1861,7 +1861,7 @@ body {
   z-index: 3;
   opacity: 0;
   animation: preloader-avatar-in 0.5s var(--ease-bounce) forwards;
-  animation-delay: 0.5s; /* 粒子扩散中期浮现 */
+  animation-delay: 0.8s; /* 粒子扩散中期浮现 */
 }
 
 .preloader-avatar picture,
@@ -1923,7 +1923,7 @@ body {
   opacity: 0;
   transform: translateY(12px);
   animation: preloader-logo-in 0.4s var(--ease-bounce) forwards;
-  animation-delay: 0.6s;
+  animation-delay: 1.0s;
 }
 
 @keyframes preloader-logo-in {
@@ -1965,7 +1965,7 @@ body {
   overflow: hidden;
   opacity: 0;
   animation: preloader-progress-in 0.3s ease forwards;
-  animation-delay: 0.6s;
+  animation-delay: 1.0s;
 }
 
 .preloader-progress::after {
@@ -1978,7 +1978,7 @@ body {
   transform: scaleX(0);
   transform-origin: left;
   animation: preloader-progress-fill 1.2s var(--ease-smooth) forwards;
-  animation-delay: 0.6s;
+  animation-delay: 1.0s;
 }
 
 @keyframes preloader-progress-in {
@@ -2094,7 +2094,7 @@ body {
   opacity: 0;
   transform: scale(0.8);
   animation: sound-toggle-in 0.4s var(--ease-bounce) forwards;
-  animation-delay: 1.8s;
+  animation-delay: 2.3s;
 }
 
 @keyframes sound-toggle-in {
@@ -2173,7 +2173,7 @@ body {
   opacity: 0;
   transform: scale(0.8);
   animation: bgm-toggle-in 0.4s var(--ease-bounce) forwards;
-  animation-delay: 2.0s; /* 比 SFX 按钮稍晚出现 */
+  animation-delay: 2.5s; /* 比 SFX 按钮稍晚出现 */
 }
 
 @keyframes bgm-toggle-in {

@@ -2549,15 +2549,15 @@
         }
       }
 
-      // Phase 3：触发头像光圈展开（0.8s 时）
+      // Phase 3：触发头像光圈展开（1.3s 时）
       setTimeout(function () {
         var avatarGlow = document.querySelector('.page:not(.hidden) .avatar-glow');
         if (avatarGlow) {
           avatarGlow.classList.add('cinematic-active');
         }
-      }, 800);
+      }, 1300);
 
-      // Phase 4：触发卡片 stagger 入场（1.0s 时）
+      // Phase 4：触发卡片 stagger 入场（1.5s 时）
       setTimeout(function () {
         var visiblePage = document.querySelector('.page:not(.hidden)');
         if (visiblePage) {
@@ -2566,20 +2566,20 @@
             el.classList.add('visible');
           });
         }
-      }, 1000);
+      }, 1500);
 
-      // 淡出 preloader（1.3s 时开始，0.3s 淡出）
+      // 淡出 preloader（1.8s 时开始，0.3s 淡出）
       setTimeout(function () {
         preloader.classList.add('fade-out');
-      }, 1300);
+      }, 1800);
 
-      // 序列完成（1.7s），移除 preloader 并 resolve
+      // 序列完成（2.2s），移除 preloader 并 resolve
       setTimeout(function () {
         if (preloader.parentNode) {
           preloader.parentNode.removeChild(preloader);
         }
         resolve();
-      }, 1700);
+      }, 2200);
     });
   }
 
