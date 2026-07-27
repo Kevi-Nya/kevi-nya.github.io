@@ -776,7 +776,7 @@
 
     var html = '';
     tags.forEach(function (tag) {
-      html += '<span class="tag">' + tag.emoji + ' ' + tag.label + '</span>';
+      html += '<span class="tag">' + escapeHtml(tag.emoji) + ' ' + escapeHtml(tag.label) + '</span>';
     });
     container.innerHTML = html;
   }
@@ -793,9 +793,9 @@
     cards.forEach(function (card) {
       html +=
         '<div class="life-card">' +
-        '<span class="life-emoji">' + card.emoji + '</span>' +
-        '<h3>' + card.title + '</h3>' +
-        '<p>' + card.description + '</p>' +
+        '<span class="life-emoji">' + escapeHtml(card.emoji) + '</span>' +
+        '<h3>' + escapeHtml(card.title) + '</h3>' +
+        '<p>' + escapeHtml(card.description) + '</p>' +
         '</div>';
     });
     container.innerHTML = html;
@@ -1412,7 +1412,7 @@
 
     var html = '';
     skills.forEach(function (skill) {
-      html += '<span class="skill-tag">' + skill.emoji + ' ' + skill.name + '</span>';
+      html += '<span class="skill-tag">' + escapeHtml(skill.emoji) + ' ' + escapeHtml(skill.name) + '</span>';
     });
     container.innerHTML = html;
   }
@@ -1438,10 +1438,10 @@
     links.forEach(function (link) {
       var iconSvg = PLATFORM_ICONS[link.platform] || '';
       html +=
-        '<a href="' + link.url + '" class="connect-link" aria-label="' + link.platform + '"' +
-        (link.qq_number ? ' data-qq="' + link.qq_number + '"' : '') + '>' +
+        '<a href="' + escapeHtml(link.url) + '" class="connect-link" aria-label="' + escapeHtml(link.platform) + '"' +
+        (link.qq_number ? ' data-qq="' + escapeHtml(link.qq_number) + '"' : '') + '>' +
         iconSvg +
-        '<span>' + link.platform + '</span>' +
+        '<span>' + escapeHtml(link.platform) + '</span>' +
         '</a>';
     });
     container.innerHTML = html;
