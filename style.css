@@ -2756,6 +2756,8 @@ body.night-mode .cloud {
   z-index: 8999;
   overflow: visible;
   pointer-events: none;
+  opacity: 1;
+  transform: scale(1);
 
   animation:
     clock-enter 0.6s cubic-bezier(0.23, 1, 0.32, 1) backwards;
@@ -2839,11 +2841,20 @@ body.night-mode .cloud {
 @media (prefers-reduced-motion: reduce) {
   .garden-clock-frame {
     animation: none;
+    opacity: 1;
+    transform: scale(1);
   }
   .garden-clock-frame .garden-clock {
     animation: none;
     opacity: 1;
     transform: scale(1);
+  }
+  .garden-clock-frame-img {
+    animation: none;
+  }
+  .garden-frame-star,
+  .garden-frame-paw {
+    animation: none;
   }
 }
 
@@ -2860,7 +2871,6 @@ body.night-mode .cloud {
   inset: 0;
   width: 100%;
   height: 100%;
-  object-fit: contain;
   pointer-events: none;
   user-select: none;
   animation:
