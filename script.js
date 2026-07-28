@@ -3880,10 +3880,10 @@
   // ==================== 花园时钟 ====================
 
   function initGardenClock() {
-    var hourLine = document.getElementById('clock-hour');
-    var minuteLine = document.getElementById('clock-minute');
-    var secondLine = document.getElementById('clock-second');
-    if (!hourLine || !minuteLine || !secondLine) return;
+    var hourGroup   = document.getElementById('clock-hour-group');
+    var minuteGroup = document.getElementById('clock-minute-group');
+    var secondGroup = document.getElementById('clock-second-group');
+    if (!hourGroup || !minuteGroup || !secondGroup) return;
 
     function tick() {
       var now = new Date();
@@ -3892,14 +3892,13 @@
       var seconds = now.getSeconds();
       var ms = now.getMilliseconds();
 
-      // 角度计算（含连续过渡）
-      var secondAngle = (seconds + ms / 1000) * 6;           // 每秒 6°
-      var minuteAngle = (minutes + seconds / 60) * 6;        // 每分 6°，秒级连续
-      var hourAngle = (hours + minutes / 60) * 30;            // 每时 30°，分级连续
+      var secondAngle = (seconds + ms / 1000) * 6;
+      var minuteAngle = (minutes + seconds / 60) * 6;
+      var hourAngle   = (hours + minutes / 60) * 30;
 
-      secondLine.setAttribute('transform', 'rotate(' + secondAngle + ', 44, 44)');
-      minuteLine.setAttribute('transform', 'rotate(' + minuteAngle + ', 44, 44)');
-      hourLine.setAttribute('transform', 'rotate(' + hourAngle + ', 44, 44)');
+      secondGroup.setAttribute('transform', 'rotate(' + secondAngle + ', 44, 44)');
+      minuteGroup.setAttribute('transform', 'rotate(' + minuteAngle + ', 44, 44)');
+      hourGroup.setAttribute('transform',   'rotate(' + hourAngle   + ', 44, 44)');
 
       requestAnimationFrame(tick);
     }

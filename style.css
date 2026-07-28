@@ -2763,8 +2763,12 @@ body.night-mode .cloud {
   z-index: 8999;
   opacity: 0;
   transform: scale(0.8);
-  animation: clock-enter 0.6s cubic-bezier(0.23, 1, 0.32, 1) forwards;
-  animation-delay: 2.8s; /* 在所有浮动按钮之后出现 */
+  animation:
+    clock-enter 0.6s cubic-bezier(0.23, 1, 0.32, 1) forwards,
+    clock-breathe 4s ease-in-out 3.5s infinite;
+  animation-delay:
+    2.8s,
+    3.5s;
   pointer-events: none;  /* 不拦截背景点击 */
   user-select: none;
   transition: box-shadow 0.4s cubic-bezier(0.23, 1, 0.32, 1);
@@ -2777,8 +2781,31 @@ body.night-mode .cloud {
   }
 }
 
+@keyframes clock-breathe {
+  0%, 100% {
+    box-shadow:
+      inset 0 1px 4px rgba(255, 255, 255, 0.7),
+      inset 0 -1px 2px rgba(0, 0, 0, 0.03),
+      0 4px 24px rgba(200, 162, 224, 0.12),
+      0 1px 4px rgba(0, 0, 0, 0.05);
+  }
+  50% {
+    box-shadow:
+      inset 0 1px 4px rgba(255, 255, 255, 0.7),
+      inset 0 -1px 2px rgba(0, 0, 0, 0.03),
+      0 6px 32px rgba(200, 162, 224, 0.22),
+      0 0 20px rgba(248, 179, 209, 0.18),
+      0 1px 4px rgba(0, 0, 0, 0.05);
+  }
+}
+
 .garden-clock-face {
   display: block;
+}
+
+/* 默认亮色模式：隐藏暗色渐变圆 */
+.clock-face-glow-dark {
+  display: none;
 }
 
 /* 暗色模式 */
@@ -2786,10 +2813,29 @@ body.night-mode .cloud {
   .garden-clock {
     background: rgba(40, 35, 50, 0.58);
     border-color: rgba(200, 162, 224, 0.14);
+    animation:
+      clock-enter 0.6s cubic-bezier(0.23, 1, 0.32, 1) forwards,
+      clock-breathe-dark 4s ease-in-out 3.5s infinite;
+  }
+
+  .clock-face-glow-light { display: none; }
+  .clock-face-glow-dark  { display: block; }
+}
+
+@keyframes clock-breathe-dark {
+  0%, 100% {
     box-shadow:
       inset 0 1px 4px rgba(255, 255, 255, 0.05),
       inset 0 -1px 2px rgba(0, 0, 0, 0.1),
       0 4px 24px rgba(0, 0, 0, 0.2),
+      0 1px 4px rgba(0, 0, 0, 0.1);
+  }
+  50% {
+    box-shadow:
+      inset 0 1px 4px rgba(255, 255, 255, 0.05),
+      inset 0 -1px 2px rgba(0, 0, 0, 0.1),
+      0 6px 32px rgba(212, 184, 232, 0.18),
+      0 0 20px rgba(240, 168, 197, 0.12),
       0 1px 4px rgba(0, 0, 0, 0.1);
   }
 }
@@ -2797,9 +2843,9 @@ body.night-mode .cloud {
 /* 减少动画 */
 @media (prefers-reduced-motion: reduce) {
   .garden-clock {
-    animation: none;
-    opacity: 1;
-    transform: scale(1);
+    animation: clock-enter 0.6s cubic-bezier(0.23, 1, 0.32, 1) forwards;
+    opacity: 0;
+    transform: scale(0.8);
   }
 }
 
