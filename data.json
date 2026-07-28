@@ -54,9 +54,22 @@
       "mood": "Happy",
       "tag_1": "零食",
       "tag_2": "小福利"
+    },
+    {
+      "content": "早上上称发现自己比想象中的轻一些🪶",
+      "note_date": "2026-07-28",
+      "mood": "Surprise"
     }
   ],
-  "thoughts": [],
+  "thoughts": [
+    {
+      "tag_type": "Work",
+      "tag_label": "工作",
+      "title": "关于工作的思考",
+      "summary": "享受工作带来的Positive Issue",
+      "thought_date": "2026-07-28"
+    }
+  ],
   "skills": [
     {
       "emoji": "🐍",
