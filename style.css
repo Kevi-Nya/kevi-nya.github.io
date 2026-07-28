@@ -2733,3 +2733,72 @@ body.night-mode .cloud {
   /* 夜间云朵更透明 */
   opacity: 0.06;
 }
+
+/* ============================================================
+   花园时钟 — SVG 矢量模拟时钟
+   位于屏幕左下角，与右下角 SFX 按钮镜像对称
+   ============================================================ */
+
+.garden-clock {
+  position: fixed;
+  bottom: 24px;
+  left: 24px;
+  width: 88px;
+  height: 88px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.58);      /* 与 var(--glass-bg-sub) 接近但不依赖 CSS变量 */
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(200, 162, 224, 0.18); /* #C8A2E0 18% — 匹配 --glass-border-sub */
+  box-shadow:
+    inset 0 1px 4px rgba(255, 255, 255, 0.7),
+    inset 0 -1px 2px rgba(0, 0, 0, 0.03),
+    0 4px 24px rgba(200, 162, 224, 0.12),
+    0 1px 4px rgba(0, 0, 0, 0.05);
+  z-index: 8999;
+  opacity: 0;
+  transform: scale(0.8);
+  animation: clock-enter 0.6s cubic-bezier(0.23, 1, 0.32, 1) forwards;
+  animation-delay: 2.8s; /* 在所有浮动按钮之后出现 */
+  pointer-events: none;  /* 不拦截背景点击 */
+  user-select: none;
+  transition: box-shadow 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+@keyframes clock-enter {
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.garden-clock-face {
+  display: block;
+}
+
+/* 暗色模式 */
+@media (prefers-color-scheme: dark) {
+  .garden-clock {
+    background: rgba(40, 35, 50, 0.58);
+    border-color: rgba(200, 162, 224, 0.14);
+    box-shadow:
+      inset 0 1px 4px rgba(255, 255, 255, 0.05),
+      inset 0 -1px 2px rgba(0, 0, 0, 0.1),
+      0 4px 24px rgba(0, 0, 0, 0.2),
+      0 1px 4px rgba(0, 0, 0, 0.1);
+  }
+}
+
+/* 减少动画 */
+@media (prefers-reduced-motion: reduce) {
+  .garden-clock {
+    animation: none;
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* 打印时隐藏 */
+@media print {
+  .garden-clock { display: none !important; }
+}

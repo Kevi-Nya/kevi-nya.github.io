@@ -3877,6 +3877,36 @@
     });
   }
 
+  // ==================== 花园时钟 ====================
+
+  function initGardenClock() {
+    var hourLine = document.getElementById('clock-hour');
+    var minuteLine = document.getElementById('clock-minute');
+    var secondLine = document.getElementById('clock-second');
+    if (!hourLine || !minuteLine || !secondLine) return;
+
+    function tick() {
+      var now = new Date();
+      var hours = now.getHours() % 12;
+      var minutes = now.getMinutes();
+      var seconds = now.getSeconds();
+      var ms = now.getMilliseconds();
+
+      // 角度计算（含连续过渡）
+      var secondAngle = (seconds + ms / 1000) * 6;           // 每秒 6°
+      var minuteAngle = (minutes + seconds / 60) * 6;        // 每分 6°，秒级连续
+      var hourAngle = (hours + minutes / 60) * 30;            // 每时 30°，分级连续
+
+      secondLine.setAttribute('transform', 'rotate(' + secondAngle + ', 44, 44)');
+      minuteLine.setAttribute('transform', 'rotate(' + minuteAngle + ', 44, 44)');
+      hourLine.setAttribute('transform', 'rotate(' + hourAngle + ', 44, 44)');
+
+      requestAnimationFrame(tick);
+    }
+
+    requestAnimationFrame(tick);
+  }
+
   // ==================== 初始化 ====================
 
   function init() {
@@ -3914,6 +3944,9 @@
 
         // 音效首次使用提示 — 延迟 1.5s 后显示，4s 后淡出
         showSoundHint();
+
+        // 启动花园时钟
+        initGardenClock();
       });
 
       // 音效引擎延迟初始化：遵守浏览器自动播放策略，
@@ -3947,6 +3980,27 @@
         SoundEngine.playClick();
       });
     });
+
+    // 注册 Service Worker — 自动缓存管理
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js', { scope: '/' }).then(function (reg) {
+        // 监听更新：新 SW 已安装但等待激活时触发
+        reg.addEventListener('updatefound', function () {
+          var newWorker = reg.installing;
+          if (!newWorker) return;
+
+          newWorker.addEventListener('statechange', function () {
+            // 新版 SW 激活完成 → 页面已有新缓存
+            if (newWorker.state === 'activated' && navigator.serviceWorker.controller) {
+              // 静默更新：不弹窗打扰，仅 console 记录
+              console.log('[花园] 缓存已自动更新至 v' + CACHE_VERSION);
+            }
+          });
+        });
+      }).catch(function (err) {
+        console.warn('[花园] Service Worker 注册失败:', err);
+      });
+    }
   }
 
   // DOM 加载完成后初始化

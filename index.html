@@ -365,6 +365,89 @@
     </svg>
   </button>
 
+  <!-- ==================== 花园时钟 ==================== -->
+  <div class="garden-clock" aria-hidden="true">
+    <svg class="garden-clock-face" viewBox="0 0 88 88" width="88" height="88"
+         aria-label="当前时间" role="img">
+      <!-- 辉光环 -->
+      <circle cx="44" cy="44" r="41" fill="none"
+              stroke="#FF9EBE" stroke-width="1" opacity="0.25"/>
+      <circle cx="44" cy="44" r="37" fill="none"
+              stroke="#FF9EBE" stroke-width="0.5" opacity="0.15"
+              stroke-dasharray="3 6"/>
+
+      <!-- 12/3/6/9 主标记（粉色） -->
+      <g transform="rotate(0, 44, 44)">
+        <circle cx="44" cy="7.5" r="2.5" fill="#FF9EBE" opacity="0.6"/>
+        <circle cx="44" cy="7.5" r="1" fill="#FF9EBE" opacity="0.9"/>
+      </g>
+      <g transform="rotate(90, 44, 44)">
+        <circle cx="44" cy="7.5" r="2.5" fill="#FF9EBE" opacity="0.6"/>
+        <circle cx="44" cy="7.5" r="1" fill="#FF9EBE" opacity="0.9"/>
+      </g>
+      <g transform="rotate(180, 44, 44)">
+        <circle cx="44" cy="7.5" r="2.5" fill="#FF9EBE" opacity="0.6"/>
+        <circle cx="44" cy="7.5" r="1" fill="#FF9EBE" opacity="0.9"/>
+      </g>
+      <g transform="rotate(270, 44, 44)">
+        <circle cx="44" cy="7.5" r="2.5" fill="#FF9EBE" opacity="0.6"/>
+        <circle cx="44" cy="7.5" r="1" fill="#FF9EBE" opacity="0.9"/>
+      </g>
+
+      <!-- 1/2/4/5/7/8/10/11 次标记（紫色） -->
+      <g transform="rotate(30, 44, 44)">
+        <circle cx="44" cy="7.5" r="2" fill="#C8A2E0" opacity="0.6"/>
+        <circle cx="44" cy="7.5" r="0.8" fill="#C8A2E0" opacity="0.9"/>
+      </g>
+      <g transform="rotate(60, 44, 44)">
+        <circle cx="44" cy="7.5" r="2" fill="#C8A2E0" opacity="0.6"/>
+        <circle cx="44" cy="7.5" r="0.8" fill="#C8A2E0" opacity="0.9"/>
+      </g>
+      <g transform="rotate(120, 44, 44)">
+        <circle cx="44" cy="7.5" r="2" fill="#C8A2E0" opacity="0.6"/>
+        <circle cx="44" cy="7.5" r="0.8" fill="#C8A2E0" opacity="0.9"/>
+      </g>
+      <g transform="rotate(150, 44, 44)">
+        <circle cx="44" cy="7.5" r="2" fill="#C8A2E0" opacity="0.6"/>
+        <circle cx="44" cy="7.5" r="0.8" fill="#C8A2E0" opacity="0.9"/>
+      </g>
+      <g transform="rotate(210, 44, 44)">
+        <circle cx="44" cy="7.5" r="2" fill="#C8A2E0" opacity="0.6"/>
+        <circle cx="44" cy="7.5" r="0.8" fill="#C8A2E0" opacity="0.9"/>
+      </g>
+      <g transform="rotate(240, 44, 44)">
+        <circle cx="44" cy="7.5" r="2" fill="#C8A2E0" opacity="0.6"/>
+        <circle cx="44" cy="7.5" r="0.8" fill="#C8A2E0" opacity="0.9"/>
+      </g>
+      <g transform="rotate(300, 44, 44)">
+        <circle cx="44" cy="7.5" r="2" fill="#C8A2E0" opacity="0.6"/>
+        <circle cx="44" cy="7.5" r="0.8" fill="#C8A2E0" opacity="0.9"/>
+      </g>
+      <g transform="rotate(330, 44, 44)">
+        <circle cx="44" cy="7.5" r="2" fill="#C8A2E0" opacity="0.6"/>
+        <circle cx="44" cy="7.5" r="0.8" fill="#C8A2E0" opacity="0.9"/>
+      </g>
+
+      <!-- 时针 -->
+      <line id="clock-hour" x1="44" y1="44" x2="44" y2="23"
+            stroke="#6B5E62" stroke-width="2.5" stroke-linecap="round"
+            transform="rotate(0, 44, 44)"/>
+      <!-- 分针 -->
+      <line id="clock-minute" x1="44" y1="44" x2="44" y2="16"
+            stroke="#6B5E62" stroke-width="1.8" stroke-linecap="round"
+            transform="rotate(0, 44, 44)"/>
+      <!-- 秒针 -->
+      <line id="clock-second" x1="44" y1="50" x2="44" y2="14"
+            stroke="#FF9EBE" stroke-width="1" stroke-linecap="round"
+            transform="rotate(0, 44, 44)"/>
+      <circle cx="44" cy="50" r="2" fill="#FF9EBE" opacity="0.5"/>
+
+      <!-- 中心轴帽 -->
+      <circle cx="44" cy="44" r="3" fill="#FFFFFF"
+              stroke="#C8A2E0" stroke-width="1" opacity="0.9"/>
+    </svg>
+  </div>
+
   <script src="script.js"></script>
 </body>
 </html>
