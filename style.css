@@ -2752,57 +2752,20 @@ body.night-mode .cloud {
   left: 4px;
   width: 128px;
   height: 128px;
-  border-radius: 50%;
+  border-radius: 0;
   z-index: 8999;
   overflow: visible;
   pointer-events: none;
 
-  /* 瓷质渐变 */
-  background: radial-gradient(
-    ellipse at 35% 30%,
-    #FCF6F0 0%,
-    #F8F0E8 35%,
-    #F3DEE6 70%,
-    #E8D8F0 100%
-  );
-
-  /* 瓷质多层阴影 */
-  box-shadow:
-    inset 0 3px 6px rgba(255, 255, 255, 0.85),
-    inset 0 -3px 6px rgba(200, 162, 224, 0.20),
-    0 6px 28px rgba(200, 162, 224, 0.20),
-    0 2px 6px rgba(0, 0, 0, 0.08);
-
   animation:
-    clock-enter 0.6s cubic-bezier(0.23, 1, 0.32, 1) backwards,
-    clock-breathe 4s ease-in-out 3.5s infinite;
-  animation-delay:
-    2.8s,
-    3.5s;
+    clock-enter 0.6s cubic-bezier(0.23, 1, 0.32, 1) backwards;
+  animation-delay: 2.8s;
 }
 
 @keyframes clock-enter {
   to {
     opacity: 1;
     transform: scale(1);
-  }
-}
-
-@keyframes clock-breathe {
-  0%, 100% {
-    box-shadow:
-      inset 0 3px 6px rgba(255, 255, 255, 0.85),
-      inset 0 -3px 6px rgba(200, 162, 224, 0.20),
-      0 6px 28px rgba(200, 162, 224, 0.20),
-      0 2px 6px rgba(0, 0, 0, 0.08);
-  }
-  50% {
-    box-shadow:
-      inset 0 3px 6px rgba(255, 255, 255, 0.85),
-      inset 0 -3px 6px rgba(200, 162, 224, 0.20),
-      0 10px 36px rgba(200, 162, 224, 0.30),
-      0 0 22px rgba(248, 179, 209, 0.22),
-      0 2px 6px rgba(0, 0, 0, 0.08);
   }
 }
 
@@ -2847,21 +2810,8 @@ body.night-mode .cloud {
 /* 暗色模式 */
 @media (prefers-color-scheme: dark) {
   .garden-clock-frame {
-    background: radial-gradient(
-      ellipse at 35% 30%,
-      #3A3240 0%,
-      #2D2535 35%,
-      #251D2D 70%,
-      #1A1520 100%
-    );
-    box-shadow:
-      inset 0 3px 6px rgba(255, 255, 255, 0.06),
-      inset 0 -3px 6px rgba(0, 0, 0, 0.3),
-      0 6px 28px rgba(0, 0, 0, 0.3),
-      0 2px 6px rgba(0, 0, 0, 0.15);
     animation:
-      clock-enter 0.6s cubic-bezier(0.23, 1, 0.32, 1) backwards,
-      clock-breathe-dark 4s ease-in-out 3.5s infinite;
+      clock-enter 0.6s cubic-bezier(0.23, 1, 0.32, 1) backwards;
   }
 
   .garden-clock-frame .garden-clock {
@@ -2885,24 +2835,6 @@ body.night-mode .cloud {
   }
 }
 
-@keyframes clock-breathe-dark {
-  0%, 100% {
-    box-shadow:
-      inset 0 3px 6px rgba(255, 255, 255, 0.06),
-      inset 0 -3px 6px rgba(0, 0, 0, 0.3),
-      0 6px 28px rgba(0, 0, 0, 0.3),
-      0 2px 6px rgba(0, 0, 0, 0.15);
-  }
-  50% {
-    box-shadow:
-      inset 0 3px 6px rgba(255, 255, 255, 0.06),
-      inset 0 -3px 6px rgba(0, 0, 0, 0.3),
-      0 10px 36px rgba(212, 184, 232, 0.22),
-      0 0 22px rgba(240, 168, 197, 0.15),
-      0 2px 6px rgba(0, 0, 0, 0.15);
-  }
-}
-
 /* 减少动画 */
 @media (prefers-reduced-motion: reduce) {
   .garden-clock-frame {
@@ -2921,6 +2853,32 @@ body.night-mode .cloud {
 }
 
 /* ==================== 瓷质外框 装饰元素 ==================== */
+
+/* PNG 外框图片 */
+.garden-clock-frame-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  pointer-events: none;
+  user-select: none;
+  animation:
+    frame-img-breathe 4s ease-in-out 3.5s infinite;
+  animation-delay: 3.5s;
+}
+
+@keyframes frame-img-breathe {
+  0%, 100% {
+    filter: drop-shadow(0 6px 28px rgba(200, 162, 224, 0.20))
+            drop-shadow(0 2px 6px rgba(0, 0, 0, 0.08));
+  }
+  50% {
+    filter: drop-shadow(0 10px 36px rgba(200, 162, 224, 0.30))
+            drop-shadow(0 0 22px rgba(248, 179, 209, 0.22))
+            drop-shadow(0 2px 6px rgba(0, 0, 0, 0.08));
+  }
+}
 
 .garden-frame-star,
 .garden-frame-paw {
