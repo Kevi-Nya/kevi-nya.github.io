@@ -4035,7 +4035,8 @@
         state: 'forming',
         size: 2 + Math.random() * 1.5,
         color: particleColor,
-        alpha: 0
+        alpha: 0,
+        formDuration: 0.50 + Math.random() * 0.15
       });
     }
   }
@@ -4149,25 +4150,32 @@
     timeParticleLastTs = nowTs;
     timeParticleElapsed += dt;
 
-    // === holding 阶段微暗底衬 ===
+    // === holding 阶段微暗底衬（渐变只创建一次） ===
     if (timeParticleElapsed >= 0.6 && timeParticleElapsed < 1.3) {
+      if (!timeParticleOverlayCtx._bgGradient) {
+        var grad = ctx.createRadialGradient(
+          canvas.width / 2, canvas.height * 0.35, canvas.width * 0.1,
+          canvas.width / 2, canvas.height * 0.35, canvas.width * 0.6
+        );
+        grad.addColorStop(0, 'rgba(26, 21, 32, 0)');
+        grad.addColorStop(1, 'rgba(26, 21, 32, 1)');
+        timeParticleOverlayCtx._bgGradient = grad;
+      }
+
       var bgAlpha;
       if (timeParticleElapsed < 0.8) {
-        bgAlpha = (timeParticleElapsed - 0.6) / 0.2 * 0.12;
+        bgAlpha = (timeParticleElapsed - 0.6) / 0.3 * 0.06;
       } else if (timeParticleElapsed < 1.1) {
-        bgAlpha = 0.12;
+        bgAlpha = 0.06;
       } else {
-        bgAlpha = (1.3 - timeParticleElapsed) / 0.2 * 0.12;
+        bgAlpha = (1.3 - timeParticleElapsed) / 0.2 * 0.06;
       }
-      bgAlpha = Math.max(0, Math.min(0.12, bgAlpha));
-      var gradient = ctx.createRadialGradient(
-        canvas.width / 2, canvas.height * 0.35, canvas.width * 0.1,
-        canvas.width / 2, canvas.height * 0.35, canvas.width * 0.6
-      );
-      gradient.addColorStop(0, 'rgba(26, 21, 32, 0)');
-      gradient.addColorStop(1, 'rgba(26, 21, 32, ' + bgAlpha + ')');
-      ctx.fillStyle = gradient;
+      bgAlpha = Math.max(0, Math.min(0.06, bgAlpha));
+
+      ctx.globalAlpha = bgAlpha;
+      ctx.fillStyle = timeParticleOverlayCtx._bgGradient;
       ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.globalAlpha = 1;
     }
 
     // === 粒子运动 ===
@@ -4175,7 +4183,7 @@
       var tp = timeParticles[p];
 
       if (tp.state === 'forming') {
-        var progress = Math.min(timeParticleElapsed / 0.6, 1);
+        var progress = Math.min(timeParticleElapsed / (tp.formDuration || 0.6), 1);
         var eased = 1 - Math.pow(1 - progress, 3);
         tp.x = tp.startX + (tp.targetX - tp.startX) * eased;
         tp.y = tp.startY + (tp.targetY - tp.startY) * eased;
@@ -4221,8 +4229,8 @@
       var sz, glowRadius, glowAlpha;
       if (tp.state === 'holding') {
         sz = tp.size + 0.5;
-        glowRadius = sz * 3;
-        glowAlpha = 0.25;
+        glowRadius = sz * 2.2;
+        glowAlpha = 0.18;
       } else if (tp.state === 'dissipating') {
         var shrink = 1 - Math.min((timeParticleElapsed - 1.3) / 1.5, 1);
         sz = tp.size * Math.max(0, 0.8 * shrink + 0.2);
@@ -4258,6 +4266,7 @@
       timeParticleElapsed = 0;
       timeParticleLastTs = 0;
       canvas.style.display = 'none';
+      timeParticleOverlayCtx._bgGradient = null;
     }
   }
 
