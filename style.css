@@ -2765,6 +2765,9 @@ body.night-mode .cloud {
   opacity: 0;
   transform: scale(0.8);
   overflow: visible;
+  cursor: pointer;
+  pointer-events: auto;
+  transition: transform 0.3s cubic-bezier(0.23, 1, 0.32, 1);
   animation:
     clock-enter 0.6s cubic-bezier(0.23, 1, 0.32, 1) forwards,
     clock-breathe 4s ease-in-out 3.5s infinite;
@@ -2864,3 +2867,57 @@ body.night-mode .cloud {
 @media print {
   .garden-clock { display: none !important; }
 }
+
+/* ==================== 花园时钟 点击交互动画 ==================== */
+
+/* 悬停放大 */
+.garden-clock:hover {
+  transform: scale(1.04);
+}
+
+/* 点击脉冲 */
+@keyframes clock-tap-pulse {
+  0%   { transform: scale(1.04); }
+  25%  { transform: scale(1.08); }
+  100% { transform: scale(1); }
+}
+.garden-clock.tap-active {
+  animation: clock-tap-pulse 0.50s cubic-bezier(0.23, 1, 0.32, 1) forwards;
+}
+
+/* 辉光圆环闪烁 */
+@keyframes ring-flash {
+  0%, 100% { opacity: 0.20; }
+  40%      { opacity: 0.50; }
+}
+#clock-ring-glow.ring-flash {
+  animation: ring-flash 0.60s ease;
+}
+
+/* 表冠旋弹 */
+@keyframes crown-flick {
+  0%   { transform: rotate(0deg); }
+  35%  { transform: rotate(-14deg); }
+  65%  { transform: rotate(5deg); }
+  100% { transform: rotate(0deg); }
+}
+#clock-crown.crown-flick {
+  animation: crown-flick 0.45s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+/* 齿轮星芒逐点闪烁 */
+@keyframes gear-flash {
+  0%, 100% { opacity: 0.40; }
+  50%      { opacity: 0.80; }
+}
+.clock-gear-pink.gear-flash polygon {
+  animation: gear-flash 0.60s ease;
+}
+
+/* 链节摆动 */
+@keyframes chain-sway-1 { 0%,100%{transform:translateX(0)} 35%{transform:translateX(3px)} }
+@keyframes chain-sway-2 { 0%,100%{transform:translateX(0)} 35%{transform:translateX(2px)} }
+@keyframes chain-sway-3 { 0%,100%{transform:translateX(0)} 35%{transform:translateX(1px)} }
+#clock-chain-1.chain-sway { animation: chain-sway-1 0.50s cubic-bezier(0.23,1,0.32,1); }
+#clock-chain-2.chain-sway { animation: chain-sway-2 0.50s cubic-bezier(0.23,1,0.32,1); }
+#clock-chain-3.chain-sway { animation: chain-sway-3 0.50s cubic-bezier(0.23,1,0.32,1); }

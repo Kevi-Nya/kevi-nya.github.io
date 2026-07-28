@@ -23,6 +23,11 @@
   // 常驻爱心数据（由 heart burst 填充，主循环绘制）
   var sharedPermanentHearts = [];
 
+  // — 时间数字粒子系统 —
+  var timeParticles = [];       // 时间数字粒子
+  var timeParticleElapsed = 0;  // 动画累计时间（秒）
+  var timeParticleLastTs = 0;   // 上一帧时间戳
+
   /**
    * 在主粒子循环每帧末尾统一绘制叠加装饰层
    * 包含：萤火虫粒子 + 心形碎裂常驻爱心
@@ -91,6 +96,65 @@
         ctx.restore();
       }
       ctx.restore();
+    }
+
+    // --- 时间数字粒子 ---
+    if (timeParticles.length > 0) {
+      var nowTs = performance.now();
+      if (timeParticleLastTs === 0) timeParticleLastTs = nowTs;
+      var dt = Math.min((nowTs - timeParticleLastTs) / 1000, 0.05);
+      timeParticleLastTs = nowTs;
+      timeParticleElapsed += dt;
+
+      for (var p = timeParticles.length - 1; p >= 0; p--) {
+        var tp = timeParticles[p];
+
+        if (tp.state === 'forming') {
+          var progress = Math.min(timeParticleElapsed / 0.6, 1);
+          var eased = 1 - Math.pow(1 - progress, 3);
+          tp.x = tp.startX + (tp.targetX - tp.startX) * eased;
+          tp.y = tp.startY + (tp.targetY - tp.startY) * eased;
+          tp.alpha = eased * 0.95;
+          if (progress >= 1) tp.state = 'holding';
+        } else if (tp.state === 'holding') {
+          tp.x = tp.targetX;
+          tp.y = tp.targetY;
+          tp.alpha = 0.9 + Math.sin(timeParticleElapsed * 4 + p * 0.3) * 0.1;
+          if (timeParticleElapsed >= 1.3) tp.state = 'dissipating';
+        } else if (tp.state === 'dissipating') {
+          var dProgress = (timeParticleElapsed - 1.3) / 1.0;
+          var angle = Math.atan2(tp.targetY - tp.startY, tp.targetX - tp.startX);
+          angle += (Math.random() - 0.5) * 1.2;
+          var speed = 30 + Math.random() * 80;
+          tp.x += Math.cos(angle) * speed * dt;
+          tp.y += Math.sin(angle) * speed * dt;
+          tp.alpha = Math.max(0, 1 - dProgress);
+          if (timeParticleElapsed >= 2.3) {
+            timeParticles.splice(p, 1);
+            continue;
+          }
+        }
+
+        var sz = tp.size;
+        var cx = tp.x, cy = tp.y;
+        ctx.save();
+        ctx.globalAlpha = tp.alpha;
+        ctx.fillStyle = tp.color;
+        ctx.beginPath();
+        ctx.arc(cx, cy, sz, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.arc(cx, cy, sz * 2, 0, Math.PI * 2);
+        ctx.fillStyle = tp.color;
+        ctx.globalAlpha = tp.alpha * 0.15;
+        ctx.fill();
+        ctx.restore();
+      }
+
+      if (timeParticles.length === 0) {
+        timeParticleElapsed = 0;
+        timeParticleLastTs = 0;
+      }
     }
   }
 
@@ -3906,6 +3970,177 @@
     requestAnimationFrame(tick);
   }
 
+  // ==================== 花园时钟 点击交互（v2） ====================
+
+  var clockTapCooldown = false;
+
+  /**
+   * 离屏渲染时间字符串 + 像素采样
+   * @returns {{ points: Array<{x: number, y: number}>, timeStr: string }}
+   */
+  function sampleTimeDigits() {
+    var now = new Date();
+    var h = String(now.getHours()).padStart(2, '0');
+    var m = String(now.getMinutes()).padStart(2, '0');
+    var timeStr = h + ':' + m;
+
+    var offCanvas = document.createElement('canvas');
+    offCanvas.width = 300;
+    offCanvas.height = 80;
+    var offCtx = offCanvas.getContext('2d');
+    offCtx.font = '700 72px system-ui, -apple-system, sans-serif';
+    offCtx.textAlign = 'center';
+    offCtx.textBaseline = 'middle';
+    offCtx.fillStyle = '#FFFFFF';
+    offCtx.fillText(timeStr, 150, 40);
+
+    var imageData = offCtx.getImageData(0, 0, 300, 80);
+    var pixels = imageData.data;
+    var step = 2;
+    var points = [];
+
+    for (var y = 0; y < 80; y += step) {
+      for (var x = 0; x < 300; x += step) {
+        var idx = (y * 300 + x) * 4;
+        if (pixels[idx + 3] > 128) {
+          points.push({ x: x, y: y });
+        }
+      }
+    }
+    return { points: points, timeStr: timeStr };
+  }
+
+  /**
+   * 从时间数字像素点创建粒子
+   * @param {number} clockCenterX - 钟面中心 X（视口坐标）
+   * @param {number} clockCenterY - 钟面中心 Y（视口坐标）
+   * @param {number} viewportW - 视口宽度
+   * @param {number} viewportH - 视口高度
+   */
+  function spawnTimeParticles(clockCenterX, clockCenterY, viewportW, viewportH) {
+    var result = sampleTimeDigits();
+    var points = result.points;
+
+    var digitW = 300, digitH = 80;
+    var scale = Math.min(viewportW / digitW * 0.85, viewportH / digitH * 0.5);
+    var displayW = digitW * scale;
+    var displayH = digitH * scale;
+    var offsetX = (viewportW - displayW) / 2;
+    var offsetY = viewportH * 0.35 - displayH / 2;
+
+    var colors = ['#FF9EBE', '#C8A2E0', '#F8B3D1', '#FFFFFF', '#E8D5F5'];
+
+    for (var i = 0; i < points.length; i++) {
+      var targetX = offsetX + points[i].x * scale;
+      var targetY = offsetY + points[i].y * scale;
+
+      var angle = Math.random() * Math.PI * 2;
+      var dist = 20 + Math.random() * 60;
+      var startX = clockCenterX + Math.cos(angle) * dist;
+      var startY = clockCenterY + Math.sin(angle) * dist;
+
+      timeParticles.push({
+        x: startX, y: startY,
+        startX: startX, startY: startY,
+        targetX: targetX, targetY: targetY,
+        state: 'forming',
+        size: 2 + Math.random() * 1.5,
+        color: colors[Math.floor(Math.random() * colors.length)],
+        alpha: 0
+      });
+    }
+  }
+
+  /**
+   * 上行琶音音效 C6→E6→G6
+   */
+  function playClockChime() {
+    var ctx = SoundEngine.getContext();
+    if (!ctx || SoundEngine.isMuted()) return;
+    var now = ctx.currentTime;
+    var notes = [
+      { freq: 1047, time: 0,    gain: 0.25 },
+      { freq: 1319, time: 0.10, gain: 0.22 },
+      { freq: 1568, time: 0.20, gain: 0.20 }
+    ];
+    notes.forEach(function (n) {
+      var osc = ctx.createOscillator();
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(n.freq, now + n.time);
+      var gain = ctx.createGain();
+      gain.gain.setValueAtTime(0, now + n.time);
+      gain.gain.linearRampToValueAtTime(n.gain, now + n.time + 0.03);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + n.time + 0.35);
+      osc.connect(gain).connect(ctx.destination);
+      osc.start(now + n.time);
+      osc.stop(now + n.time + 0.40);
+    });
+  }
+
+  /**
+   * 花园时钟点击事件主逻辑
+   */
+  function initClockTap() {
+    var clock = document.querySelector('.garden-clock');
+    if (!clock) return;
+
+    clock.addEventListener('click', function (e) {
+      if (clockTapCooldown) return;
+      clockTapCooldown = true;
+
+      // === 机械层 ===
+
+      // 容器脉冲
+      clock.classList.add('tap-active');
+      setTimeout(function () { clock.classList.remove('tap-active'); }, 500);
+
+      // 辉光环
+      var ring = document.getElementById('clock-ring-glow');
+      if (ring) { ring.classList.add('ring-flash'); setTimeout(function () { ring.classList.remove('ring-flash'); }, 600); }
+
+      // 表冠旋弹
+      var crown = document.getElementById('clock-crown');
+      if (crown) { crown.classList.add('crown-flick'); setTimeout(function () { crown.classList.remove('crown-flick'); }, 450); }
+
+      // 音效
+      playClockChime();
+
+      // 齿轮星芒逐点闪烁
+      var gears = document.querySelectorAll('.clock-gear-pink');
+      for (var g = 0; g < gears.length; g++) {
+        (function (el, d) {
+          setTimeout(function () { el.classList.add('gear-flash'); setTimeout(function () { el.classList.remove('gear-flash'); }, 600); }, d);
+        })(gears[g], g * 70);
+      }
+
+      // 链节摆动
+      ['clock-chain-1', 'clock-chain-2', 'clock-chain-3'].forEach(function (id, i) {
+        setTimeout(function () {
+          var el = document.getElementById(id);
+          if (el) { el.classList.add('chain-sway'); setTimeout(function () { el.classList.remove('chain-sway'); }, 500); }
+        }, 50 + i * 50);
+      });
+
+      // === Canvas 层：时间数字粒子 ===
+
+      // 清除上一轮
+      timeParticles = [];
+      timeParticleElapsed = 0;
+      timeParticleLastTs = 0;
+
+      // 创建新粒子
+      var clockRect = clock.getBoundingClientRect();
+      var clockCX = clockRect.left + 54;
+      var clockCY = clockRect.top + 54;
+      spawnTimeParticles(clockCX, clockCY, window.innerWidth, window.innerHeight);
+
+      // === 冷却 3.0s ===
+      setTimeout(function () {
+        clockTapCooldown = false;
+      }, 3000);
+    });
+  }
+
   // ==================== 初始化 ====================
 
   function init() {
@@ -3946,6 +4181,9 @@
 
         // 启动花园时钟
         initGardenClock();
+
+        // 花园时钟点击交互
+        initClockTap();
       });
 
       // 音效引擎延迟初始化：遵守浏览器自动播放策略，

@@ -385,33 +385,35 @@
       </defs>
 
       <!-- A. 表冠（钟面之上，容器 overflow:visible 显示） -->
-      <circle cx="54" cy="6" r="4" fill="#E8D5F5" stroke="#C8A2E0" stroke-width="0.6" opacity="0.55"/>
-      <circle cx="54" cy="6" r="2.5" fill="#FDE4EC" stroke="#FF9EBE" stroke-width="0.5" opacity="0.45"/>
-      <line x1="50" y1="6" x2="58" y2="6" stroke="#6B5E62" stroke-width="0.5" opacity="0.18"/>
+      <g id="clock-crown" style="transform-origin: 54px 6px;">
+        <circle cx="54" cy="6" r="4" fill="#E8D5F5" stroke="#C8A2E0" stroke-width="0.6" opacity="0.55"/>
+        <circle cx="54" cy="6" r="2.5" fill="#FDE4EC" stroke="#FF9EBE" stroke-width="0.5" opacity="0.45"/>
+        <line x1="50" y1="6" x2="58" y2="6" stroke="#6B5E62" stroke-width="0.5" opacity="0.18"/>
+      </g>
 
       <!-- B. 齿轮星芒边框（12 点构成怀表外圈） -->
       <!-- 偶数位 — 粉色大星芒（0/60/120/180/240/300°） -->
-      <g transform="rotate(0, 54, 54)">
+      <g class="clock-gear-pink" transform="rotate(0, 54, 54)">
         <polygon points="54,1.5 55.3,4 54,6.5 52.7,4" fill="#FF9EBE" opacity="0.40"/>
         <circle cx="54" cy="4" r="1.2" fill="#FF9EBE" opacity="0.55"/>
       </g>
-      <g transform="rotate(60, 54, 54)">
+      <g class="clock-gear-pink" transform="rotate(60, 54, 54)">
         <polygon points="54,1.5 55.3,4 54,6.5 52.7,4" fill="#FF9EBE" opacity="0.40"/>
         <circle cx="54" cy="4" r="1.2" fill="#FF9EBE" opacity="0.55"/>
       </g>
-      <g transform="rotate(120, 54, 54)">
+      <g class="clock-gear-pink" transform="rotate(120, 54, 54)">
         <polygon points="54,1.5 55.3,4 54,6.5 52.7,4" fill="#FF9EBE" opacity="0.40"/>
         <circle cx="54" cy="4" r="1.2" fill="#FF9EBE" opacity="0.55"/>
       </g>
-      <g transform="rotate(180, 54, 54)">
+      <g class="clock-gear-pink" transform="rotate(180, 54, 54)">
         <polygon points="54,1.5 55.3,4 54,6.5 52.7,4" fill="#FF9EBE" opacity="0.40"/>
         <circle cx="54" cy="4" r="1.2" fill="#FF9EBE" opacity="0.55"/>
       </g>
-      <g transform="rotate(240, 54, 54)">
+      <g class="clock-gear-pink" transform="rotate(240, 54, 54)">
         <polygon points="54,1.5 55.3,4 54,6.5 52.7,4" fill="#FF9EBE" opacity="0.40"/>
         <circle cx="54" cy="4" r="1.2" fill="#FF9EBE" opacity="0.55"/>
       </g>
-      <g transform="rotate(300, 54, 54)">
+      <g class="clock-gear-pink" transform="rotate(300, 54, 54)">
         <polygon points="54,1.5 55.3,4 54,6.5 52.7,4" fill="#FF9EBE" opacity="0.40"/>
         <circle cx="54" cy="4" r="1.2" fill="#FF9EBE" opacity="0.55"/>
       </g>
@@ -442,7 +444,7 @@
       <circle cx="54" cy="54" r="49" fill="none"
               stroke="#E8D5F5" stroke-width="0.5" opacity="0.22"/>
       <!-- R2 辉光 -->
-      <circle cx="54" cy="54" r="48" fill="none"
+      <circle id="clock-ring-glow" cx="54" cy="54" r="48" fill="none"
               stroke="#FF9EBE" stroke-width="1" opacity="0.20"/>
       <!-- R3 星轨 -->
       <circle cx="54" cy="54" r="44" fill="none"
@@ -542,17 +544,17 @@
 
       <!-- G. 悬挂链（钟面之下） -->
       <!-- 链节 1 -->
-      <ellipse cx="54" cy="110" rx="3.5" ry="5" fill="none"
+      <ellipse id="clock-chain-1" cx="54" cy="110" rx="3.5" ry="5" fill="none"
                stroke="#C8A2E0" stroke-width="0.5" opacity="0.28"/>
       <circle cx="54" cy="115" r="1.2" fill="#C8A2E0" opacity="0.18"/>
 
       <!-- 链节 2 -->
-      <ellipse cx="54" cy="120" rx="3.5" ry="5" fill="none"
+      <ellipse id="clock-chain-2" cx="54" cy="120" rx="3.5" ry="5" fill="none"
                stroke="#C8A2E0" stroke-width="0.5" opacity="0.22"/>
       <circle cx="54" cy="125" r="1.2" fill="#C8A2E0" opacity="0.14"/>
 
       <!-- 链节 3 + 末端收束圆 -->
-      <ellipse cx="54" cy="130" rx="3.5" ry="5" fill="none"
+      <ellipse id="clock-chain-3" cx="54" cy="130" rx="3.5" ry="5" fill="none"
                stroke="#C8A2E0" stroke-width="0.5" opacity="0.16"/>
       <circle cx="54" cy="134.5" r="1.5" fill="#C8A2E0" opacity="0.12"/>
     </svg>
