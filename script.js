@@ -4152,17 +4152,22 @@
     timeParticleElapsed += dt;
 
     // === holding 阶段底衬（亮色辉光 / 暗色压暗双模式） ===
-    if (timeParticleElapsed >= 0.6 && timeParticleElapsed < 1.3) {
+    if (timeParticleElapsed >= 0.3 && timeParticleElapsed < 1.8) {
       var isDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
 
-      // 渐入/保持/渐出 alpha
+      // 渐入/保持/渐出 alpha（ease-out / ease-in 曲线）
       var bgAlpha;
       if (timeParticleElapsed < 0.8) {
-        bgAlpha = (timeParticleElapsed - 0.6) / 0.3;
-      } else if (timeParticleElapsed < 1.1) {
+        // 渐入 0.5s（0.3→0.8）：ease-out
+        var tIn = (timeParticleElapsed - 0.3) / 0.5;
+        bgAlpha = 1 - Math.pow(Math.max(0, 1 - tIn), 2);
+      } else if (timeParticleElapsed < 1.3) {
+        // 保持峰值
         bgAlpha = 1.0;
       } else {
-        bgAlpha = (1.3 - timeParticleElapsed) / 0.2;
+        // 渐出 0.5s（1.3→1.8）：ease-in
+        var tOut = (timeParticleElapsed - 1.3) / 0.5;
+        bgAlpha = 1 - Math.pow(Math.min(1, tOut), 2);
       }
       bgAlpha = Math.max(0, Math.min(1, bgAlpha));
 
