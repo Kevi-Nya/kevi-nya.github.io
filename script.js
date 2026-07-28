@@ -27,6 +27,7 @@
   var timeParticles = [];       // 时间数字粒子
   var timeParticleElapsed = 0;  // 动画累计时间（秒）
   var timeParticleLastTs = 0;   // 上一帧时间戳
+  var timeParticleOverlayCtx = null;  // 覆盖层 Canvas 2D context
 
   /**
    * 在主粒子循环每帧末尾统一绘制叠加装饰层
@@ -96,65 +97,6 @@
         ctx.restore();
       }
       ctx.restore();
-    }
-
-    // --- 时间数字粒子 ---
-    if (timeParticles.length > 0) {
-      var nowTs = performance.now();
-      if (timeParticleLastTs === 0) timeParticleLastTs = nowTs;
-      var dt = Math.min((nowTs - timeParticleLastTs) / 1000, 0.05);
-      timeParticleLastTs = nowTs;
-      timeParticleElapsed += dt;
-
-      for (var p = timeParticles.length - 1; p >= 0; p--) {
-        var tp = timeParticles[p];
-
-        if (tp.state === 'forming') {
-          var progress = Math.min(timeParticleElapsed / 0.6, 1);
-          var eased = 1 - Math.pow(1 - progress, 3);
-          tp.x = tp.startX + (tp.targetX - tp.startX) * eased;
-          tp.y = tp.startY + (tp.targetY - tp.startY) * eased;
-          tp.alpha = eased * 0.95;
-          if (progress >= 1) tp.state = 'holding';
-        } else if (tp.state === 'holding') {
-          tp.x = tp.targetX;
-          tp.y = tp.targetY;
-          tp.alpha = 0.9 + Math.sin(timeParticleElapsed * 4 + p * 0.3) * 0.1;
-          if (timeParticleElapsed >= 1.3) tp.state = 'dissipating';
-        } else if (tp.state === 'dissipating') {
-          var dProgress = (timeParticleElapsed - 1.3) / 1.0;
-          var angle = Math.atan2(tp.targetY - tp.startY, tp.targetX - tp.startX);
-          angle += (Math.random() - 0.5) * 1.2;
-          var speed = 30 + Math.random() * 80;
-          tp.x += Math.cos(angle) * speed * dt;
-          tp.y += Math.sin(angle) * speed * dt;
-          tp.alpha = Math.max(0, 1 - dProgress);
-          if (timeParticleElapsed >= 2.3) {
-            timeParticles.splice(p, 1);
-            continue;
-          }
-        }
-
-        var sz = tp.size;
-        var cx = tp.x, cy = tp.y;
-        ctx.save();
-        ctx.globalAlpha = tp.alpha;
-        ctx.fillStyle = tp.color;
-        ctx.beginPath();
-        ctx.arc(cx, cy, sz, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.beginPath();
-        ctx.arc(cx, cy, sz * 2, 0, Math.PI * 2);
-        ctx.fillStyle = tp.color;
-        ctx.globalAlpha = tp.alpha * 0.15;
-        ctx.fill();
-        ctx.restore();
-      }
-
-      if (timeParticles.length === 0) {
-        timeParticleElapsed = 0;
-        timeParticleLastTs = 0;
-      }
     }
   }
 
@@ -816,6 +758,12 @@
       clearTimeout(resizeTimer);
       resizeTimer = setTimeout(function () {
         resizeCanvas();
+        // 同步时间粒子覆盖层尺寸
+        var overlayCanvas = document.getElementById('time-particle-overlay');
+        if (overlayCanvas) {
+          overlayCanvas.width = window.innerWidth;
+          overlayCanvas.height = window.innerHeight;
+        }
       }, 150);
     }
     window.addEventListener('resize', onResize);
@@ -865,6 +813,9 @@
 
       // 绘制共享装饰层（萤火虫 + 常驻爱心）
       renderSharedDecorations(ctx, canvas);
+
+      // 绘制时间粒子覆盖层
+      renderTimeParticles();
 
       requestAnimationFrame(animate);
     }
@@ -3975,6 +3926,40 @@
   var clockTapCooldown = false;
 
   /**
+   * 时间粒子渐变配色 — 基于归一化 Y 坐标色阶插值
+   * @param {number} normY - 归一化 Y 坐标 0(顶部粉色) ~ 1(底部紫色)
+   * @returns {string} rgb(r, g, b)
+   */
+  function getTimeParticleColor(normY) {
+    normY = Math.max(0, Math.min(1, normY));
+
+    var stops = [
+      { pos: 0.0, r: 0xFF, g: 0x9E, b: 0xBE },
+      { pos: 0.4, r: 0xFF, g: 0xDC, b: 0xEB },
+      { pos: 0.5, r: 0xFF, g: 0xFF, b: 0xFF },
+      { pos: 0.6, r: 0xF0, g: 0xE0, b: 0xF8 },
+      { pos: 1.0, r: 0xC8, g: 0xA2, b: 0xE0 }
+    ];
+
+    var lower = stops[0], upper = stops[stops.length - 1];
+    for (var i = 0; i < stops.length - 1; i++) {
+      if (normY >= stops[i].pos && normY <= stops[i + 1].pos) {
+        lower = stops[i];
+        upper = stops[i + 1];
+        break;
+      }
+    }
+
+    var range = upper.pos - lower.pos;
+    var t = range === 0 ? 0 : (normY - lower.pos) / range;
+    var r = Math.round(lower.r + (upper.r - lower.r) * t);
+    var g = Math.round(lower.g + (upper.g - lower.g) * t);
+    var b = Math.round(lower.b + (upper.b - lower.b) * t);
+
+    return 'rgb(' + r + ',' + g + ',' + b + ')';
+  }
+
+  /**
    * 离屏渲染时间字符串 + 像素采样
    * @returns {{ points: Array<{x: number, y: number}>, timeStr: string }}
    */
@@ -4027,12 +4012,16 @@
     var displayH = digitH * scale;
     var offsetX = (viewportW - displayW) / 2;
     var offsetY = viewportH * 0.35 - displayH / 2;
-
-    var colors = ['#FF9EBE', '#C8A2E0', '#F8B3D1', '#FFFFFF', '#E8D5F5'];
+    var digitTop = offsetY;
+    var digitBottom = offsetY + displayH;
 
     for (var i = 0; i < points.length; i++) {
       var targetX = offsetX + points[i].x * scale;
       var targetY = offsetY + points[i].y * scale;
+
+      // 基于 Y 坐标计算渐变颜色
+      var normY = (targetY - digitTop) / (digitBottom - digitTop);
+      var particleColor = getTimeParticleColor(normY);
 
       var angle = Math.random() * Math.PI * 2;
       var dist = 20 + Math.random() * 60;
@@ -4045,7 +4034,7 @@
         targetX: targetX, targetY: targetY,
         state: 'forming',
         size: 2 + Math.random() * 1.5,
-        color: colors[Math.floor(Math.random() * colors.length)],
+        color: particleColor,
         alpha: 0
       });
     }
@@ -4141,6 +4130,137 @@
     });
   }
 
+  /**
+   * 独立时间粒子渲染（使用 overlay Canvas，脱离主粒子循环）
+   */
+  function renderTimeParticles() {
+    var canvas = document.getElementById('time-particle-overlay');
+    if (!canvas || timeParticles.length === 0) {
+      if (canvas) canvas.style.display = 'none';
+      return;
+    }
+    canvas.style.display = 'block';
+    var ctx = timeParticleOverlayCtx;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    var nowTs = performance.now();
+    if (timeParticleLastTs === 0) timeParticleLastTs = nowTs;
+    var dt = Math.min((nowTs - timeParticleLastTs) / 1000, 0.05);
+    timeParticleLastTs = nowTs;
+    timeParticleElapsed += dt;
+
+    // === holding 阶段微暗底衬 ===
+    if (timeParticleElapsed >= 0.6 && timeParticleElapsed < 1.3) {
+      var bgAlpha;
+      if (timeParticleElapsed < 0.8) {
+        bgAlpha = (timeParticleElapsed - 0.6) / 0.2 * 0.12;
+      } else if (timeParticleElapsed < 1.1) {
+        bgAlpha = 0.12;
+      } else {
+        bgAlpha = (1.3 - timeParticleElapsed) / 0.2 * 0.12;
+      }
+      bgAlpha = Math.max(0, Math.min(0.12, bgAlpha));
+      var gradient = ctx.createRadialGradient(
+        canvas.width / 2, canvas.height * 0.35, canvas.width * 0.1,
+        canvas.width / 2, canvas.height * 0.35, canvas.width * 0.6
+      );
+      gradient.addColorStop(0, 'rgba(26, 21, 32, 0)');
+      gradient.addColorStop(1, 'rgba(26, 21, 32, ' + bgAlpha + ')');
+      ctx.fillStyle = gradient;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+    }
+
+    // === 粒子运动 ===
+    for (var p = timeParticles.length - 1; p >= 0; p--) {
+      var tp = timeParticles[p];
+
+      if (tp.state === 'forming') {
+        var progress = Math.min(timeParticleElapsed / 0.6, 1);
+        var eased = 1 - Math.pow(1 - progress, 3);
+        tp.x = tp.startX + (tp.targetX - tp.startX) * eased;
+        tp.y = tp.startY + (tp.targetY - tp.startY) * eased;
+        tp.alpha = eased * 0.95;
+        if (progress >= 1) tp.state = 'holding';
+      } else if (tp.state === 'holding') {
+        tp.x = tp.targetX;
+        tp.y = tp.targetY;
+        tp.alpha = 0.9 + Math.sin(timeParticleElapsed * 4 + p * 0.3) * 0.1;
+        if (timeParticleElapsed >= 1.3) {
+          // 进入消散：初始化风晶蝶式漂浮参数
+          if (!tp.driftAngle) {
+            tp.driftAngle = Math.random() * Math.PI * 2;
+            tp.driftSpeed = 10 + Math.random() * 25;
+            tp.wobblePhase = Math.random() * Math.PI * 2;
+            tp.wobbleAmp = 0.4 + Math.random() * 0.8;
+            tp.wobbleFreq = 1.5 + Math.random() * 2.0;
+          }
+          tp.state = 'dissipating';
+        }
+      } else if (tp.state === 'dissipating') {
+        var dProgress = Math.min((timeParticleElapsed - 1.3) / 1.5, 1);
+
+        // 主方向漂移
+        tp.x += Math.cos(tp.driftAngle) * tp.driftSpeed * dt;
+        tp.y += Math.sin(tp.driftAngle) * tp.driftSpeed * dt;
+
+        // 风晶蝶式正弦浮游
+        var wobbleOffset = Math.sin(timeParticleElapsed * tp.wobbleFreq * Math.PI + tp.wobblePhase) * tp.wobbleAmp;
+        tp.x += Math.cos(tp.driftAngle + Math.PI / 2) * wobbleOffset * dt * 2;
+        tp.y += Math.sin(tp.driftAngle + Math.PI / 2) * wobbleOffset * dt * 2;
+
+        // 慢速淡出（二次曲线）
+        tp.alpha = Math.max(0, 1 - dProgress * dProgress);
+
+        if (timeParticleElapsed >= 2.8) {
+          timeParticles.splice(p, 1);
+          continue;
+        }
+      }
+
+      // === 绘制（含增强辉光） ===
+      var sz, glowRadius, glowAlpha;
+      if (tp.state === 'holding') {
+        sz = tp.size + 0.5;
+        glowRadius = sz * 3;
+        glowAlpha = 0.25;
+      } else if (tp.state === 'dissipating') {
+        var shrink = 1 - Math.min((timeParticleElapsed - 1.3) / 1.5, 1);
+        sz = tp.size * Math.max(0, 0.8 * shrink + 0.2);
+        glowRadius = sz * 1.5;
+        glowAlpha = 0.15;
+      } else {
+        sz = tp.size;
+        glowRadius = sz * 2.5;
+        glowAlpha = 0.20;
+      }
+
+      ctx.save();
+      ctx.globalAlpha = tp.alpha;
+      ctx.fillStyle = tp.color;
+
+      // 辉光
+      ctx.beginPath();
+      ctx.arc(tp.x, tp.y, glowRadius, 0, Math.PI * 2);
+      ctx.globalAlpha = tp.alpha * glowAlpha;
+      ctx.fill();
+
+      // 核心
+      ctx.beginPath();
+      ctx.arc(tp.x, tp.y, sz, 0, Math.PI * 2);
+      ctx.globalAlpha = tp.alpha;
+      ctx.fill();
+
+      ctx.restore();
+    }
+
+    // 全部消散完毕
+    if (timeParticles.length === 0) {
+      timeParticleElapsed = 0;
+      timeParticleLastTs = 0;
+      canvas.style.display = 'none';
+    }
+  }
+
   // ==================== 初始化 ====================
 
   function init() {
@@ -4184,6 +4304,14 @@
 
         // 花园时钟点击交互
         initClockTap();
+
+        // 初始化时间粒子覆盖层 Canvas
+        var overlayCanvas = document.getElementById('time-particle-overlay');
+        if (overlayCanvas) {
+          overlayCanvas.width = window.innerWidth;
+          overlayCanvas.height = window.innerHeight;
+          timeParticleOverlayCtx = overlayCanvas.getContext('2d');
+        }
       });
 
       // 音效引擎延迟初始化：遵守浏览器自动播放策略，
