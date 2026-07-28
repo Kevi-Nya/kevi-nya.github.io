@@ -2762,19 +2762,18 @@ body.night-mode .cloud {
     0 2px 8px rgba(0, 0, 0, 0.08),
     0 0 0 5px rgba(200, 162, 224, 0.06);
   z-index: 8999;
-  opacity: 0;
-  transform: scale(0.8);
+  opacity: 1;
+  transform: scale(1);
   overflow: visible;
   cursor: pointer;
   pointer-events: auto;
   transition: transform 0.3s cubic-bezier(0.23, 1, 0.32, 1);
   animation:
-    clock-enter 0.6s cubic-bezier(0.23, 1, 0.32, 1) forwards,
+    clock-enter 0.6s cubic-bezier(0.23, 1, 0.32, 1) backwards,
     clock-breathe 4s ease-in-out 3.5s infinite;
   animation-delay:
     2.8s,
     3.5s;
-  pointer-events: none;
   user-select: none;
 }
 
