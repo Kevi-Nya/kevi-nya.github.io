@@ -3934,12 +3934,12 @@
     normY = Math.max(0, Math.min(1, normY));
 
     var stops = [
-      { pos: 0.00, r: 0xFF, g: 0xBB, b: 0xD5 },
-      { pos: 0.25, r: 0xFF, g: 0xF0, b: 0xF8 },
-      { pos: 0.35, r: 0xFF, g: 0xFF, b: 0xFF },
-      { pos: 0.65, r: 0xFF, g: 0xFF, b: 0xFF },
-      { pos: 0.75, r: 0xF5, g: 0xE8, b: 0xFA },
-      { pos: 1.00, r: 0xDC, g: 0xBD, b: 0xEB }
+      { pos: 0.00, r: 0xFF, g: 0x7B, b: 0x9C },
+      { pos: 0.25, r: 0xFF, g: 0xA8, b: 0xC0 },
+      { pos: 0.35, r: 0xFF, g: 0xF4, b: 0xF0 },
+      { pos: 0.65, r: 0xFF, g: 0xF4, b: 0xF0 },
+      { pos: 0.75, r: 0xE8, g: 0xCC, b: 0xF5 },
+      { pos: 1.00, r: 0xB5, g: 0x80, b: 0xD5 }
     ];
 
     var lower = stops[0], upper = stops[stops.length - 1];
