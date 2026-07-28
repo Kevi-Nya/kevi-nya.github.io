@@ -4297,13 +4297,9 @@
       initMidnightGardenEasterEgg();
 
       // 首屏 cinematic 加载序列 — 在所有模块初始化后启动
-      // 序列完成后不再调用 initScrollAnimation（已在序列内触发）
       initCinematicIntro().then(function () {
-        // 如果 cinematic 被跳过（reduced-motion），则正常触发滚动动画
-        var motionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
-        if (motionQuery.matches) {
-          initScrollAnimation();
-        }
+        // 始终初始化滚动动画，确保任何跳过路径下元素均可正常显示
+        initScrollAnimation();
 
         // 音效首次使用提示 — 延迟 1.5s 后显示，4s 后淡出
         showSoundHint();
