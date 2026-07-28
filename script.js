@@ -4076,6 +4076,15 @@
 
     clock.addEventListener('click', function (e) {
       if (clockTapCooldown) return;
+
+      // 首次点击时等待 Kalam 字体加载完成
+      if (document.fonts && !document.fonts.check('700 72px Kalam')) {
+        document.fonts.ready.then(function () {
+          clock.dispatchEvent(new MouseEvent('click', { clientX: e.clientX, clientY: e.clientY }));
+        });
+        return;
+      }
+
       clockTapCooldown = true;
 
       // === 机械层 ===
