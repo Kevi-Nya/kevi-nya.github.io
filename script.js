@@ -3514,7 +3514,7 @@
       if (!dayBtn) return;
 
       // 仅 Page A 日历
-      var calendarSection = dayBtn.closest('#little-notes-calendar');
+      var calendarSection = dayBtn.closest('#little-notes-calendar, #thoughts-calendar');
       if (!calendarSection) return;
 
       var dateStr = dayBtn.getAttribute('data-date');
@@ -3643,7 +3643,7 @@
    * 心形碎裂彩蛋 — Page B 页脚💛 移动端长按 1.5s / 桌面端双击
    */
   function initHeartBurstEasterEgg() {
-    var footerHeart = document.querySelector('#page-b .footer-heart');
+    var footerHeart = document.querySelector('.footer-heart');
     if (!footerHeart) return;
 
     var longPressTimer = null;
