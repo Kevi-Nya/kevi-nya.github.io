@@ -3974,7 +3974,7 @@
     offCanvas.width = 300;
     offCanvas.height = 80;
     var offCtx = offCanvas.getContext('2d');
-    offCtx.font = '700 72px system-ui, -apple-system, sans-serif';
+    offCtx.font = '600 72px "LXGW WenKai", "Klee One", cursive, sans-serif';
     offCtx.textAlign = 'center';
     offCtx.textBaseline = 'middle';
     offCtx.fillStyle = '#FFFFFF';
