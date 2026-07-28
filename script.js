@@ -3648,8 +3648,8 @@
 
     var longPressTimer = null;
     var LONG_PRESS_DURATION = 1500;
-    var isMobile = /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent) ||
-                   ('ontouchstart' in window && window.innerWidth < 768);
+    var isMobile = window.matchMedia('(pointer: coarse)').matches ||
+                   /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent);
 
     if (isMobile) {
       // 移动端：长按 1.5s
