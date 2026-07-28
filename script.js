@@ -3972,11 +3972,12 @@
     offCanvas.width = 300;
     offCanvas.height = 80;
     var offCtx = offCanvas.getContext('2d');
-    offCtx.font = '600 72px "LXGW WenKai", "Klee One", cursive, sans-serif';
+    offCtx.font = '700 72px "Kalam", "Patrick Hand", cursive, sans-serif';
     offCtx.textAlign = 'center';
     offCtx.textBaseline = 'middle';
-    offCtx.fillStyle = '#FFFFFF';
-    offCtx.fillText(timeStr, 150, 40);
+    offCtx.lineWidth = 4;
+    offCtx.strokeStyle = '#FFFFFF';
+    offCtx.strokeText(timeStr, 150, 40);
 
     var imageData = offCtx.getImageData(0, 0, 300, 80);
     var pixels = imageData.data;
