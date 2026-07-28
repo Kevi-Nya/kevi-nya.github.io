@@ -2744,37 +2744,41 @@ body.night-mode .cloud {
    位于屏幕左下角，与右下角 SFX 按钮镜像对称
    ============================================================ */
 
-.garden-clock {
+/* ==================== 花园时钟 — 瓷质外框 ==================== */
+
+.garden-clock-frame {
   position: fixed;
-  bottom: 14px;
-  left: 14px;
-  width: 108px;
-  height: 108px;
+  bottom: 4px;
+  left: 4px;
+  width: 128px;
+  height: 128px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.58);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  border: 1px solid rgba(200, 162, 224, 0.18);
-  box-shadow:
-    inset 0 1px 4px rgba(255, 255, 255, 0.65),
-    inset 0 -1px 2px rgba(0, 0, 0, 0.04),
-    0 8px 36px rgba(200, 162, 224, 0.20),
-    0 2px 8px rgba(0, 0, 0, 0.08),
-    0 0 0 5px rgba(200, 162, 224, 0.06);
   z-index: 8999;
-  opacity: 1;
-  transform: scale(1);
   overflow: visible;
-  cursor: pointer;
-  pointer-events: auto;
-  transition: transform 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+  pointer-events: none;
+
+  /* 瓷质渐变 */
+  background: radial-gradient(
+    ellipse at 35% 30%,
+    #FCF6F0 0%,
+    #F8F0E8 35%,
+    #F3DEE6 70%,
+    #E8D8F0 100%
+  );
+
+  /* 瓷质多层阴影 */
+  box-shadow:
+    inset 0 3px 6px rgba(255, 255, 255, 0.85),
+    inset 0 -3px 6px rgba(200, 162, 224, 0.20),
+    0 6px 28px rgba(200, 162, 224, 0.20),
+    0 2px 6px rgba(0, 0, 0, 0.08);
+
   animation:
     clock-enter 0.6s cubic-bezier(0.23, 1, 0.32, 1) backwards,
     clock-breathe 4s ease-in-out 3.5s infinite;
   animation-delay:
     2.8s,
     3.5s;
-  user-select: none;
 }
 
 @keyframes clock-enter {
@@ -2787,75 +2791,124 @@ body.night-mode .cloud {
 @keyframes clock-breathe {
   0%, 100% {
     box-shadow:
-      inset 0 1px 4px rgba(255, 255, 255, 0.65),
-      inset 0 -1px 2px rgba(0, 0, 0, 0.04),
-      0 8px 36px rgba(200, 162, 224, 0.20),
-      0 2px 8px rgba(0, 0, 0, 0.08),
-      0 0 0 5px rgba(200, 162, 224, 0.06);
+      inset 0 3px 6px rgba(255, 255, 255, 0.85),
+      inset 0 -3px 6px rgba(200, 162, 224, 0.20),
+      0 6px 28px rgba(200, 162, 224, 0.20),
+      0 2px 6px rgba(0, 0, 0, 0.08);
   }
   50% {
     box-shadow:
-      inset 0 1px 4px rgba(255, 255, 255, 0.65),
-      inset 0 -1px 2px rgba(0, 0, 0, 0.04),
-      0 12px 44px rgba(200, 162, 224, 0.28),
-      0 0 28px rgba(248, 179, 209, 0.22),
-      0 2px 8px rgba(0, 0, 0, 0.08),
-      0 0 0 7px rgba(200, 162, 224, 0.10);
+      inset 0 3px 6px rgba(255, 255, 255, 0.85),
+      inset 0 -3px 6px rgba(200, 162, 224, 0.20),
+      0 10px 36px rgba(200, 162, 224, 0.30),
+      0 0 22px rgba(248, 179, 209, 0.22),
+      0 2px 6px rgba(0, 0, 0, 0.08);
   }
+}
+
+/* 时钟本体退为内嵌 */
+.garden-clock-frame .garden-clock {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  bottom: auto;
+  right: auto;
+  width: 108px;
+  height: 108px;
+
+  background: rgba(255, 255, 255, 0.58);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(200, 162, 224, 0.18);
+  box-shadow:
+    inset 0 1px 4px rgba(255, 255, 255, 0.65),
+    inset 0 -1px 2px rgba(0, 0, 0, 0.04),
+    0 0 0 5px rgba(200, 162, 224, 0);
+
+  z-index: 1;
+  opacity: 1;
+  transform: scale(1);
+  overflow: visible;
+  cursor: pointer;
+  pointer-events: auto;
+  transition: transform 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+  animation: none;
+  user-select: none;
 }
 
 .garden-clock-face {
   display: block;
 }
 
-/* 默认亮色模式：隐藏暗色渐变圆 */
 .clock-face-v3-dark {
   display: none;
 }
 
 /* 暗色模式 */
 @media (prefers-color-scheme: dark) {
-  .garden-clock {
+  .garden-clock-frame {
+    background: radial-gradient(
+      ellipse at 35% 30%,
+      #3A3240 0%,
+      #2D2535 35%,
+      #251D2D 70%,
+      #1A1520 100%
+    );
+    box-shadow:
+      inset 0 3px 6px rgba(255, 255, 255, 0.06),
+      inset 0 -3px 6px rgba(0, 0, 0, 0.3),
+      0 6px 28px rgba(0, 0, 0, 0.3),
+      0 2px 6px rgba(0, 0, 0, 0.15);
+    animation:
+      clock-enter 0.6s cubic-bezier(0.23, 1, 0.32, 1) backwards,
+      clock-breathe-dark 4s ease-in-out 3.5s infinite;
+  }
+
+  .garden-clock-frame .garden-clock {
     background: rgba(40, 35, 50, 0.58);
     border-color: rgba(200, 162, 224, 0.14);
     box-shadow:
       inset 0 1px 4px rgba(255, 255, 255, 0.05),
       inset 0 -1px 2px rgba(0, 0, 0, 0.1),
-      0 8px 36px rgba(0, 0, 0, 0.25),
-      0 2px 8px rgba(0, 0, 0, 0.12),
-      0 0 0 5px rgba(200, 162, 224, 0.04);
-    animation:
-      clock-enter 0.6s cubic-bezier(0.23, 1, 0.32, 1) forwards,
-      clock-breathe-dark 4s ease-in-out 3.5s infinite;
+      0 0 0 5px rgba(200, 162, 224, 0);
   }
 
   .clock-face-v3-light { display: none; }
   .clock-face-v3-dark  { display: block; }
+
+  .garden-frame-star {
+    filter: drop-shadow(0 0 3px rgba(200, 162, 224, 0.4));
+    opacity: 0.65;
+  }
+  .garden-frame-paw {
+    opacity: 0.55;
+  }
 }
 
 @keyframes clock-breathe-dark {
   0%, 100% {
     box-shadow:
-      inset 0 1px 4px rgba(255, 255, 255, 0.05),
-      inset 0 -1px 2px rgba(0, 0, 0, 0.1),
-      0 8px 36px rgba(0, 0, 0, 0.25),
-      0 2px 8px rgba(0, 0, 0, 0.12),
-      0 0 0 5px rgba(200, 162, 224, 0.04);
+      inset 0 3px 6px rgba(255, 255, 255, 0.06),
+      inset 0 -3px 6px rgba(0, 0, 0, 0.3),
+      0 6px 28px rgba(0, 0, 0, 0.3),
+      0 2px 6px rgba(0, 0, 0, 0.15);
   }
   50% {
     box-shadow:
-      inset 0 1px 4px rgba(255, 255, 255, 0.05),
-      inset 0 -1px 2px rgba(0, 0, 0, 0.1),
-      0 12px 44px rgba(212, 184, 232, 0.18),
-      0 0 28px rgba(240, 168, 197, 0.12),
-      0 2px 8px rgba(0, 0, 0, 0.12),
-      0 0 0 7px rgba(212, 184, 232, 0.08);
+      inset 0 3px 6px rgba(255, 255, 255, 0.06),
+      inset 0 -3px 6px rgba(0, 0, 0, 0.3),
+      0 10px 36px rgba(212, 184, 232, 0.22),
+      0 0 22px rgba(240, 168, 197, 0.15),
+      0 2px 6px rgba(0, 0, 0, 0.15);
   }
 }
 
 /* 减少动画 */
 @media (prefers-reduced-motion: reduce) {
-  .garden-clock {
+  .garden-clock-frame {
+    animation: none;
+  }
+  .garden-clock-frame .garden-clock {
     animation: none;
     opacity: 1;
     transform: scale(1);
@@ -2864,8 +2917,50 @@ body.night-mode .cloud {
 
 /* 打印时隐藏 */
 @media print {
-  .garden-clock { display: none !important; }
+  .garden-clock-frame { display: none !important; }
 }
+
+/* ==================== 瓷质外框 装饰元素 ==================== */
+
+.garden-frame-star,
+.garden-frame-paw {
+  position: absolute;
+  top: 50%; left: 50%;
+  font-size: 10px;
+  line-height: 1;
+  pointer-events: none;
+  user-select: none;
+  transform-origin: 0 0;
+}
+
+.garden-frame-star {
+  opacity: 0.55;
+  filter: drop-shadow(0 0 2px rgba(248, 179, 209, 0.3));
+}
+
+.garden-frame-paw {
+  font-size: 11px;
+  opacity: 0.45;
+}
+
+/* 8 组装饰浮动 keyframes */
+@keyframes dec-0-float   { 0%,100%{transform:rotate(0deg)translateY(-57px)}   50%{transform:rotate(0deg)translateY(-59px)} }
+@keyframes dec-45-float  { 0%,100%{transform:rotate(45deg)translateY(-57px)}  50%{transform:rotate(45deg)translateY(-59px)} }
+@keyframes dec-90-float  { 0%,100%{transform:rotate(90deg)translateY(-57px)}  50%{transform:rotate(90deg)translateY(-59px)} }
+@keyframes dec-135-float { 0%,100%{transform:rotate(135deg)translateY(-57px)} 50%{transform:rotate(135deg)translateY(-59px)} }
+@keyframes dec-180-float { 0%,100%{transform:rotate(180deg)translateY(-57px)} 50%{transform:rotate(180deg)translateY(-59px)} }
+@keyframes dec-225-float { 0%,100%{transform:rotate(225deg)translateY(-57px)} 50%{transform:rotate(225deg)translateY(-59px)} }
+@keyframes dec-270-float { 0%,100%{transform:rotate(270deg)translateY(-57px)} 50%{transform:rotate(270deg)translateY(-59px)} }
+@keyframes dec-315-float { 0%,100%{transform:rotate(315deg)translateY(-57px)} 50%{transform:rotate(315deg)translateY(-59px)} }
+
+.frame-s1 { animation: dec-0-float   3s ease-in-out infinite; }
+.frame-p1 { animation: dec-45-float  3s ease-in-out infinite; }
+.frame-s2 { animation: dec-90-float  3s ease-in-out infinite; }
+.frame-p2 { animation: dec-135-float 3s ease-in-out infinite; }
+.frame-s3 { animation: dec-180-float 3s ease-in-out infinite; }
+.frame-p3 { animation: dec-225-float 3s ease-in-out infinite; }
+.frame-s4 { animation: dec-270-float 3s ease-in-out infinite; }
+.frame-p4 { animation: dec-315-float 3s ease-in-out infinite; }
 
 /* ==================== 花园时钟 点击交互动画 ==================== */
 
