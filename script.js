@@ -1017,15 +1017,15 @@
    */
   function renderDynamicContent(data) {
     // 自动补全 AI 标签（仅前端，不修改 data.json）
-    if (data.little_notes) enrichEntriesWithTags(data.little_notes, 'little');
-    if (data.thoughts) enrichEntriesWithTags(data.thoughts, 'thoughts');
+    try { if (data.little_notes) enrichEntriesWithTags(data.little_notes, 'little'); } catch (e) { console.warn('[花园] 标签补全失败 (little_notes):', e); }
+    try { if (data.thoughts) enrichEntriesWithTags(data.thoughts, 'thoughts'); } catch (e) { console.warn('[花园] 标签补全失败 (thoughts):', e); }
 
-    if (data.about_tags) renderAboutTags(data.about_tags);
-    if (data.life_cards) renderLifeCards(data.life_cards);
-    if (data.little_notes) renderLittleNotes(data.little_notes);
-    if (data.thoughts) renderThoughts(data.thoughts);
-    if (data.skills) renderSkills(data.skills);
-    if (data.links) renderLinks(data.links);
+    try { if (data.about_tags) renderAboutTags(data.about_tags); } catch (e) { console.warn('[花园] 渲染失败 (about_tags):', e); }
+    try { if (data.life_cards) renderLifeCards(data.life_cards); } catch (e) { console.warn('[花园] 渲染失败 (life_cards):', e); }
+    try { if (data.little_notes) renderLittleNotes(data.little_notes); } catch (e) { console.warn('[花园] 渲染失败 (little_notes):', e); }
+    try { if (data.thoughts) renderThoughts(data.thoughts); } catch (e) { console.warn('[花园] 渲染失败 (thoughts):', e); }
+    try { if (data.skills) renderSkills(data.skills); } catch (e) { console.warn('[花园] 渲染失败 (skills):', e); }
+    try { if (data.links) renderLinks(data.links); } catch (e) { console.warn('[花园] 渲染失败 (links):', e); }
   }
 
   /**
