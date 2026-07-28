@@ -367,127 +367,194 @@
 
   <!-- ==================== 花园时钟 ==================== -->
   <div class="garden-clock" aria-hidden="true">
-    <svg class="garden-clock-face" viewBox="0 0 88 88" width="88" height="88"
+    <svg class="garden-clock-face" viewBox="0 0 108 142" width="108" height="142"
          aria-label="当前时间" role="img">
       <defs>
-        <radialGradient id="clock-face-glow" cx="50%" cy="38%" r="58%">
-          <stop offset="0%"   stop-color="#FFF8F0" stop-opacity="0" />
-          <stop offset="55%"  stop-color="#FDE4EC" stop-opacity="0.06" />
-          <stop offset="85%"  stop-color="#E8E0F5" stop-opacity="0.10" />
-          <stop offset="100%" stop-color="#D8C8E8" stop-opacity="0.14" />
+        <radialGradient id="clock-face-v3" cx="50%" cy="38%" r="58%">
+          <stop offset="0%"   stop-color="#FFF8F0" stop-opacity="0"/>
+          <stop offset="55%"  stop-color="#FDE4EC" stop-opacity="0.06"/>
+          <stop offset="85%"  stop-color="#E8E0F5" stop-opacity="0.10"/>
+          <stop offset="100%" stop-color="#D8C8E8" stop-opacity="0.14"/>
         </radialGradient>
-        <radialGradient id="clock-face-glow-dark" cx="50%" cy="38%" r="58%">
-          <stop offset="0%"   stop-color="#1A1520" stop-opacity="0" />
-          <stop offset="55%"  stop-color="#2D1F28" stop-opacity="0.06" />
-          <stop offset="85%"  stop-color="#262030" stop-opacity="0.10" />
-          <stop offset="100%" stop-color="#1A1228" stop-opacity="0.14" />
+        <radialGradient id="clock-face-v3-dark" cx="50%" cy="38%" r="58%">
+          <stop offset="0%"   stop-color="#1A1520" stop-opacity="0"/>
+          <stop offset="55%"  stop-color="#2D1F28" stop-opacity="0.06"/>
+          <stop offset="85%"  stop-color="#262030" stop-opacity="0.10"/>
+          <stop offset="100%" stop-color="#1A1228" stop-opacity="0.14"/>
         </radialGradient>
       </defs>
 
-      <!-- 表盘径向渐变底色 -->
-      <circle cx="44" cy="44" r="39" fill="url(#clock-face-glow)" class="clock-face-glow-light"/>
-      <circle cx="44" cy="44" r="39" fill="url(#clock-face-glow-dark)" class="clock-face-glow-dark" style="display:none"/>
+      <!-- A. 表冠（钟面之上，容器 overflow:visible 显示） -->
+      <circle cx="54" cy="6" r="4" fill="#E8D5F5" stroke="#C8A2E0" stroke-width="0.6" opacity="0.55"/>
+      <circle cx="54" cy="6" r="2.5" fill="#FDE4EC" stroke="#FF9EBE" stroke-width="0.5" opacity="0.45"/>
+      <line x1="50" y1="6" x2="58" y2="6" stroke="#6B5E62" stroke-width="0.5" opacity="0.18"/>
 
-      <!-- 4 层圆环系统 -->
+      <!-- B. 齿轮星芒边框（12 点构成怀表外圈） -->
+      <!-- 偶数位 — 粉色大星芒（0/60/120/180/240/300°） -->
+      <g transform="rotate(0, 54, 54)">
+        <polygon points="54,1.5 55.3,4 54,6.5 52.7,4" fill="#FF9EBE" opacity="0.40"/>
+        <circle cx="54" cy="4" r="1.2" fill="#FF9EBE" opacity="0.55"/>
+      </g>
+      <g transform="rotate(60, 54, 54)">
+        <polygon points="54,1.5 55.3,4 54,6.5 52.7,4" fill="#FF9EBE" opacity="0.40"/>
+        <circle cx="54" cy="4" r="1.2" fill="#FF9EBE" opacity="0.55"/>
+      </g>
+      <g transform="rotate(120, 54, 54)">
+        <polygon points="54,1.5 55.3,4 54,6.5 52.7,4" fill="#FF9EBE" opacity="0.40"/>
+        <circle cx="54" cy="4" r="1.2" fill="#FF9EBE" opacity="0.55"/>
+      </g>
+      <g transform="rotate(180, 54, 54)">
+        <polygon points="54,1.5 55.3,4 54,6.5 52.7,4" fill="#FF9EBE" opacity="0.40"/>
+        <circle cx="54" cy="4" r="1.2" fill="#FF9EBE" opacity="0.55"/>
+      </g>
+      <g transform="rotate(240, 54, 54)">
+        <polygon points="54,1.5 55.3,4 54,6.5 52.7,4" fill="#FF9EBE" opacity="0.40"/>
+        <circle cx="54" cy="4" r="1.2" fill="#FF9EBE" opacity="0.55"/>
+      </g>
+      <g transform="rotate(300, 54, 54)">
+        <polygon points="54,1.5 55.3,4 54,6.5 52.7,4" fill="#FF9EBE" opacity="0.40"/>
+        <circle cx="54" cy="4" r="1.2" fill="#FF9EBE" opacity="0.55"/>
+      </g>
+      <!-- 奇数位 — 紫色小星芒（30/90/150/210/270/330°） -->
+      <g transform="rotate(30, 54, 54)">
+        <polygon points="54,2.5 54.8,4 54,5.5 53.2,4" fill="#C8A2E0" opacity="0.30"/>
+      </g>
+      <g transform="rotate(90, 54, 54)">
+        <polygon points="54,2.5 54.8,4 54,5.5 53.2,4" fill="#C8A2E0" opacity="0.30"/>
+      </g>
+      <g transform="rotate(150, 54, 54)">
+        <polygon points="54,2.5 54.8,4 54,5.5 53.2,4" fill="#C8A2E0" opacity="0.30"/>
+      </g>
+      <g transform="rotate(210, 54, 54)">
+        <polygon points="54,2.5 54.8,4 54,5.5 53.2,4" fill="#C8A2E0" opacity="0.30"/>
+      </g>
+      <g transform="rotate(270, 54, 54)">
+        <polygon points="54,2.5 54.8,4 54,5.5 53.2,4" fill="#C8A2E0" opacity="0.30"/>
+      </g>
+      <g transform="rotate(330, 54, 54)">
+        <polygon points="54,2.5 54.8,4 54,5.5 53.2,4" fill="#C8A2E0" opacity="0.30"/>
+      </g>
+
+      <!-- C. 钟面底色 + 圆环系统 -->
+      <circle cx="54" cy="54" r="48" fill="url(#clock-face-v3)" class="clock-face-v3-light"/>
+      <circle cx="54" cy="54" r="48" fill="url(#clock-face-v3-dark)" class="clock-face-v3-dark" style="display:none"/>
       <!-- R1 外廓 -->
-      <circle cx="44" cy="44" r="42" fill="none"
-              stroke="#E8D5F5" stroke-width="0.5" opacity="0.25"/>
+      <circle cx="54" cy="54" r="49" fill="none"
+              stroke="#E8D5F5" stroke-width="0.5" opacity="0.22"/>
       <!-- R2 辉光 -->
-      <circle cx="44" cy="44" r="41" fill="none"
-              stroke="#FF9EBE" stroke-width="1" opacity="0.22"/>
+      <circle cx="54" cy="54" r="48" fill="none"
+              stroke="#FF9EBE" stroke-width="1" opacity="0.20"/>
       <!-- R3 星轨 -->
-      <circle cx="44" cy="44" r="37" fill="none"
-              stroke="#C8A2E0" stroke-width="0.5" opacity="0.18"
-              stroke-dasharray="1.5 5"/>
+      <circle cx="54" cy="54" r="44" fill="none"
+              stroke="#C8A2E0" stroke-width="0.5" opacity="0.16"
+              stroke-dasharray="1.5 6"/>
       <!-- R4 内边 -->
-      <circle cx="44" cy="44" r="35" fill="none"
-              stroke="#C8A2E0" stroke-width="0.3" opacity="0.10"/>
+      <circle cx="54" cy="54" r="42" fill="none"
+              stroke="#C8A2E0" stroke-width="0.3" opacity="0.09"/>
 
-      <!-- 星芒主标记（12/3/6/9 点位） -->
-      <g transform="rotate(0, 44, 44)">
-        <circle cx="44" cy="9.5" r="3.5" fill="#FF9EBE" opacity="0.18"/>
-        <polygon points="44,7.5 45.2,9.5 44,11.5 42.8,9.5" fill="#FF9EBE" opacity="0.80"/>
-        <circle cx="44" cy="9.5" r="0.8" fill="#FFFFFF" opacity="0.70"/>
+      <!-- D. 刻度标记 -->
+      <!-- 星芒主标记（4个，0/90/180/270°） -->
+      <g transform="rotate(0, 54, 54)">
+        <circle cx="54" cy="11.5" r="3.5" fill="#FF9EBE" opacity="0.18"/>
+        <polygon points="54,9.5 55.2,11.5 54,13.5 52.8,11.5" fill="#FF9EBE" opacity="0.80"/>
+        <circle cx="54" cy="11.5" r="0.8" fill="#FFFFFF" opacity="0.70"/>
       </g>
-      <g transform="rotate(90, 44, 44)">
-        <circle cx="44" cy="9.5" r="3.5" fill="#FF9EBE" opacity="0.18"/>
-        <polygon points="44,7.5 45.2,9.5 44,11.5 42.8,9.5" fill="#FF9EBE" opacity="0.80"/>
-        <circle cx="44" cy="9.5" r="0.8" fill="#FFFFFF" opacity="0.70"/>
+      <g transform="rotate(90, 54, 54)">
+        <circle cx="54" cy="11.5" r="3.5" fill="#FF9EBE" opacity="0.18"/>
+        <polygon points="54,9.5 55.2,11.5 54,13.5 52.8,11.5" fill="#FF9EBE" opacity="0.80"/>
+        <circle cx="54" cy="11.5" r="0.8" fill="#FFFFFF" opacity="0.70"/>
       </g>
-      <g transform="rotate(180, 44, 44)">
-        <circle cx="44" cy="9.5" r="3.5" fill="#FF9EBE" opacity="0.18"/>
-        <polygon points="44,7.5 45.2,9.5 44,11.5 42.8,9.5" fill="#FF9EBE" opacity="0.80"/>
-        <circle cx="44" cy="9.5" r="0.8" fill="#FFFFFF" opacity="0.70"/>
+      <g transform="rotate(180, 54, 54)">
+        <circle cx="54" cy="11.5" r="3.5" fill="#FF9EBE" opacity="0.18"/>
+        <polygon points="54,9.5 55.2,11.5 54,13.5 52.8,11.5" fill="#FF9EBE" opacity="0.80"/>
+        <circle cx="54" cy="11.5" r="0.8" fill="#FFFFFF" opacity="0.70"/>
       </g>
-      <g transform="rotate(270, 44, 44)">
-        <circle cx="44" cy="9.5" r="3.5" fill="#FF9EBE" opacity="0.18"/>
-        <polygon points="44,7.5 45.2,9.5 44,11.5 42.8,9.5" fill="#FF9EBE" opacity="0.80"/>
-        <circle cx="44" cy="9.5" r="0.8" fill="#FFFFFF" opacity="0.70"/>
-      </g>
-
-      <!-- 菱晶次标记（1/2/4/5/7/8/10/11 点位） -->
-      <g transform="rotate(30, 44, 44)">
-        <polygon points="44,7.9 45,9.5 44,11.1 43,9.5" fill="#C8A2E0" opacity="0.55"/>
-        <circle cx="44" cy="9.5" r="0.5" fill="#C8A2E0" opacity="0.80"/>
-      </g>
-      <g transform="rotate(60, 44, 44)">
-        <polygon points="44,7.9 45,9.5 44,11.1 43,9.5" fill="#C8A2E0" opacity="0.55"/>
-        <circle cx="44" cy="9.5" r="0.5" fill="#C8A2E0" opacity="0.80"/>
-      </g>
-      <g transform="rotate(120, 44, 44)">
-        <polygon points="44,7.9 45,9.5 44,11.1 43,9.5" fill="#C8A2E0" opacity="0.55"/>
-        <circle cx="44" cy="9.5" r="0.5" fill="#C8A2E0" opacity="0.80"/>
-      </g>
-      <g transform="rotate(150, 44, 44)">
-        <polygon points="44,7.9 45,9.5 44,11.1 43,9.5" fill="#C8A2E0" opacity="0.55"/>
-        <circle cx="44" cy="9.5" r="0.5" fill="#C8A2E0" opacity="0.80"/>
-      </g>
-      <g transform="rotate(210, 44, 44)">
-        <polygon points="44,7.9 45,9.5 44,11.1 43,9.5" fill="#C8A2E0" opacity="0.55"/>
-        <circle cx="44" cy="9.5" r="0.5" fill="#C8A2E0" opacity="0.80"/>
-      </g>
-      <g transform="rotate(240, 44, 44)">
-        <polygon points="44,7.9 45,9.5 44,11.1 43,9.5" fill="#C8A2E0" opacity="0.55"/>
-        <circle cx="44" cy="9.5" r="0.5" fill="#C8A2E0" opacity="0.80"/>
-      </g>
-      <g transform="rotate(300, 44, 44)">
-        <polygon points="44,7.9 45,9.5 44,11.1 43,9.5" fill="#C8A2E0" opacity="0.55"/>
-        <circle cx="44" cy="9.5" r="0.5" fill="#C8A2E0" opacity="0.80"/>
-      </g>
-      <g transform="rotate(330, 44, 44)">
-        <polygon points="44,7.9 45,9.5 44,11.1 43,9.5" fill="#C8A2E0" opacity="0.55"/>
-        <circle cx="44" cy="9.5" r="0.5" fill="#C8A2E0" opacity="0.80"/>
+      <g transform="rotate(270, 54, 54)">
+        <circle cx="54" cy="11.5" r="3.5" fill="#FF9EBE" opacity="0.18"/>
+        <polygon points="54,9.5 55.2,11.5 54,13.5 52.8,11.5" fill="#FF9EBE" opacity="0.80"/>
+        <circle cx="54" cy="11.5" r="0.8" fill="#FFFFFF" opacity="0.70"/>
       </g>
 
+      <!-- 菱晶次标记（8个，30/60/120/150/210/240/300/330°） -->
+      <g transform="rotate(30, 54, 54)">
+        <polygon points="54,9.9 55,11.5 54,13.1 53,11.5" fill="#C8A2E0" opacity="0.55"/>
+        <circle cx="54" cy="11.5" r="0.5" fill="#C8A2E0" opacity="0.80"/>
+      </g>
+      <g transform="rotate(60, 54, 54)">
+        <polygon points="54,9.9 55,11.5 54,13.1 53,11.5" fill="#C8A2E0" opacity="0.55"/>
+        <circle cx="54" cy="11.5" r="0.5" fill="#C8A2E0" opacity="0.80"/>
+      </g>
+      <g transform="rotate(120, 54, 54)">
+        <polygon points="54,9.9 55,11.5 54,13.1 53,11.5" fill="#C8A2E0" opacity="0.55"/>
+        <circle cx="54" cy="11.5" r="0.5" fill="#C8A2E0" opacity="0.80"/>
+      </g>
+      <g transform="rotate(150, 54, 54)">
+        <polygon points="54,9.9 55,11.5 54,13.1 53,11.5" fill="#C8A2E0" opacity="0.55"/>
+        <circle cx="54" cy="11.5" r="0.5" fill="#C8A2E0" opacity="0.80"/>
+      </g>
+      <g transform="rotate(210, 54, 54)">
+        <polygon points="54,9.9 55,11.5 54,13.1 53,11.5" fill="#C8A2E0" opacity="0.55"/>
+        <circle cx="54" cy="11.5" r="0.5" fill="#C8A2E0" opacity="0.80"/>
+      </g>
+      <g transform="rotate(240, 54, 54)">
+        <polygon points="54,9.9 55,11.5 54,13.1 53,11.5" fill="#C8A2E0" opacity="0.55"/>
+        <circle cx="54" cy="11.5" r="0.5" fill="#C8A2E0" opacity="0.80"/>
+      </g>
+      <g transform="rotate(300, 54, 54)">
+        <polygon points="54,9.9 55,11.5 54,13.1 53,11.5" fill="#C8A2E0" opacity="0.55"/>
+        <circle cx="54" cy="11.5" r="0.5" fill="#C8A2E0" opacity="0.80"/>
+      </g>
+      <g transform="rotate(330, 54, 54)">
+        <polygon points="54,9.9 55,11.5 54,13.1 53,11.5" fill="#C8A2E0" opacity="0.55"/>
+        <circle cx="54" cy="11.5" r="0.5" fill="#C8A2E0" opacity="0.80"/>
+      </g>
+
+      <!-- E. 指针系统 -->
       <!-- 时针组 -->
-      <g id="clock-hour-group" transform="rotate(0, 44, 44)">
-        <line x1="44" y1="44" x2="44" y2="24"
+      <g id="clock-hour-group" transform="rotate(0, 54, 54)">
+        <line x1="54" y1="54" x2="54" y2="30"
               stroke="#6B5E62" stroke-width="2.2" stroke-linecap="round"/>
-        <polygon points="44,44 44.8,46.5 44,49 43.2,46.5"
+        <polygon points="54,54 54.8,56.5 54,59 53.2,56.5"
                  fill="#6B5E62" opacity="0.20"/>
       </g>
 
       <!-- 分针组 -->
-      <g id="clock-minute-group" transform="rotate(0, 44, 44)">
-        <line x1="44" y1="44" x2="44" y2="17"
+      <g id="clock-minute-group" transform="rotate(0, 54, 54)">
+        <line x1="54" y1="54" x2="54" y2="21"
               stroke="#6B5E62" stroke-width="1.6" stroke-linecap="round"/>
       </g>
 
       <!-- 秒针组 -->
-      <g id="clock-second-group" transform="rotate(0, 44, 44)">
-        <line x1="44" y1="49" x2="44" y2="15"
+      <g id="clock-second-group" transform="rotate(0, 54, 54)">
+        <line x1="54" y1="57" x2="54" y2="19"
               stroke="#FF9EBE" stroke-width="0.7" stroke-linecap="round"/>
-        <polygon points="44,13 44.6,14.8 44,16.6 43.4,14.8"
+        <polygon points="54,17 54.6,18.8 54,20.6 53.4,18.8"
                  fill="#FF9EBE" opacity="0.90"/>
-        <circle cx="44" cy="49" r="1.8" fill="#FF9EBE" opacity="0.30"/>
+        <circle cx="54" cy="57" r="1.8" fill="#FF9EBE" opacity="0.30"/>
       </g>
 
-      <!-- 三层宝石轴心 -->
-      <circle cx="44" cy="44" r="3.5" fill="#FFFFFF"
+      <!-- F. 宝石轴心 -->
+      <circle cx="54" cy="54" r="3.5" fill="#FFFFFF"
               stroke="#C8A2E0" stroke-width="0.8" opacity="0.85"/>
-      <circle cx="44" cy="44" r="2" fill="#FDE4EC"
+      <circle cx="54" cy="54" r="2" fill="#FDE4EC"
               stroke="#FF9EBE" stroke-width="0.5" opacity="0.65"/>
-      <circle cx="44" cy="44" r="0.8" fill="#FF9EBE" opacity="0.75"/>
+      <circle cx="54" cy="54" r="0.8" fill="#FF9EBE" opacity="0.75"/>
+
+      <!-- G. 悬挂链（钟面之下） -->
+      <!-- 链节 1 -->
+      <ellipse cx="54" cy="110" rx="3.5" ry="5" fill="none"
+               stroke="#C8A2E0" stroke-width="0.5" opacity="0.28"/>
+      <circle cx="54" cy="115" r="1.2" fill="#C8A2E0" opacity="0.18"/>
+
+      <!-- 链节 2 -->
+      <ellipse cx="54" cy="120" rx="3.5" ry="5" fill="none"
+               stroke="#C8A2E0" stroke-width="0.5" opacity="0.22"/>
+      <circle cx="54" cy="125" r="1.2" fill="#C8A2E0" opacity="0.14"/>
+
+      <!-- 链节 3 + 末端收束圆 -->
+      <ellipse cx="54" cy="130" rx="3.5" ry="5" fill="none"
+               stroke="#C8A2E0" stroke-width="0.5" opacity="0.16"/>
+      <circle cx="54" cy="134.5" r="1.5" fill="#C8A2E0" opacity="0.12"/>
     </svg>
   </div>
 

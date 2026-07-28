@@ -3896,9 +3896,9 @@
       var minuteAngle = (minutes + seconds / 60) * 6;
       var hourAngle   = (hours + minutes / 60) * 30;
 
-      secondGroup.setAttribute('transform', 'rotate(' + secondAngle + ', 44, 44)');
-      minuteGroup.setAttribute('transform', 'rotate(' + minuteAngle + ', 44, 44)');
-      hourGroup.setAttribute('transform',   'rotate(' + hourAngle   + ', 44, 44)');
+      secondGroup.setAttribute('transform', 'rotate(' + secondAngle + ', 54, 54)');
+      minuteGroup.setAttribute('transform', 'rotate(' + minuteAngle + ', 54, 54)');
+      hourGroup.setAttribute('transform',   'rotate(' + hourAngle   + ', 54, 54)');
 
       requestAnimationFrame(tick);
     }
