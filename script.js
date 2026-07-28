@@ -3934,11 +3934,12 @@
     normY = Math.max(0, Math.min(1, normY));
 
     var stops = [
-      { pos: 0.0, r: 0xFF, g: 0x9E, b: 0xBE },
-      { pos: 0.4, r: 0xFF, g: 0xDC, b: 0xEB },
-      { pos: 0.5, r: 0xFF, g: 0xFF, b: 0xFF },
-      { pos: 0.6, r: 0xF0, g: 0xE0, b: 0xF8 },
-      { pos: 1.0, r: 0xC8, g: 0xA2, b: 0xE0 }
+      { pos: 0.00, r: 0xFF, g: 0xBB, b: 0xD5 },
+      { pos: 0.25, r: 0xFF, g: 0xF0, b: 0xF8 },
+      { pos: 0.35, r: 0xFF, g: 0xFF, b: 0xFF },
+      { pos: 0.65, r: 0xFF, g: 0xFF, b: 0xFF },
+      { pos: 0.75, r: 0xF5, g: 0xE8, b: 0xFA },
+      { pos: 1.00, r: 0xDC, g: 0xBD, b: 0xEB }
     ];
 
     var lower = stops[0], upper = stops[stops.length - 1];
@@ -4150,32 +4151,52 @@
     timeParticleLastTs = nowTs;
     timeParticleElapsed += dt;
 
-    // === holding 阶段微暗底衬（渐变只创建一次） ===
+    // === holding 阶段底衬（亮色辉光 / 暗色压暗双模式） ===
     if (timeParticleElapsed >= 0.6 && timeParticleElapsed < 1.3) {
-      if (!timeParticleOverlayCtx._bgGradient) {
-        var grad = ctx.createRadialGradient(
-          canvas.width / 2, canvas.height * 0.35, canvas.width * 0.1,
-          canvas.width / 2, canvas.height * 0.35, canvas.width * 0.6
-        );
-        grad.addColorStop(0, 'rgba(26, 21, 32, 0)');
-        grad.addColorStop(1, 'rgba(26, 21, 32, 1)');
-        timeParticleOverlayCtx._bgGradient = grad;
-      }
+      var isDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
 
+      // 渐入/保持/渐出 alpha
       var bgAlpha;
       if (timeParticleElapsed < 0.8) {
-        bgAlpha = (timeParticleElapsed - 0.6) / 0.3 * 0.06;
+        bgAlpha = (timeParticleElapsed - 0.6) / 0.3;
       } else if (timeParticleElapsed < 1.1) {
-        bgAlpha = 0.06;
+        bgAlpha = 1.0;
       } else {
-        bgAlpha = (1.3 - timeParticleElapsed) / 0.2 * 0.06;
+        bgAlpha = (1.3 - timeParticleElapsed) / 0.2;
       }
-      bgAlpha = Math.max(0, Math.min(0.06, bgAlpha));
+      bgAlpha = Math.max(0, Math.min(1, bgAlpha));
 
-      ctx.globalAlpha = bgAlpha;
-      ctx.fillStyle = timeParticleOverlayCtx._bgGradient;
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-      ctx.globalAlpha = 1;
+      if (isDarkMode) {
+        // 暗色模式：暗底衬，让亮粒子更突出
+        if (!timeParticleOverlayCtx._bgGradient) {
+          var grad = ctx.createRadialGradient(
+            canvas.width / 2, canvas.height * 0.35, canvas.width * 0.1,
+            canvas.width / 2, canvas.height * 0.35, canvas.width * 0.6
+          );
+          grad.addColorStop(0, 'rgba(26, 21, 32, 0)');
+          grad.addColorStop(1, 'rgba(26, 21, 32, 1)');
+          timeParticleOverlayCtx._bgGradient = grad;
+        }
+        ctx.globalAlpha = bgAlpha * 0.08;
+        ctx.fillStyle = timeParticleOverlayCtx._bgGradient;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.globalAlpha = 1;
+      } else {
+        // 亮色模式：柔白辉光底衬，让粒子浮在光晕上
+        if (!timeParticleOverlayCtx._bgGradient) {
+          var grad = ctx.createRadialGradient(
+            canvas.width / 2, canvas.height * 0.35, canvas.width * 0.05,
+            canvas.width / 2, canvas.height * 0.35, canvas.width * 0.45
+          );
+          grad.addColorStop(0, 'rgba(255, 255, 255, 1)');
+          grad.addColorStop(1, 'rgba(255, 248, 240, 0)');
+          timeParticleOverlayCtx._bgGradient = grad;
+        }
+        ctx.globalAlpha = bgAlpha * 0.25;
+        ctx.fillStyle = timeParticleOverlayCtx._bgGradient;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.globalAlpha = 1;
+      }
     }
 
     // === 粒子运动 ===
@@ -4229,8 +4250,8 @@
       var sz, glowRadius, glowAlpha;
       if (tp.state === 'holding') {
         sz = tp.size + 0.5;
-        glowRadius = sz * 2.2;
-        glowAlpha = 0.18;
+        glowRadius = sz * 1.6;
+        glowAlpha = 0.28;
       } else if (tp.state === 'dissipating') {
         var shrink = 1 - Math.min((timeParticleElapsed - 1.3) / 1.5, 1);
         sz = tp.size * Math.max(0, 0.8 * shrink + 0.2);
