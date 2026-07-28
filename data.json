@@ -47,6 +47,13 @@
     {
       "content": "拥有人生第一个个人网站🎉",
       "note_date": "2026-07-27"
+    },
+    {
+      "content": "公司新发了好多小零食🍭",
+      "note_date": "2026-07-27",
+      "mood": "Happy",
+      "tag_1": "零食",
+      "tag_2": "小福利"
     }
   ],
   "thoughts": [],
@@ -72,21 +79,25 @@
     {
       "platform": "GitHub",
       "url": "https://github.com/Kevi-Nya",
+      "icon_class": "fa-brands fa-github",
       "qq_number": null
     },
     {
       "platform": "QQ",
       "url": "#",
+      "icon_class": "fa-brands fa-qq",
       "qq_number": "1447954419"
     },
     {
       "platform": "Email",
-      "url": "mailto:1447954419@qq.com",
+      "url": "1447954419@qq.com",
+      "icon_class": "fa-solid fa-envelope",
       "qq_number": null
     },
     {
       "platform": "Bilibili",
       "url": "https://space.bilibili.com/456988162?spm_id_from=333.1007.0.0",
+      "icon_class": "fa-brands fa-bilibili",
       "qq_number": null
     }
   ]
