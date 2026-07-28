@@ -3993,7 +3993,7 @@
             // 新版 SW 激活完成 → 页面已有新缓存
             if (newWorker.state === 'activated' && navigator.serviceWorker.controller) {
               // 静默更新：不弹窗打扰，仅 console 记录
-              console.log('[花园] 缓存已自动更新至 v' + CACHE_VERSION);
+              console.log('[花园] 缓存已自动更新');
             }
           });
         });
