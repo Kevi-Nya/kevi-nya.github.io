@@ -4338,6 +4338,11 @@
         // 音效首次使用提示 — 延迟 1.5s 后显示，4s 后淡出
         showSoundHint();
 
+        // 预加载时钟点击用 Kalam 字体（不阻塞页面）
+        if (document.fonts) {
+          document.fonts.load('700 72px Kalam').catch(function () {});
+        }
+
         // 启动花园时钟
         initGardenClock();
 

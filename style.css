@@ -2780,6 +2780,7 @@ body.night-mode .cloud {
   right: auto;
   width: 108px;
   height: 108px;
+  border-radius: 50%;
 
   background: rgba(255, 255, 255, 0.58);
   backdrop-filter: blur(14px);
