@@ -1169,6 +1169,7 @@ body {
   box-shadow: var(--glass-shadow-inner), var(--shadow-sm), var(--glass-border-glow);
   transition: all 0.25s var(--ease-bounce);
   animation: detailFadeIn 0.35s var(--ease-bounce);
+  display: flow-root;              /* 创建 BFC，包含内部浮动 mood 元素 */
 }
 
 .note-detail-card:hover {
@@ -1186,11 +1187,15 @@ body {
 
 /* 心情图标 */
 .note-detail-mood {
-  position: absolute;
-  top: 12px;
-  right: 14px;
+  float: right;                    /* 右浮动：贴卡片右上角，文字自动环绕 */
+  margin: 0 0 4px 10px;           /* 与正文保持 10px 间距，下方留 4px */
   font-size: 1.2rem;
+  line-height: 1;                  /* 消除行高对首行对齐的干扰 */
   opacity: 0.8;
+  max-width: 45%;                  /* 防御：极端长 mood 时截断，不挤占过半宽度 */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* 笔记内容文字 */
@@ -1199,7 +1204,6 @@ body {
   color: var(--text-primary);
   line-height: 1.7;
   margin-bottom: 8px;
-  padding-right: 28px; /* 给心情图标留空间 */
 }
 
 /* 想法标题 */
@@ -1223,6 +1227,7 @@ body {
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
+  clear: both;                     /* 标签行始终起始于内容+mood 之下，防止被浮动 mood 上挤 */
 }
 
 .note-detail-tag {
