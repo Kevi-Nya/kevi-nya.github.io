@@ -2998,119 +2998,141 @@ body.night-mode .cloud {
   display: none;
 }
 
-/* ==================== 分享模块 ==================== */
-.share-module {
-  margin-top: 16px;
-  padding: 12px 0 4px;
-  border-top: 1px solid var(--glass-border-sub);
-}
+/* ==================== 下载 OG 名片 ==================== */
 
-.share-label {
-  display: block;
-  font-size: 0.78rem;
-  color: var(--text-tertiary);
-  margin-bottom: 10px;
+.download-og-module {
+  margin-top: 14px;
+  padding: 10px 0 2px;
   text-align: center;
 }
 
-.share-buttons {
-  display: flex;
+.download-og-btn {
+  display: inline-flex;
+  align-items: center;
   justify-content: center;
-  gap: 12px;
-}
-
-.share-btn {
-  width: 38px;
-  height: 38px;
-  border-radius: 50%;
-  border: 1px solid var(--glass-border-sub);
-  background: rgba(255, 255, 255, 0.6);
+  gap: 8px;
+  width: 196px;
+  height: 44px;
+  border-radius: 24px;
+  border: 1px solid rgba(200, 162, 224, 0.22);
+  background: linear-gradient(
+    135deg,
+    rgba(255, 248, 240, 0.88) 0%,
+    rgba(253, 228, 236, 0.72) 100%
+  );
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
+  box-shadow:
+    0 2px 12px rgba(200, 162, 224, 0.12),
+    0 1px 3px rgba(0, 0, 0, 0.04);
   cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--text-secondary);
-  transition: all 0.25s var(--ease-bounce);
-  padding: 0;
+  font-family: 'LXGW WenKai', cursive, sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  color: #6B5E62;
+  transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
 }
 
-.share-btn:hover {
-  background: rgba(255, 255, 255, 0.85);
-  color: var(--accent-pink-strong);
+.download-og-btn:hover {
+  transform: scale(1.03);
+  box-shadow:
+    0 4px 20px rgba(248, 179, 209, 0.22),
+    0 2px 12px rgba(200, 162, 224, 0.12),
+    0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.download-og-btn:active {
+  transform: scale(0.97);
+}
+
+.download-og-icon {
+  flex-shrink: 0;
+  transition: transform 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.download-og-btn:hover .download-og-icon {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(200, 162, 224, 0.2);
 }
 
-/* 暗色模式分享按钮 */
+.download-og-label {
+  white-space: nowrap;
+}
+
+/* 下载完成反馈状态 */
+.download-og-btn.done {
+  pointer-events: none;
+  animation: og-download-done 1.2s ease;
+}
+
+.download-og-btn.done .download-og-label {
+  opacity: 0;
+}
+
+.download-og-btn.done .download-og-icon {
+  animation: og-icon-check 0.4s ease forwards;
+}
+
+.download-og-hint.show {
+  display: inline-block !important;
+  font-size: 14px;
+  font-weight: 600;
+  color: #B086D0;
+  font-family: 'LXGW WenKai', cursive, sans-serif;
+  animation: og-hint-pop 1.2s ease forwards;
+}
+
+@keyframes og-download-done {
+  0%   { box-shadow: 0 4px 20px rgba(248,179,209,0.22), 0 2px 12px rgba(200,162,224,0.12); }
+  30%  { box-shadow: 0 8px 32px rgba(248,179,209,0.40), 0 4px 20px rgba(200,162,224,0.30); }
+  100% { box-shadow: 0 2px 12px rgba(200,162,224,0.12), 0 1px 3px rgba(0,0,0,0.04); }
+}
+
+@keyframes og-icon-check {
+  to { transform: translateY(-2px) scale(1.15); opacity: 0.8; }
+}
+
+@keyframes og-hint-pop {
+  0%   { opacity: 0; transform: translateY(4px); }
+  30%  { opacity: 1; transform: translateY(0); }
+  80%  { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+/* 暗色模式 */
 @media (prefers-color-scheme: dark) {
-  .share-btn { background: rgba(40, 35, 50, 0.6); color: #D0C0E0; border-color: rgba(200, 162, 224, 0.15); }
-  .share-btn:hover { background: rgba(50, 42, 62, 0.8); color: #E8D8F5; }
-}
-
-/* 微信二维码弹窗 */
-.share-qr-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.35);
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
-  z-index: 10001;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.share-qr-dialog {
-  background: var(--glass-bg);
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
-  border: 1px solid var(--glass-border);
-  border-radius: var(--radius-lg);
-  padding: 32px;
-  text-align: center;
-  box-shadow: var(--shadow-lg);
-  animation: dialog-pop-in 0.3s var(--ease-bounce);
-}
-
-.share-qr-dialog h3 {
-  font-size: 1rem;
-  color: var(--text-primary);
-  margin-bottom: 16px;
-}
-
-.share-qr-tip {
-  font-size: 0.8rem;
-  color: var(--text-secondary);
-  margin-top: 12px;
-}
-
-.share-qr-close {
-  margin-top: 16px;
-  padding: 8px 24px;
-  border: 1px solid var(--glass-border);
-  border-radius: 24px;
-  background: transparent;
-  color: var(--text-secondary);
-  cursor: pointer;
-  font-family: inherit;
-  font-size: 0.85rem;
-  transition: all 0.25s var(--ease-bounce);
-}
-
-.share-qr-close:hover {
-  background: var(--glass-bg);
-  color: var(--text-primary);
-}
-
-/* 移动端适配 */
-@media (max-width: 640px) {
-  .share-module {
-    margin-top: 12px;
-    padding: 10px 0 2px;
+  .download-og-btn {
+    background: linear-gradient(
+      135deg,
+      rgba(58, 50, 64, 0.8) 0%,
+      rgba(45, 37, 53, 0.7) 100%
+    );
+    border-color: rgba(200, 162, 224, 0.12);
+    color: #C8C0D4;
+    box-shadow:
+      0 2px 12px rgba(0, 0, 0, 0.2),
+      0 1px 3px rgba(0, 0, 0, 0.1);
   }
-  .share-buttons {
-    gap: 16px;
+  .download-og-btn:hover {
+    box-shadow:
+      0 4px 20px rgba(200, 162, 224, 0.18),
+      0 2px 12px rgba(0, 0, 0, 0.2);
   }
+  .download-og-btn.done {
+    animation-name: og-download-done-dark;
+  }
+  .download-og-hint.show { color: #D0C0E0; }
+}
+
+@keyframes og-download-done-dark {
+  0%   { box-shadow: 0 4px 20px rgba(200,162,224,0.18), 0 2px 12px rgba(0,0,0,0.2); }
+  30%  { box-shadow: 0 8px 32px rgba(200,162,224,0.35), 0 4px 20px rgba(200,162,224,0.25); }
+  100% { box-shadow: 0 2px 12px rgba(0,0,0,0.2), 0 1px 3px rgba(0,0,0,0.1); }
+}
+
+/* 减少动画 */
+@media (prefers-reduced-motion: reduce) {
+  .download-og-btn { transition: none; }
+  .download-og-btn.done { animation: none; }
 }

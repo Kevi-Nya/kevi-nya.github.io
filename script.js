@@ -4307,81 +4307,48 @@
   // ==================== 初始化 ====================
 
   /**
-   * 初始化分享模块
-   * 微信/QQ/微博/X 分享 + 移动端 Web Share API
+   * 初始化下载 OG 名片模块
+   * 根据当前页面下载对应的 OG 图片，带完成反馈动画
    */
-  function initShareModule() {
-    var siteUrl = 'https://kevi-nya.github.io';
-    var siteTitle = 'Kevi_Nya — 猫耳少年的数字花园';
-    var siteDesc = '用代码记录想法，用镜头记录世界。属于 kevi_nya 的温柔、治愈、有猫系灵魂的个人数字花园。';
-    var ogImage = 'https://kevi-nya.github.io/pics/og-image.jpg';
+  function initDownloadOG() {
+    document.querySelectorAll('.download-og-btn').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        // 判断当前页面
+        var visiblePage = document.querySelector('.page:not(.hidden)');
+        var isPageA = visiblePage && visiblePage.id === 'page-a';
+        var imageUrl = isPageA
+          ? 'pics/og-image-a.jpg'
+          : 'pics/og-image-b.jpg';
 
-    // 事件委托：在 .share-buttons 容器上统一监听
-    document.querySelectorAll('.share-buttons').forEach(function (container) {
-      container.addEventListener('click', function (e) {
-        var btn = e.target.closest('.share-btn');
-        if (!btn) return;
-        var platform = btn.getAttribute('data-platform');
+        // 下载
+        fetch(imageUrl)
+          .then(function (res) { return res.blob(); })
+          .then(function (blob) {
+            var url = URL.createObjectURL(blob);
+            var a = document.createElement('a');
+            a.href = url;
+            a.download = 'Kevi_Nya_OG_' + (isPageA ? 'Secret' : 'Garden') + '.jpg';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
 
-        // 移动端优先 Web Share API
-        if (navigator.share && window.innerWidth < 768) {
-          navigator.share({ url: siteUrl, title: siteTitle, text: siteDesc }).catch(function () {});
-          return;
-        }
+            // 完成反馈
+            btn.classList.add('done');
+            var hint = btn.parentElement.querySelector('.download-og-hint');
+            if (hint) hint.classList.add('show');
 
-        switch (platform) {
-          case 'wechat':
-            showWechatQR(siteUrl);
-            break;
-          case 'qq':
-            window.open('https://connect.qq.com/widget/shareqq/index.html?url=' +
-              encodeURIComponent(siteUrl) + '&title=' + encodeURIComponent(siteTitle) +
-              '&desc=' + encodeURIComponent(siteDesc) + '&site=Kevi_Nya',
-              '_blank', 'width=600,height=500');
-            break;
-          case 'weibo':
-            window.open('https://service.weibo.com/share/share.php?url=' +
-              encodeURIComponent(siteUrl) + '&title=' + encodeURIComponent(siteTitle) +
-              '&pic=' + encodeURIComponent(ogImage),
-              '_blank', 'width=600,height=500');
-            break;
-          case 'x':
-            window.open('https://twitter.com/intent/tweet?url=' +
-              encodeURIComponent(siteUrl) + '&text=' + encodeURIComponent(siteTitle),
-              '_blank', 'width=600,height=400');
-            break;
-        }
+            setTimeout(function () {
+              btn.classList.remove('done');
+              if (hint) hint.classList.remove('show');
+            }, 1200);
+          })
+          .catch(function () {
+            // 降级：直接打开图片
+            window.open(imageUrl, '_blank');
+          });
       });
     });
-  }
-
-  /**
-   * 显示微信扫码分享二维码弹窗
-   * @param {string} url - 要分享的 URL
-   */
-  function showWechatQR(url) {
-    // 检查是否已有弹窗
-    var existing = document.querySelector('.share-qr-overlay');
-    if (existing) existing.remove();
-
-    var overlay = document.createElement('div');
-    overlay.className = 'share-qr-overlay';
-    overlay.innerHTML = '<div class="share-qr-dialog">' +
-      '<h3>微信扫码分享</h3>' +
-      '<img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=' +
-      encodeURIComponent(url) + '" width="200" height="200" alt="QR Code" style="display:block;margin:0 auto;">' +
-      '<p class="share-qr-tip">打开微信「扫一扫」分享给朋友</p>' +
-      '<button class="share-qr-close">关闭</button>' +
-      '</div>';
-
-    overlay.addEventListener('click', function (e) {
-      if (e.target === overlay) overlay.remove();
-    });
-    overlay.querySelector('.share-qr-close').addEventListener('click', function () {
-      overlay.remove();
-    });
-
-    document.body.appendChild(overlay);
   }
 
   function init() {
@@ -4389,8 +4356,8 @@
     loadData().then(function (data) {
       renderDynamicContent(data);
 
-      // 初始化分享模块（Page B Links 卡片内的分享按钮）
-      initShareModule();
+      // 初始化下载 OG 名片模块
+      initDownloadOG();
 
       initPageRouting();
       initAvatarEffect();
