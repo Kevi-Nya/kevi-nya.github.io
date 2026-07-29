@@ -3038,14 +3038,16 @@ body.night-mode .cloud {
 
 .share-btn:hover {
   background: rgba(255, 255, 255, 0.85);
+  color: var(--accent-pink-strong);
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(200, 162, 224, 0.2);
 }
 
-.share-wechat:hover { color: #07C160; border-color: #07C160; }
-.share-qq:hover    { color: #12B7F5; border-color: #12B7F5; }
-.share-weibo:hover { color: #E6162D; border-color: #E6162D; }
-.share-x:hover     { color: #0F1419; border-color: #0F1419; }
+/* 暗色模式分享按钮 */
+@media (prefers-color-scheme: dark) {
+  .share-btn { background: rgba(40, 35, 50, 0.6); color: #D0C0E0; border-color: rgba(200, 162, 224, 0.15); }
+  .share-btn:hover { background: rgba(50, 42, 62, 0.8); color: #E8D8F5; }
+}
 
 /* 微信二维码弹窗 */
 .share-qr-overlay {

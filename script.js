@@ -4317,7 +4317,7 @@
     var ogImage = 'https://kevi-nya.github.io/pics/og-image.jpg';
 
     // 微信二维码
-    var wechatBtn = document.querySelector('.share-wechat');
+    var wechatBtn = document.querySelectorAll('.share-btn')[0];
     if (wechatBtn) {
       wechatBtn.addEventListener('click', function () {
         showWechatQR(siteUrl);
@@ -4325,7 +4325,7 @@
     }
 
     // QQ
-    var qqBtn = document.querySelector('.share-qq');
+    var qqBtn = document.querySelectorAll('.share-btn')[1];
     if (qqBtn) {
       qqBtn.addEventListener('click', function () {
         var qqUrl = 'https://connect.qq.com/widget/shareqq/index.html?url=' +
@@ -4336,7 +4336,7 @@
     }
 
     // 微博
-    var weiboBtn = document.querySelector('.share-weibo');
+    var weiboBtn = document.querySelectorAll('.share-btn')[2];
     if (weiboBtn) {
       weiboBtn.addEventListener('click', function () {
         var weiboUrl = 'https://service.weibo.com/share/share.php?url=' +
@@ -4347,7 +4347,7 @@
     }
 
     // X (Twitter)
-    var xBtn = document.querySelector('.share-x');
+    var xBtn = document.querySelectorAll('.share-btn')[3];
     if (xBtn) {
       xBtn.addEventListener('click', function () {
         var xUrl = 'https://twitter.com/intent/tweet?url=' +
