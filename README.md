@@ -1,15 +1,14 @@
-# kevi_nya
+# Kevi_Nya
 
 ![License](https://img.shields.io/badge/license-MIT-blue)
 ![Status](https://img.shields.io/badge/status-active-brightgreen)
 
-> 🌸 属于 kevi_nya 的温柔、治愈、有猫系灵魂的个人数字花园。
+> 🌸 属于 Kevi_Nya 的温柔、治愈、有猫系灵魂的个人数字花园。
 
 一个纯静态的个人主页网站，日系治愈风格，支持访客专属页面与公开主页双模式切换。可直接部署到 GitHub Pages。
 
 ## ✨ 特性
 
-- **双页面模式** — URL 参数 `?from=4b68ab3847feda7d` 触发访客专属页面，默认显示公开主页，无刷新 fade 切换
 - **数据库驱动内容** — PostgreSQL 管理全部动态内容（About Me / My Life / Little Notes / Thoughts / Skills / Links），`tools/export.py` 一键导出 JSON
 - **日系治愈设计** — 温暖奶油米白底色 + 浅粉浅紫渐变，Apple 留白感 × Notion 卡片布局
 - **猫系元素** — 浮动云朵、星星、猫爪、代码符号等 CSS 纯动画装饰

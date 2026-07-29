@@ -4306,10 +4306,105 @@
 
   // ==================== 初始化 ====================
 
+  /**
+   * 初始化分享模块
+   * 微信/QQ/微博/X 分享 + 移动端 Web Share API
+   */
+  function initShareModule() {
+    var siteUrl = 'https://kevi-nya.github.io';
+    var siteTitle = 'Kevi_Nya — 猫耳少年的数字花园';
+    var siteDesc = '用代码记录想法，用镜头记录世界。属于 kevi_nya 的温柔、治愈、有猫系灵魂的个人数字花园。';
+    var ogImage = 'https://kevi-nya.github.io/pics/og-image.jpg';
+
+    // 微信二维码
+    var wechatBtn = document.querySelector('.share-wechat');
+    if (wechatBtn) {
+      wechatBtn.addEventListener('click', function () {
+        showWechatQR(siteUrl);
+      });
+    }
+
+    // QQ
+    var qqBtn = document.querySelector('.share-qq');
+    if (qqBtn) {
+      qqBtn.addEventListener('click', function () {
+        var qqUrl = 'https://connect.qq.com/widget/shareqq/index.html?url=' +
+          encodeURIComponent(siteUrl) + '&title=' + encodeURIComponent(siteTitle) +
+          '&desc=' + encodeURIComponent(siteDesc) + '&site=Kevi_Nya';
+        window.open(qqUrl, '_blank', 'width=600,height=500');
+      });
+    }
+
+    // 微博
+    var weiboBtn = document.querySelector('.share-weibo');
+    if (weiboBtn) {
+      weiboBtn.addEventListener('click', function () {
+        var weiboUrl = 'https://service.weibo.com/share/share.php?url=' +
+          encodeURIComponent(siteUrl) + '&title=' + encodeURIComponent(siteTitle) +
+          '&pic=' + encodeURIComponent(ogImage);
+        window.open(weiboUrl, '_blank', 'width=600,height=500');
+      });
+    }
+
+    // X (Twitter)
+    var xBtn = document.querySelector('.share-x');
+    if (xBtn) {
+      xBtn.addEventListener('click', function () {
+        var xUrl = 'https://twitter.com/intent/tweet?url=' +
+          encodeURIComponent(siteUrl) + '&text=' + encodeURIComponent(siteTitle);
+        window.open(xUrl, '_blank', 'width=600,height=400');
+      });
+    }
+
+    // 移动端 Web Share API
+    if (navigator.share && window.innerWidth < 768) {
+      var allBtns = document.querySelectorAll('.share-btn');
+      allBtns.forEach(function (btn) {
+        btn.addEventListener('click', function (e) {
+          e.preventDefault();
+          e.stopPropagation();
+          navigator.share({ url: siteUrl, title: siteTitle, text: siteDesc }).catch(function () {});
+        });
+      });
+    }
+  }
+
+  /**
+   * 显示微信扫码分享二维码弹窗
+   * @param {string} url - 要分享的 URL
+   */
+  function showWechatQR(url) {
+    // 检查是否已有弹窗
+    var existing = document.querySelector('.share-qr-overlay');
+    if (existing) existing.remove();
+
+    var overlay = document.createElement('div');
+    overlay.className = 'share-qr-overlay';
+    overlay.innerHTML = '<div class="share-qr-dialog">' +
+      '<h3>微信扫码分享</h3>' +
+      '<img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=' +
+      encodeURIComponent(url) + '" width="200" height="200" alt="QR Code" style="display:block;margin:0 auto;">' +
+      '<p class="share-qr-tip">打开微信「扫一扫」分享给朋友</p>' +
+      '<button class="share-qr-close">关闭</button>' +
+      '</div>';
+
+    overlay.addEventListener('click', function (e) {
+      if (e.target === overlay) overlay.remove();
+    });
+    overlay.querySelector('.share-qr-close').addEventListener('click', function () {
+      overlay.remove();
+    });
+
+    document.body.appendChild(overlay);
+  }
+
   function init() {
     // 先加载数据并渲染，再初始化页面路由和动画
     loadData().then(function (data) {
       renderDynamicContent(data);
+
+      // 初始化分享模块（Page B Links 卡片内的分享按钮）
+      initShareModule();
 
       initPageRouting();
       initAvatarEffect();

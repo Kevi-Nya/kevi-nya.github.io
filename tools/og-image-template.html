@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OG Image</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lxgw-wenkai-webfont@1.7.0/style.css">
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    font-family: 'LXGW WenKai', 'Klee One', 'Hiragino Sans GB', cursive, sans-serif;
+    background: linear-gradient(180deg, #FFF8F0 0%, #FDE4EC 50%, #E8E0F5 100%);
+    width: 1200px; height: 630px;
+    display: flex; align-items: center;
+    overflow: hidden; position: relative;
+  }
+
+  /* 浮动装饰 — 匹配网站粒子 */
+  .bg-deco { position:absolute; inset:0; pointer-events:none; }
+  .star { position:absolute; opacity:0.25; color:#C8A2E0; animation:star-float 8s ease-in-out infinite; }
+  .paw  { position:absolute; opacity:0.18; font-size:18px; animation:paw-float 10s ease-in-out infinite; }
+  .heart{ position:absolute; opacity:0.15; color:#FF9EBE; animation:heart-float 12s ease-in-out infinite; }
+
+  .star:nth-child(1) { top:8%; left:55%; font-size:14px; }
+  .star:nth-child(2) { top:20%; left:80%; font-size:10px; animation-delay:-2s; }
+  .star:nth-child(3) { top:70%; left:48%; font-size:12px; animation-delay:-4s; }
+  .star:nth-child(4) { top:85%; left:90%; font-size:8px;  animation-delay:-6s; }
+  .star:nth-child(5) { top:15%; left:70%; font-size:11px; animation-delay:-3s; }
+  .paw:nth-child(6)  { top:60%; left:40%; animation-delay:-1s; }
+  .paw:nth-child(7)  { top:30%; left:52%; animation-delay:-5s; }
+  .paw:nth-child(8)  { top:80%; left:72%; animation-delay:-7s; }
+  .heart:nth-child(9) { top:12%; left:62%; font-size:16px; animation-delay:-2s; }
+  .heart:nth-child(10){ top:50%; left:45%; font-size:13px; animation-delay:-4s; }
+
+  @keyframes star-float  { 0%,100%{transform:translateY(0)rotate(0deg)} 50%{transform:translateY(-8px)rotate(10deg)} }
+  @keyframes paw-float   { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-6px)} }
+  @keyframes heart-float { 0%,100%{transform:translateY(0)scale(1)} 50%{transform:translateY(-10px)scale(1.2)} }
+
+  /* 头像区 */
+  .avatar-wrap {
+    flex-shrink: 0; margin-left: 90px;
+    position: relative;
+  }
+  .avatar {
+    width: 160px; height: 160px; border-radius: 50%; object-fit: cover;
+    box-shadow: 0 0 0 4px rgba(255,158,190,0.3), 0 0 0 10px rgba(255,158,190,0.12),
+                0 0 0 18px rgba(255,158,190,0.05), 0 8px 32px rgba(200,162,224,0.2);
+  }
+
+  /* 文字区 */
+  .text-block {
+    margin-left: 40px;
+    max-width: 620px;
+  }
+  .site-name {
+    font-size: 52px; font-weight: 700; color: #2B2B2B;
+    letter-spacing: 2px;
+    text-shadow: 0 2px 8px rgba(248,179,209,0.3);
+  }
+  .subtitle {
+    font-size: 24px; color: #6B5E62; margin-top: 6px;
+    font-weight: 400;
+  }
+  .desc {
+    font-size: 16px; color: #A08C92; margin-top: 12px; line-height: 1.8;
+  }
+  .tags {
+    display: flex; gap: 10px; margin-top: 18px;
+  }
+  .tag {
+    padding: 5px 16px; border-radius: 20px; font-size: 14px; font-weight: 500;
+    background: rgba(248,179,209,0.18); color: #6B5E62;
+    border: 1px solid rgba(255,158,190,0.25);
+  }
+
+  /* QR 码 — 填补右侧留空 */
+  .qr-block {
+    position: absolute; top: 50%; right: 60px;
+    transform: translateY(-50%);
+    text-align: center;
+  }
+  .qr-block img { width: 180px; height: 180px; border-radius: 12px; }
+  .qr-label { font-size: 15px; color: #A08C92; margin-top: 8px; }
+
+  /* 页面标签 */
+  .page-badge {
+    position: absolute; top: 20px; right: 40px;
+    padding: 6px 20px; border-radius: 20px; font-size: 15px;
+    background: rgba(200,162,224,0.18); color: #B086D0;
+    border: 1px solid rgba(200,162,224,0.3);
+    font-weight: 500;
+  }
+
+  /* 底部品牌 */
+  .brand {
+    position: absolute; bottom: 20px; left: 60px;
+    font-size: 12px; color: rgba(160,140,146,0.7);
+  }
+</style>
+</head>
+<body>
+
+  <!-- 浮动装饰 -->
+  <div class="bg-deco">
+    <span class="star">✦</span><span class="star">✦</span><span class="star">✦</span>
+    <span class="star">✦</span><span class="star">✦</span>
+    <span class="paw">🐾</span><span class="paw">🐾</span><span class="paw">🐾</span>
+    <span class="heart">💛</span><span class="heart">💛</span>
+  </div>
+
+  <!-- 头像 -->
+  <div class="avatar-wrap">
+    <img class="avatar" src="../pics/SH.JPG" alt="Kevi_Nya">
+  </div>
+
+  <!-- 文字 -->
+  <div class="text-block">
+    <div class="site-name">Kevi_Nya</div>
+    <div class="subtitle">猫耳少年的数字花园</div>
+    <div class="desc">
+      用代码记录想法，用镜头记录世界。<br>
+      属于 kevi_nya 的温柔、治愈、有猫系灵魂的个人数字花园。
+    </div>
+    <div class="tags">
+      <span class="tag">AI Explorer</span>
+      <span class="tag">Creator</span>
+      <span class="tag">Life Recorder</span>
+      <span class="tag">Cat Soul</span>
+    </div>
+  </div>
+
+  <!-- 页面标签 -->
+  <div class="page-badge" id="page-badge">— 公 开 花 园 —</div>
+
+  <!-- QR 码 -->
+  <div class="qr-block">
+    <img src="https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=https://kevi-nya.github.io&margin=4" id="qr-img" alt="QR">
+    <div class="qr-label">扫描访问</div>
+  </div>
+
+  <!-- 品牌 -->
+  <div class="brand">kevi-nya.github.io  © 2026 Kevi_Nya</div>
+
+  <script>
+    // 在 Console 中调用 setPage('b', 'https://...') 或 setPage('a', 'https://...')
+    function setPage(id, url) {
+      if (id === 'a') {
+        document.getElementById('page-badge').textContent = '— 秘 密 花 园 —';
+      } else {
+        document.getElementById('page-badge').textContent = '— 公 开 花 园 —';
+      }
+      document.getElementById('qr-img').src =
+        'https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=' +
+        encodeURIComponent(url) + '&margin=4';
+    }
+  </script>
+</body>
+</html>
