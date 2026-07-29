@@ -4316,57 +4316,43 @@
     var siteDesc = '用代码记录想法，用镜头记录世界。属于 kevi_nya 的温柔、治愈、有猫系灵魂的个人数字花园。';
     var ogImage = 'https://kevi-nya.github.io/pics/og-image.jpg';
 
-    // 微信二维码
-    var wechatBtn = document.querySelectorAll('.share-btn')[0];
-    if (wechatBtn) {
-      wechatBtn.addEventListener('click', function () {
-        showWechatQR(siteUrl);
-      });
-    }
+    // 事件委托：在 .share-buttons 容器上统一监听
+    document.querySelectorAll('.share-buttons').forEach(function (container) {
+      container.addEventListener('click', function (e) {
+        var btn = e.target.closest('.share-btn');
+        if (!btn) return;
+        var platform = btn.getAttribute('data-platform');
 
-    // QQ
-    var qqBtn = document.querySelectorAll('.share-btn')[1];
-    if (qqBtn) {
-      qqBtn.addEventListener('click', function () {
-        var qqUrl = 'https://connect.qq.com/widget/shareqq/index.html?url=' +
-          encodeURIComponent(siteUrl) + '&title=' + encodeURIComponent(siteTitle) +
-          '&desc=' + encodeURIComponent(siteDesc) + '&site=Kevi_Nya';
-        window.open(qqUrl, '_blank', 'width=600,height=500');
-      });
-    }
-
-    // 微博
-    var weiboBtn = document.querySelectorAll('.share-btn')[2];
-    if (weiboBtn) {
-      weiboBtn.addEventListener('click', function () {
-        var weiboUrl = 'https://service.weibo.com/share/share.php?url=' +
-          encodeURIComponent(siteUrl) + '&title=' + encodeURIComponent(siteTitle) +
-          '&pic=' + encodeURIComponent(ogImage);
-        window.open(weiboUrl, '_blank', 'width=600,height=500');
-      });
-    }
-
-    // X (Twitter)
-    var xBtn = document.querySelectorAll('.share-btn')[3];
-    if (xBtn) {
-      xBtn.addEventListener('click', function () {
-        var xUrl = 'https://twitter.com/intent/tweet?url=' +
-          encodeURIComponent(siteUrl) + '&text=' + encodeURIComponent(siteTitle);
-        window.open(xUrl, '_blank', 'width=600,height=400');
-      });
-    }
-
-    // 移动端 Web Share API
-    if (navigator.share && window.innerWidth < 768) {
-      var allBtns = document.querySelectorAll('.share-btn');
-      allBtns.forEach(function (btn) {
-        btn.addEventListener('click', function (e) {
-          e.preventDefault();
-          e.stopPropagation();
+        // 移动端优先 Web Share API
+        if (navigator.share && window.innerWidth < 768) {
           navigator.share({ url: siteUrl, title: siteTitle, text: siteDesc }).catch(function () {});
-        });
+          return;
+        }
+
+        switch (platform) {
+          case 'wechat':
+            showWechatQR(siteUrl);
+            break;
+          case 'qq':
+            window.open('https://connect.qq.com/widget/shareqq/index.html?url=' +
+              encodeURIComponent(siteUrl) + '&title=' + encodeURIComponent(siteTitle) +
+              '&desc=' + encodeURIComponent(siteDesc) + '&site=Kevi_Nya',
+              '_blank', 'width=600,height=500');
+            break;
+          case 'weibo':
+            window.open('https://service.weibo.com/share/share.php?url=' +
+              encodeURIComponent(siteUrl) + '&title=' + encodeURIComponent(siteTitle) +
+              '&pic=' + encodeURIComponent(ogImage),
+              '_blank', 'width=600,height=500');
+            break;
+          case 'x':
+            window.open('https://twitter.com/intent/tweet?url=' +
+              encodeURIComponent(siteUrl) + '&text=' + encodeURIComponent(siteTitle),
+              '_blank', 'width=600,height=400');
+            break;
+        }
       });
-    }
+    });
   }
 
   /**
