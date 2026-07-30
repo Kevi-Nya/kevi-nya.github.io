@@ -58,7 +58,21 @@
     {
       "content": "早上上称发现自己比想象中的轻一些🪶",
       "note_date": "2026-07-28",
-      "mood": "Surprise"
+      "mood": "Surprise",
+      "tag_1": "体重"
+    },
+    {
+      "content": "今日体重：64.25 kg，比昨天又轻了一点🍃",
+      "note_date": "2026-07-30",
+      "mood": "Happy",
+      "tag_1": "体重"
+    },
+    {
+      "content": "赶工一周的KPI ing💻",
+      "note_date": "2026-07-30",
+      "mood": "Sad",
+      "tag_1": "工作",
+      "tag_2": "KPI"
     }
   ],
   "thoughts": [
