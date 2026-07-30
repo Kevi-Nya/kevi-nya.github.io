@@ -81,7 +81,18 @@
       "tag_label": "工作",
       "title": "关于工作的思考",
       "summary": "享受工作带来的Positive Issue",
-      "thought_date": "2026-07-28"
+      "thought_date": "2026-07-28",
+      "tag_1": "工作",
+      "tag_2": "情绪稳定"
+    },
+    {
+      "tag_type": "Life",
+      "tag_label": "生活",
+      "title": "关于审美的思考",
+      "summary": "我对于审美的标准究竟是什么呢🤔",
+      "thought_date": "2026-07-30",
+      "tag_1": "审美",
+      "tag_2": "标准"
     }
   ],
   "skills": [
