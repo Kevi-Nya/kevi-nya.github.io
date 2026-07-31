@@ -29,6 +29,20 @@
   var timeParticleLastTs = 0;   // 上一帧时间戳
   var timeParticleOverlayCtx = null;  // 覆盖层 Canvas 2D context
 
+  // ==================== 缓存的 matchMedia 对象（避免每帧创建） ====================
+  var cachedReducedMotionMQ = window.matchMedia('(prefers-reduced-motion: reduce)');
+  var isReducedMotionCached = cachedReducedMotionMQ.matches;
+  cachedReducedMotionMQ.addEventListener('change', function (e) {
+    isReducedMotionCached = e.matches;
+  });
+
+  // 暗色模式缓存（避免 renderTimeParticles 每帧重建 matchMedia）
+  var cachedDarkModeMQ = window.matchMedia('(prefers-color-scheme: dark)');
+  var isDarkModeCached = cachedDarkModeMQ.matches;
+  cachedDarkModeMQ.addEventListener('change', function (e) {
+    isDarkModeCached = e.matches;
+  });
+
   /**
    * 在主粒子循环每帧末尾统一绘制叠加装饰层
    * 包含：萤火虫粒子 + 心形碎裂常驻爱心
@@ -38,8 +52,6 @@
   function renderSharedDecorations(ctx, canvas) {
     // --- 萤火虫绘制 ---
     if (sharedFirefliesActive && sharedFireflies.length > 0) {
-      var motionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
-      var isReducedMotion = motionQuery.matches;
 
       for (var i = 0; i < sharedFireflies.length; i++) {
         var f = sharedFireflies[i];
@@ -54,8 +66,8 @@
         if (f.x < 0 || f.x > canvas.width) f.vx *= -1;
         if (f.y < 0 || f.y > canvas.height) f.vy *= -1;
 
-        // 呼吸明灭
-        var alpha = isReducedMotion ? 0.5 :
+        // 呼吸明灭（使用缓存的 matchMedia 值）
+        var alpha = isReducedMotionCached ? 0.5 :
           (0.3 + 0.7 * (Math.sin(Date.now() * f.twinkleSpeed + f.phase) * 0.5 + 0.5));
 
         // 辉光
@@ -537,7 +549,7 @@
       }
 
       // 水平轻微摇摆
-      this.x += Math.sin(performance.now() * 0.0005 * this.swaySpeed + this.swayPhase)
+      this.x += Math.sin(frameTime * 0.0005 * this.swaySpeed + this.swayPhase)
                 * CONFIG.swayAmplitude * effectiveDt;
 
       // 鼠标互动：轻柔吸引
@@ -554,7 +566,7 @@
 
       // 猫爪/爱心/猫耳：计算淡入淡出
       if (this.type === 'paw' || this.type === 'heart' || this.type === 'catEar') {
-        var elapsed = performance.now() - this.birthTime;
+        var elapsed = frameTime - this.birthTime;
         var progress = elapsed / this.lifetime;
         if (progress > 1) {
           this.reset(false);
@@ -588,7 +600,7 @@
       // 星星粒子：闪烁 + 四角星形
       if (this.type === 'star') {
         var twinkle = 0.5 + 0.5 * Math.sin(
-          performance.now() * 0.002 + this.twinklePhase
+          frameTime * 0.002 + this.twinklePhase
         );
         currentOpacity = this.baseOpacity * (0.5 + twinkle * 0.5);
 
@@ -796,11 +808,13 @@
 
     // --- 主渲染循环 ---
     var lastTime = performance.now();
+    var frameTime = 0; // 缓存的帧时间戳，避免每粒子重复调用 performance.now()
 
     function animate(now) {
       // 计算归一化时间增量
       var dt = (now - lastTime) / 16.667; // 约 1.0 @ 60fps
       lastTime = now;
+      frameTime = now; // 缓存当前帧时间戳
 
       // 清空画布
       ctx.clearRect(0, 0, w, h);
@@ -2308,7 +2322,7 @@
       try {
         nightAmbienceNodes.gain.gain.linearRampToValueAtTime(0, now + 1.5);
         setTimeout(function () {
-          try { nightAmbienceNodes.source.stop(); } catch (e) {}
+          try { nightAmbienceNodes.source.stop(); } catch (e) { console.warn('[花园] 夜间环境音源停止失败:', e); }
           nightAmbienceNodes = null;
         }, 1600);
       } catch (e) {
@@ -2403,9 +2417,9 @@
           try {
             masterGain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.3);
             setTimeout(function () {
-              try { noise.stop(); } catch (e) {}
+              try { noise.stop(); } catch (e) { console.warn('[花园] 背景噪音停止失败:', e); }
             }, 400);
-          } catch (e) {}
+          } catch (e) { console.warn('[花园] 背景噪音淡出失败:', e); }
         }
       };
     }
@@ -2680,7 +2694,7 @@
 
       // 停止所有活跃的振荡器
       activeNodes.forEach(function (node) {
-        try { node.stop(); } catch (e) { /* 已停止 */ }
+        try { node.stop(); } catch (e) { console.warn('[花园] 音频节点停止失败 (已预期):', e); }
       });
       activeNodes = [];
     }
@@ -3058,7 +3072,7 @@
 
       // 15s 后恢复
       setTimeout(function () {
-        try { track.stop(); } catch (e) {}
+        try { track.stop(); } catch (e) { console.warn('[花园] BGM 轨道停止失败:', e); }
         if (wasPlaying && currentPage && !muted) {
           playing = true;
           if (currentVariant === 'night') {
@@ -4161,7 +4175,7 @@
 
     // === holding 阶段底衬（亮色辉光 / 暗色压暗双模式） ===
     if (timeParticleElapsed >= 0.3 && timeParticleElapsed < 1.8) {
-      var isDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      var isDarkMode = isDarkModeCached;
 
       // 渐入/保持/渐出 alpha（ease-out / ease-in 曲线）
       var bgAlpha;
@@ -4345,7 +4359,7 @@
           })
           .catch(function () {
             // 降级：直接打开图片
-            window.open(imageUrl, '_blank');
+            window.open(imageUrl, '_blank', 'noopener');
           });
       });
     });
@@ -4457,6 +4471,13 @@
       }).catch(function (err) {
         console.warn('[花园] Service Worker 注册失败:', err);
       });
+
+      // 主动检查 SW 更新
+      if (reg && reg.update) {
+        setTimeout(function () {
+          reg.update().catch(function () { /* 静默失败 */ });
+        }, 3000);
+      }
     }
   }
 

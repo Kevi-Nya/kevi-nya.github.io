@@ -15,7 +15,11 @@ var PRECACHE_URLS = [
   '/manifest.json',
   '/favicon.png',
   '/pics/avatar.webp',
-  '/pics/og-image.jpg'
+  '/pics/avatar.avif',
+  '/pics/og-image.jpg',
+  '/pics/clock-frame.png',
+  '/pics/clock-frame@2x.png',
+  '/pics/SH.JPG'
 ];
 
 // ===== install: 预缓存关键资源 =====

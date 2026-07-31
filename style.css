@@ -257,7 +257,7 @@ body {
   z-index: 0;
   pointer-events: none;
   overflow: hidden;
-  will-change: transform;
+  /* 命运光带层 — 子元素 .fate-light-band 自身持有 will-change */
 }
 
 /* 命运光带 — 极慢的细长渐变光束 */
@@ -289,7 +289,6 @@ body {
   background: rgba(255, 255, 255, 0.35);
   border-radius: 50%;
   filter: blur(24px);
-  will-change: transform;
   opacity: 0.12;
 }
 .cloud-1 {
@@ -327,7 +326,6 @@ body {
   opacity: 0.12;
   font-size: 12px;
   animation: star-float-twinkle var(--star-duration, 14s) ease-in-out infinite;
-  will-change: transform, opacity;
 }
 .star-1  { top: 12%; left: 10%;  --star-duration: 16s; animation-delay: 0s; }
 .star-2  { top: 45%; right: 15%; --star-duration: 13s; animation-delay: 3s; }
@@ -348,7 +346,6 @@ body {
   font-size: 16px;
   opacity: 0.10;
   animation: paw-drift var(--paw-duration, 16s) ease-in-out infinite;
-  will-change: transform, opacity;
 }
 .paw-1 { top: 55%; left: 12%;  --paw-duration: 17s; animation-delay: 0s; }
 .paw-2 { top: 30%; right: 8%;  --paw-duration: 15s; animation-delay: 4s; }
@@ -388,7 +385,6 @@ body {
   font-size: 15px;
   opacity: 0.09;
   animation: heart-float var(--heart-duration, 22s) ease-in-out infinite;
-  will-change: transform, opacity;
 }
 .footer-heart {
   display: inline-block;
@@ -642,12 +638,14 @@ body {
 /* ==================== below-fold 内容延迟渲染优化 ==================== */
 /* 浏览器原生 content-visibility 跳过屏幕外元素渲染，降低首屏布局成本 */
 /* 注意：calendar-wrapper 是交互组件，需要完整渲染，不参与延迟渲染 */
-.projects-grid,
-.skills-cloud,
-#links-container,
-.footer {
-  content-visibility: auto;
-  contain-intrinsic-size: auto 300px;
+@supports (content-visibility: auto) {
+  .projects-grid,
+  .skills-cloud,
+  #links-container,
+  .footer {
+    content-visibility: auto;
+    contain-intrinsic-size: auto 300px;
+  }
 }
 
 .card-icon {
@@ -1863,12 +1861,14 @@ body {
   }
 
   /* content-visibility 暗色模式同步 */
-  .projects-grid,
-  .skills-cloud,
-  #links-container,
-  .footer {
-    content-visibility: auto;
-    contain-intrinsic-size: auto 300px;
+  @supports (content-visibility: auto) {
+    .projects-grid,
+    .skills-cloud,
+    #links-container,
+    .footer {
+      content-visibility: auto;
+      contain-intrinsic-size: auto 300px;
+    }
   }
 
   /* Preloader 暗色模式 */
