@@ -1077,12 +1077,10 @@ body {
   transform: translateY(-2px);
 }
 
-/* 非本月日期 */
+/* 非本月日期 — 视觉淡化但允许点击翻月 */
 .calendar-day.other-month {
   color: #9CA3AF;
   opacity: 0.5;
-  cursor: default;
-  pointer-events: none;
 }
 
 /* 今天是当前日期 */

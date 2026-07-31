@@ -19,7 +19,9 @@ var PRECACHE_URLS = [
   '/pics/og-image.jpg',
   '/pics/clock-frame.png',
   '/pics/clock-frame@2x.png',
-  '/pics/SH.JPG'
+  '/pics/SH.JPG',
+  '/pics/icons/icon-192.png',
+  '/pics/icons/icon-512.png'
 ];
 
 // ===== install: 预缓存关键资源 =====

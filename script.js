@@ -1270,6 +1270,21 @@
       if (dayBtn) {
         var dateStr = dayBtn.getAttribute('data-date');
 
+        // 非本月日期 → 切换月份
+        if (dayBtn.classList.contains('other-month')) {
+          var parts = dateStr.split('-');
+          var targetYear = parseInt(parts[0], 10);
+          var targetMonth = parseInt(parts[1], 10) - 1; // 0-based
+
+          container.setAttribute('data-year', targetYear);
+          container.setAttribute('data-month', targetMonth);
+          container.setAttribute('data-selected', dateStr);
+
+          SoundEngine.playSwitch();
+          renderCalendar(container, type);
+          return;
+        }
+
         // 播放猫叫 toggle 音效（猫系灵魂专属）
         SoundEngine.playToggle();
 
@@ -1483,10 +1498,15 @@
     var totalDays = daysInMonth(currentYear, currentMonth);
     var prevMonthDays = daysInMonth(currentYear, currentMonth === 0 ? 11 : currentMonth - 1);
 
-    // 填充上月末尾日期
+    // 填充上月末尾日期（可点击翻至上月）
     for (var i = firstDay - 1; i >= 0; i--) {
       var pDay = prevMonthDays - i;
-      html += '<div class="calendar-day other-month" aria-hidden="true">' + pDay + '</div>';
+      var pMonth = currentMonth === 0 ? 11 : currentMonth - 1;
+      var pYear = currentMonth === 0 ? currentYear - 1 : currentYear;
+      var pDateStr = formatDate(pYear, pMonth, pDay);
+      html += '<button type="button" class="calendar-day other-month" data-date="' + pDateStr + '"' +
+        ' role="gridcell" tabindex="-1"' +
+        ' aria-label="' + (pMonth + 1) + '月' + pDay + '日，点击切换到上月">' + pDay + '</button>';
     }
 
     // 当月日期 (使用 button 确保可访问性)
@@ -1514,11 +1534,16 @@
         '>' + d + '</button>';
     }
 
-    // 填充下月开头日期（补满最后一行）
+    // 填充下月开头日期（可点击翻至下月）
     var remaining = 7 - ((firstDay + totalDays) % 7);
     if (remaining < 7) {
+      var nMonth = currentMonth === 11 ? 0 : currentMonth + 1;
+      var nYear = currentMonth === 11 ? currentYear + 1 : currentYear;
       for (var nd = 1; nd <= remaining; nd++) {
-        html += '<div class="calendar-day other-month" aria-hidden="true">' + nd + '</div>';
+        var nDateStr = formatDate(nYear, nMonth, nd);
+        html += '<button type="button" class="calendar-day other-month" data-date="' + nDateStr + '"' +
+          ' role="gridcell" tabindex="-1"' +
+          ' aria-label="' + (nMonth + 1) + '月' + nd + '日，点击切换到下月">' + nd + '</button>';
       }
     }
 
@@ -4468,16 +4493,14 @@
             }
           });
         });
-      }).catch(function (err) {
-        console.warn('[花园] Service Worker 注册失败:', err);
-      });
 
-      // 主动检查 SW 更新
-      if (reg && reg.update) {
+        // 主动检查 SW 更新（3s 后，避免阻塞首屏）
         setTimeout(function () {
           reg.update().catch(function () { /* 静默失败 */ });
         }, 3000);
-      }
+      }).catch(function (err) {
+        console.warn('[花园] Service Worker 注册失败:', err);
+      });
     }
   }
 
