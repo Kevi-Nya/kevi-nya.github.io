@@ -56,16 +56,44 @@
       "tag_2": "小福利"
     },
     {
+      "content": "今日体重：64.25 kg，比昨天又轻了一点🍃",
+      "note_date": "2026-07-30",
+      "mood": "Happy",
+      "tag_1": "体重"
+    },
+    {
+      "content": "和 momo 出去吃滨寿司，好吃喵～🥰",
+      "note_date": "2026-08-02",
+      "mood": "Happy",
+      "tag_1": "寿司",
+      "tag_2": "momo"
+    },
+    {
       "content": "早上上称发现自己比想象中的轻一些🪶",
       "note_date": "2026-07-28",
       "mood": "Surprise",
       "tag_1": "体重"
     },
     {
-      "content": "今日体重：64.25 kg，比昨天又轻了一点🍃",
-      "note_date": "2026-07-30",
-      "mood": "Happy",
-      "tag_1": "体重"
+      "content": "顾问好难做，emo想跳槽ing😭",
+      "note_date": "2026-07-31",
+      "mood": "Sad",
+      "tag_1": "工作",
+      "tag_2": "低谷"
+    },
+    {
+      "content": "又是无聊的周一，但领导不在公司😑",
+      "note_date": "2026-08-03",
+      "mood": "Boring",
+      "tag_1": "周一",
+      "tag_2": "工作"
+    },
+    {
+      "content": "又被pdd的拉去充内推kpi了😇",
+      "note_date": "2026-08-01",
+      "mood": "Boring",
+      "tag_1": "跳槽",
+      "tag_2": "大厂"
     },
     {
       "content": "赶工一周的KPI ing💻",
@@ -84,6 +112,15 @@
       "thought_date": "2026-07-28",
       "tag_1": "工作",
       "tag_2": "情绪稳定"
+    },
+    {
+      "tag_type": "Work",
+      "tag_label": "工作",
+      "title": "关于打工人的思考",
+      "summary": "赚钱的打工人都不容易😭",
+      "thought_date": "2026-07-31",
+      "tag_1": "工作",
+      "tag_2": "低谷"
     },
     {
       "tag_type": "Life",
