@@ -56,6 +56,12 @@
       "tag_2": "小福利"
     },
     {
+      "content": "早上上称发现自己比想象中的轻一些🪶",
+      "note_date": "2026-07-28",
+      "mood": "Surprise",
+      "tag_1": "体重"
+    },
+    {
       "content": "今日体重：64.25 kg，比昨天又轻了一点🍃",
       "note_date": "2026-07-30",
       "mood": "Happy",
@@ -69,10 +75,18 @@
       "tag_2": "momo"
     },
     {
-      "content": "早上上称发现自己比想象中的轻一些🪶",
-      "note_date": "2026-07-28",
-      "mood": "Surprise",
-      "tag_1": "体重"
+      "content": "想跳槽去当老师，也是约了明天的面试😋",
+      "note_date": "2026-08-14",
+      "mood": "😚",
+      "tag_1": "跳槽",
+      "tag_2": "面试"
+    },
+    {
+      "content": "赶工一周的KPI ing💻",
+      "note_date": "2026-07-30",
+      "mood": "Sad",
+      "tag_1": "工作",
+      "tag_2": "KPI"
     },
     {
       "content": "顾问好难做，emo想跳槽ing😭",
@@ -94,13 +108,6 @@
       "mood": "Boring",
       "tag_1": "跳槽",
       "tag_2": "大厂"
-    },
-    {
-      "content": "赶工一周的KPI ing💻",
-      "note_date": "2026-07-30",
-      "mood": "Sad",
-      "tag_1": "工作",
-      "tag_2": "KPI"
     }
   ],
   "thoughts": [
@@ -121,6 +128,24 @@
       "thought_date": "2026-07-31",
       "tag_1": "工作",
       "tag_2": "低谷"
+    },
+    {
+      "tag_type": "Work",
+      "tag_label": "工作",
+      "title": "做了一个月猎头的思考",
+      "summary": "是我的原因么，感觉别人候选人都不是很想和我交流诶😭",
+      "thought_date": "2026-08-14",
+      "tag_1": "工作",
+      "tag_2": "困难"
+    },
+    {
+      "tag_type": "Work",
+      "tag_label": "工作",
+      "title": "关于跳槽的思考",
+      "summary": "我要跳槽去当网课助教么🤔",
+      "thought_date": "2026-08-14",
+      "tag_1": "跳槽",
+      "tag_2": "抉择"
     },
     {
       "tag_type": "Life",
