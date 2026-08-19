@@ -56,12 +56,6 @@
       "tag_2": "小福利"
     },
     {
-      "content": "早上上称发现自己比想象中的轻一些🪶",
-      "note_date": "2026-07-28",
-      "mood": "Surprise",
-      "tag_1": "体重"
-    },
-    {
       "content": "今日体重：64.25 kg，比昨天又轻了一点🍃",
       "note_date": "2026-07-30",
       "mood": "Happy",
@@ -75,11 +69,24 @@
       "tag_2": "momo"
     },
     {
+      "content": "早上上称发现自己比想象中的轻一些🪶",
+      "note_date": "2026-07-28",
+      "mood": "Surprise",
+      "tag_1": "体重"
+    },
+    {
       "content": "想跳槽去当老师，也是约了明天的面试😋",
       "note_date": "2026-08-14",
       "mood": "😚",
       "tag_1": "跳槽",
       "tag_2": "面试"
+    },
+    {
+      "content": "通过大厂HR的一面了喵🎊",
+      "note_date": "2026-08-18",
+      "mood": "Happy",
+      "tag_1": "大厂",
+      "tag_2": "面试顺利"
     },
     {
       "content": "赶工一周的KPI ing💻",
@@ -155,6 +162,15 @@
       "thought_date": "2026-07-30",
       "tag_1": "审美",
       "tag_2": "标准"
+    },
+    {
+      "tag_type": "Work",
+      "tag_label": "跳槽",
+      "title": "关于方向的思考",
+      "summary": "也许一线工人比高等级人才更容易接触？🧐",
+      "thought_date": "2026-08-19",
+      "tag_1": "跳槽",
+      "tag_2": "方向"
     }
   ],
   "skills": [
