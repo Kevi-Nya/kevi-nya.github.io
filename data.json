@@ -89,6 +89,33 @@
       "tag_2": "面试顺利"
     },
     {
+      "content": "找到新工作了喵🥳",
+      "note_date": "2026-08-29",
+      "mood": "Happy",
+      "tag_1": "新工作",
+      "tag_2": "甲方"
+    },
+    {
+      "content": "新公司氛围好好🥰",
+      "note_date": "2026-09-04",
+      "mood": "Happy",
+      "tag_1": "工作氛围",
+      "tag_2": "职场环境"
+    },
+    {
+      "content": "被安排了一周调休，少了5天工资喵😭",
+      "note_date": "2026-09-04",
+      "mood": "Sad",
+      "tag_1": "休息"
+    },
+    {
+      "content": "新来的HRBP人不赖诶😉",
+      "note_date": "2026-09-14",
+      "mood": "Surprise",
+      "tag_1": "新同事",
+      "tag_2": "工作氛围"
+    },
+    {
       "content": "赶工一周的KPI ing💻",
       "note_date": "2026-07-30",
       "mood": "Sad",
@@ -121,11 +148,11 @@
     {
       "tag_type": "Work",
       "tag_label": "工作",
-      "title": "关于工作的思考",
-      "summary": "享受工作带来的Positive Issue",
-      "thought_date": "2026-07-28",
+      "title": "做了一个月猎头的思考",
+      "summary": "是我的原因么，感觉别人候选人都不是很想和我交流诶😭",
+      "thought_date": "2026-08-14",
       "tag_1": "工作",
-      "tag_2": "情绪稳定"
+      "tag_2": "困难"
     },
     {
       "tag_type": "Work",
@@ -139,11 +166,11 @@
     {
       "tag_type": "Work",
       "tag_label": "工作",
-      "title": "做了一个月猎头的思考",
-      "summary": "是我的原因么，感觉别人候选人都不是很想和我交流诶😭",
-      "thought_date": "2026-08-14",
+      "title": "关于工作的思考",
+      "summary": "享受工作带来的Positive Issue",
+      "thought_date": "2026-07-28",
       "tag_1": "工作",
-      "tag_2": "困难"
+      "tag_2": "情绪稳定"
     },
     {
       "tag_type": "Work",
@@ -162,6 +189,15 @@
       "thought_date": "2026-07-30",
       "tag_1": "审美",
       "tag_2": "标准"
+    },
+    {
+      "tag_type": "Work",
+      "tag_label": "工作",
+      "title": "关于新公司的想法",
+      "summary": "新公司挺好的，但是我真的能转正嘛...",
+      "thought_date": "2026-09-01",
+      "tag_1": "新公司",
+      "tag_2": "转正焦虑"
     },
     {
       "tag_type": "Work",
